@@ -1,0 +1,62 @@
+spring:      
+  cloud:
+    loadbalancer:
+    ribbon:
+      enabled: false
+    gateway:
+      routes:
+        - id: vets-service
+          uri: http://vets-service
+          predicates:
+            - Path=/api/vet/**
+          filters:
+            - StripPrefix=2
+        - id: visits-service
+          uri: http://visits-service
+          predicates:
+            - Path=/api/visit/**
+          filters:
+            - StripPrefix=2
+        - id: customers-service
+          uri: http://customers-service
+          predicates:
+            - Path=/api/customer/**
+          filters:
+            - StripPrefix=2
+---            
+management:
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  endpoints:
+    enabled-by-default: false
+    web:
+      base-path: "/manage"
+      exposure: # https://docs.spring.io/spring-boot/docs/2.6.3/reference/html/actuator.html#actuator.endpoints.exposing
+        include: "health,info,env,mappings" # "*"
+        exclude: "beans"    
+  endpoint:
+    health:
+      enabled: true
+      status:
+        http-mapping:
+          down: 503
+          fatal: 503
+          out-of-service: 503
+      group:
+        readiness:
+          include: "readinessState"
+        liveness:
+          include: "livenessState"                      
+    probes:
+        enabled: true      
+    info:
+      enabled: true
+    env:
+      enabled: true
+    mappings:
+      enabled: true            
+  server:
+    port: 8081

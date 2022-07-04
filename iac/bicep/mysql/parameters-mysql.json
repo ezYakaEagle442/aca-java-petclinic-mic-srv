@@ -1,0 +1,27 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "appName": {
+        "value": "petcliaca"
+      },
+      "location": {
+        "value": "centralindia"
+      },       
+      "administratorLogin": {
+        "value": "mys_adm"
+      },
+      "administratorLoginPassword": {
+        "value": "IsTrator42!"
+      },
+      "clientIPAddress": {
+        "value": "xxx"
+      },  
+      "startIpAddress": {
+        "value": "10.42.1.0"
+      }, 
+      "endIpAddress": {
+        "value": "10.42.1.15"
+      }     
+    }
+  }

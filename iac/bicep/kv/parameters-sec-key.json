@@ -1,0 +1,34 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "appName": {
+        "value": "petcliaca"
+      }, 
+      "kvName": {
+        "value": "kv-petcliaca-UNIQUEID42"
+      },
+      "secretsObject": {
+        "value": {
+          "secrets": [
+            {
+              "secretName": "MYSQL-SERVER-FULL-NAME",
+              "secretValue": "petcliaca"
+            },
+            {
+              "secretName": "MYSQL-DATABASE-NAME",
+              "secretValue": "petclinic"
+            },
+            {
+              "secretName": "MYSQL-SERVER-ADMIN-LOGIN-NAME",
+              "secretValue": "mys_adm"
+            },
+            {
+              "secretName": "MYSQL-SERVER-ADMIN-PASSWORD",
+              "secretValue": "IsTrator42!"
+            }                        
+          ]
+        }
+      }        
+    }
+  }
