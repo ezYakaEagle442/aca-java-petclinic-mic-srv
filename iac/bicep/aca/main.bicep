@@ -26,9 +26,6 @@ param appName string = 'petclinic${uniqueString(resourceGroup().id)}'
 param location string = 'centralindia'
 // param rgName string = 'rg-${appName}'
 
-@description('The Azure Container Apps Resource Provider ID')
-param azureContainerAppsRp string
-
 @maxLength(24)
 @description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
 param kvName string // = 'kv-${appName}'
@@ -86,10 +83,10 @@ param apiGatewayContainerAppName string = 'aca-${appName}-api-gateway'
 param customersServiceContainerAppName string = 'aca-${appName}-customers-service'
 
 @description('The Azure Container App instance name for vets-service')
-param vetsServiceContainerAppEnvName string = 'aca-env-${appName}-vets-service'
+param vetsServiceContainerAppName string = 'aca-env-${appName}-vets-service'
 
 @description('The Azure Container App instance name for visits-service')
-param visitsServiceContainerAppEnvName string = 'aca-env-${appName}-visits-service'
+param visitsServiceContainerAppName string = 'aca-env-${appName}-visits-service'
 
 @description('The Azure Container App Environment name')
 param azureContainerAppEnvName string = 'aca-env-${appName}'
@@ -152,10 +149,6 @@ param ghaSettingsCfgDockerFilePathVetsService string = './docker/petclinic-vets-
 @description('The GitHub Action Settings Configuration / Docker file Path for visits-service Azure Container App ')
 param ghaSettingsCfgDockerFilePathVisitsService string = './docker/petclinic-visits-service/Dockerfile'
 
-
-@description('The GitHub Action Settings Configuration / Publish Type')
-param ghaSettingsCfgPublishType string = xxx
-
 @description('The GitHub Action Settings Configuration / Registry User Name')
 param ghaSettingsCfgRegistryUserName string
 
@@ -165,14 +158,43 @@ param ghaSettingsCfgRegistryPassword string
 @description('The GitHub Action Settings Configuration / Registry URL')
 param ghaSettingsCfgRegistryUrl string
 
+@description('The GitHub Action Settings / Repo URL')
+param ghaSettingsCfgRepoUrl string = 'https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv'
+
+@description('The GitHub Action Settings Configuration / Publish Type')
+param ghaSettingsCfgPublishType string = 'Image'
+
+/* They seem to be more App Service focused as this interface is shared with App Service.
+      https://docs.microsoft.com/en-us/javascript/api/@azure/arm-appservice/githubactioncodeconfiguration?view=azure-node-latest
+az webapp list-runtimes –-linux [
+[
+  "DOTNETCORE:6.0",
+  "DOTNETCORE:3.1",
+  "NODE:16-lts",
+  "NODE:14-lts",
+  "PYTHON:3.9",
+  "PYTHON:3.8",
+  "PYTHON:3.7",
+  "PHP:8.0",
+  "PHP:7.4",
+  "RUBY:2.7",
+  "JAVA:11-java11",
+  "JAVA:8-jre8",
+  "JBOSSEAP:7-java11",
+  "JBOSSEAP:7-java8",
+  "TOMCAT:10.0-java11",
+  "TOMCAT:10.0-jre8",
+  "TOMCAT:9.0-java11",
+  "TOMCAT:9.0-jre8",
+  "TOMCAT:8.5-java11",
+  "TOMCAT:8.5-jre8"
+]
+*/
 @description('The GitHub Action Settings Configuration / Runtime Stack')
-param ghaSettingsCfgRegistryRuntimeStack string = xxx
+param ghaSettingsCfgRegistryRuntimeStack string = 'JAVA'
 
 @description('The GitHub Action Settings Configuration / Runtime Version')
-param ghaSettingsCfgRegistryRuntimeVersion string = xxx
-
-@description('The GitHub Action Settings / Repo URL')
-param ghaSettingsCfgRepoUrl string = xxx
+param ghaSettingsCfgRegistryRuntimeVersion string = '11-java11'
 
 /*
 module rg 'rg.bicep' = {
@@ -201,20 +223,16 @@ module vnet 'vnet.bicep' = {
   }   
 }
 
-resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' = {
+module ACR 'acr.bicep' = {
   name: acrName
-  location: location
-  sku: {
-    name: 'Basic'
-  }
-  properties: {
-    adminUserEnabled: false
-    dataEndpointEnabled: false // data endpoint rule is not supported for the SKU Basic
-    publicNetworkAccess: 'Enabled'
-    zoneRedundancy: 'Disabled'
+  params: {
+    appName: appName
+    acrName: acrName
+    location: location
+    tenantId: tenantId
+    networkRuleSetCidr: runtimeSubnetCidr
   }
 }
-
 
 module azurecontainerapp 'aca.bicep' = {
   name: 'azurecontainerapp'
@@ -244,14 +262,31 @@ module azurecontainerapp 'aca.bicep' = {
     ghaSettingsCfgRegistryRuntimeStack: ghaSettingsCfgRegistryRuntimeStack
     ghaSettingsCfgRegistryRuntimeVersion: ghaSettingsCfgRegistryRuntimeVersion
     ghaSettingsCfgPublishType: ghaSettingsCfgPublishType
-    configServerContainerAppName: configServerContainerAppName
-    customersServiceContainerAppName: customersServiceContainerAppName
+    adminServerContainerAppName: adminServerContainerAppName
     discoveryServerContainerAppName: discoveryServerContainerAppName
-    vetsServiceContainerAppEnvName: vetsServiceContainerAppEnvName
-    visitsServiceContainerAppEnvName: visitsServiceContainerAppEnvName
+    configServerContainerAppName: configServerContainerAppName
     apiGatewayContainerAppName: apiGatewayContainerAppName
-
+    customersServiceContainerAppName: customersServiceContainerAppName
+    vetsServiceContainerAppName: vetsServiceContainerAppName
+    visitsServiceContainerAppName: visitsServiceContainerAppName
   }
+}
+
+resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' = {
+  name: azureContainerAppEnvName
+  location: location
+}
+
+resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+  name: customersServiceContainerAppName
+}
+
+resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+  name: vetsServiceContainerAppName
+}
+
+resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+  name: visitsServiceContainerAppName
 }
 
 // https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scope-extension-resources
@@ -266,7 +301,9 @@ module roleAssignments 'roleAssignments.bicep' = {
     networkRoleType: 'Owner'
     kvRoleType: 'KeyVaultReader'
     acrRoleType: 'AcrPull'
-    acaPrincipalId: azurecontainerapp.outputs.xxxContainerAppIdentity
+    acaCustomersServicePrincipalId: CustomersServiceContainerApp.identity.principalId
+    acaVetsServicePrincipalId: VetsServiceContainerApp.identity.principalId
+    acaVisitsServicePrincipalId: VisitsServiceContainerApp.identity.principalId
   }
   dependsOn: [
     vnet
@@ -285,7 +322,7 @@ module mysql '../mysql/mysql.bicep' = {
     endIpAddress: endIpAddress
     administratorLogin: administratorLogin
     administratorLoginPassword: administratorLoginPassword
-    azureContainerAppsOutboundPubIP: azurecontainerapp.outputs.xxxContainerAppOutboundIPAddresses
+    azureContainerAppsOutboundPubIP: corpManagedEnvironment.properties.staticIp // CustomersServiceContainerApp.properties.outboundIPAddresses[0]
   }
 }
 
@@ -316,15 +353,15 @@ var appsObject = {
   apps: [
     {
     appName: 'customers-service'
-    appIdentity: azurecontainerapp.outputs.customersServiceIdentity
+    appIdentity: CustomersServiceContainerApp.identity.principalId
     }
     {
     appName: 'vets-service'
-    appIdentity: azurecontainerapp.outputs.vetsServiceIdentity
+    appIdentity: VetsServiceContainerApp.identity.principalId
     }
     {
     appName: 'visits-service'
-    appIdentity: azurecontainerapp.outputs.visitsServiceIdentity
+    appIdentity: VisitsServiceContainerApp.identity.principalId
     }
   ]
 }
@@ -332,7 +369,7 @@ var appsObject = {
 var accessPoliciesObject = {
   accessPolicies: [
     {
-      objectId: azurecontainerapp.outputs.customersServiceIdentity
+      objectId: CustomersServiceContainerApp.identity.principalId
       tenantId: tenantId
       permissions: {
         secrets: [
@@ -342,7 +379,7 @@ var accessPoliciesObject = {
       }
     }
     {
-      objectId: azurecontainerapp.outputs.vetsServiceIdentity
+      objectId: VetsServiceContainerApp.identity.principalId
       tenantId: tenantId
       permissions: {
         secrets: [
@@ -352,7 +389,7 @@ var accessPoliciesObject = {
       }
     }
     {
-      objectId:  azurecontainerapp.outputs.visitsServiceIdentity
+      objectId: VisitsServiceContainerApp.identity.principalId
       tenantId: tenantId
       permissions: {
         secrets: [

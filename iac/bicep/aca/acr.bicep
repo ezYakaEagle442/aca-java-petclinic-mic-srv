@@ -13,6 +13,8 @@ param location string = resourceGroup().location
 @description('The Azure Container App Env. VNet CIDR')
 param networkRuleSetCidr string
 
+@description('The Azure Active Directory tenant ID that should be used for authenticating requests to the Key Vault.')
+param tenantId string = subscription().tenantId
 
 resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' = {
   name: acrName
@@ -22,9 +24,9 @@ resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' = {
   }
   /*
   identity: {
-    principalId: 'string'
-    tenantId: 'string'
-    type: 'string'
+    principalId: xxx
+    tenantId: tenantId
+    type: 'SystemAssigned'
     userAssignedIdentities: {}
   }
   */

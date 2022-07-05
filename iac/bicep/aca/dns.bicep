@@ -14,19 +14,6 @@ param location string = resourceGroup().location
 
 param vnetName string = 'vnet-azure-container-apps'
 
-@description('The Azure Container App Environment name')
-param azureContainerAppEnvName string = 'aca-env-${appName}'
-
-resource azureContainerAppEnv 'Microsoft.App/managedEnvironments@2022-03-01' existing =  {
-  name: azureContainerAppEnvName
-}
-
-@description('The resource group where all network resources for apps will be created in')
-param appNetworkResourceGroup string = 'rg-aca-petclinic'
-
-@description('The resource group where all network resources for Azure Container App service runtime will be created in. Ex: MC_wittyhill-01dfb8c1-rg_wittyhill-01dfb8c1_westeurope')
-param serviceRuntimeNetworkResourceGroup string = 'rg-aca-svc-run-petclinic'
-
 @description('The Azure Container App instance name for admin-server')
 param adminServerContainerAppName string = 'aca-${appName}-admin-server'
 
@@ -40,14 +27,24 @@ param configServerContainerAppName string = 'aca-${appName}-config-server'
 param customersServiceContainerAppName string = 'aca-${appName}-customers-service'
 
 @description('The Azure Container App Environment name for vets-service')
-param vetsServiceContainerAppEnvName string = 'aca-env-${appName}-vets-service'
+param vetsServiceContainerAppName string = 'aca-env-${appName}-vets-service'
 
 @description('The Azure Container App Environment name for visits-service')
-param visitsServiceContainerAppEnvName string = 'aca-env-${appName}-visits-service'
+param visitsServiceContainerAppName string = 'aca-env-${appName}-visits-service'
 
+@description('Static IP of the Environment')
+param corpManagedEnvironmentStaticIp string
+
+/*
+@description('The resource group where all network resources for apps will be created in')
+param appNetworkResourceGroup string = 'rg-aca-petclinic'
+
+@description('The resource group where all network resources for Azure Container App service runtime will be created in. Ex: MC_wittyhill-01dfb8c1-rg_wittyhill-01dfb8c1_westeurope')
+param serviceRuntimeNetworkResourceGroup string
+*/
 resource acaPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
-  //<env>.<REGION>.azurecontainerapps.io
-  name: 'private.azurecontainerapps.io'
+  //<env>.<RANDOM>.<REGION>.azurecontainerapps.io. Ex: https://aca-test-vnet.wittyhill-01dfb8c1.westeurope.azurecontainerapps.io
+  name: '${location}.azurecontainerapps.io' // 'private.azurecontainerapps.io'
   location:location
   // properties: {}
 }
@@ -57,8 +54,8 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing =  {
 }
 output vnetId string = vnet.id
 
-resource dnsLinklnkACA 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
-  name: 'dns-lnk-aca-petclinic'
+resource DnsVNetLinklnkACA 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+  name: 'dns-vnet-lnk-aca-petclinic'
   location: location
   parent: acaPrivateDnsZone
   properties: {
@@ -68,9 +65,27 @@ resource dnsLinklnkACA 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@20
     }
   }
 }
+output private_dns_link_id string = DnsVNetLinklnkACA.id
 
-output private_dns_link_id string = dnsLinklnkACA.id
+resource acaAppsRecordSet 'Microsoft.Network/privateDnsZones/A@2020-06-01' = {
+  name: '*' // customersServiceContainerAppName
+  parent: acaPrivateDnsZone
+  properties: {
+    aRecords: [
+      {
+        ipv4Address: corpManagedEnvironmentStaticIp // appsAksLb.properties.frontendIPConfigurations[0].properties.privateIPAddress
+      }
+    ]
+    /*
+    cnameRecord: {
+      cname: customersServiceContainerAppName
+    }
+    */
+    ttl: 360
+  }
+}
 
+/*
 
 resource appNetworkRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
   name: appNetworkResourceGroup
@@ -84,7 +99,7 @@ resource serviceRuntimeNetworkRG 'Microsoft.Resources/resourceGroups@2021-04-01'
 
 resource appsAksLb 'Microsoft.Network/loadBalancers@2021-05-01' existing = {
   scope: appNetworkRG
-  name: 'kubernetes' // 'kubernetes-internal'
+  name: 'kubernetes-internal' // 'kubernetes'
 }
 output appsAksLbFrontEndIpConfigId string = appsAksLb.properties.frontendIPConfigurations[0].id
 output appsAksLbFrontEndIpConfigName string = appsAksLb.properties.frontendIPConfigurations[0].name
@@ -97,35 +112,4 @@ resource acaServiceRuntime_AksLb 'Microsoft.Network/loadBalancers@2021-05-01' ex
 output acaServiceRuntime_AksLbFrontEndIpConfigId string = acaServiceRuntime_AksLb.properties.frontendIPConfigurations[0].id
 output acaServiceRuntime_AksLbFrontEndIpConfigName string = acaServiceRuntime_AksLb.properties.frontendIPConfigurations[0].name
 
-
-resource acaAppsRecordSet 'Microsoft.Network/privateDnsZones/A@2020-06-01' = {
-  name: customersServiceContainerAppName
-  parent: acaPrivateDnsZone
-  properties: {
-    aRecords: [
-      {
-        ipv4Address: appsAksLb.properties.frontendIPConfigurations[0].properties.privateIPAddress
-      }
-    ]
-    cnameRecord: {
-      cname: customersServiceContainerAppName
-    }
-    ttl: 360
-  }
-}
-
-resource ascAppsTestRecordSet 'Microsoft.Network/privateDnsZones/A@2020-06-01' = {
-  name: '${customersServiceContainerAppName}.test'
-  parent: acaPrivateDnsZone
-  properties: {
-    aRecords: [
-      {
-        ipv4Address: appsAksLb.properties.frontendIPConfigurations[0].properties.privateIPAddress
-      }
-    ]
-    cnameRecord: {
-      cname: customersServiceContainerAppName
-    }
-    ttl: 360
-  }
-}
+*/

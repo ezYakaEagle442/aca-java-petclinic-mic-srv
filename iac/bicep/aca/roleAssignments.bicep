@@ -30,7 +30,10 @@ param kvRGName string
 param acrRoleType string
 
 param acrName string
-param acaPrincipalId string
+
+param acaCustomersServicePrincipalId string
+param acaVetsServicePrincipalId string
+param acaVisitsServicePrincipalId string
 
 resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = {
   name: vnetName
@@ -62,12 +65,34 @@ var role = {
 }
 
  // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
- resource AcrPullRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
-  name: guid(acr.id, acrRoleType , acaPrincipalId)
+ resource AcrPullRoleAssignmentCustomersService 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(acr.id, acrRoleType , acaCustomersServicePrincipalId)
   scope: acr
   properties: {
     roleDefinitionId: role[acrRoleType]
-    principalId: acaPrincipalId
+    principalId: acaCustomersServicePrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+ // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
+ resource AcrPullRoleAssignmentVetsService 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(acr.id, acrRoleType , acaVetsServicePrincipalId)
+  scope: acr
+  properties: {
+    roleDefinitionId: role[acrRoleType]
+    principalId: acaVetsServicePrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+ // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
+ resource AcrPullRoleAssignmentVisitsService 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(acr.id, acrRoleType , acaVisitsServicePrincipalId)
+  scope: acr
+  properties: {
+    roleDefinitionId: role[acrRoleType]
+    principalId: acaVisitsServicePrincipalId
     principalType: 'ServicePrincipal'
   }
 }
