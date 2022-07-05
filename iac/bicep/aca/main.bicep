@@ -153,6 +153,7 @@ param ghaSettingsCfgDockerFilePathVisitsService string = './docker/petclinic-vis
 param ghaSettingsCfgRegistryUserName string
 
 @description('The GitHub Action Settings Configuration / Registry Password')
+@secure()
 param ghaSettingsCfgRegistryPassword string
 
 @description('The GitHub Action Settings Configuration / Registry URL')
@@ -233,6 +234,8 @@ module ACR 'acr.bicep' = {
     networkRuleSetCidr: runtimeSubnetCidr
   }
 }
+// /!\ Once ACR is created, you need to build the Apps and to push the images to ACR
+
 
 module azurecontainerapp 'aca.bicep' = {
   name: 'azurecontainerapp'
@@ -270,6 +273,9 @@ module azurecontainerapp 'aca.bicep' = {
     vetsServiceContainerAppName: vetsServiceContainerAppName
     visitsServiceContainerAppName: visitsServiceContainerAppName
   }
+  dependsOn: [
+    ACR
+  ]
 }
 
 resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' = {
@@ -307,7 +313,7 @@ module roleAssignments 'roleAssignments.bicep' = {
   }
   dependsOn: [
     vnet
-    acr
+    ACR
     azurecontainerapp
   ]  
 }
