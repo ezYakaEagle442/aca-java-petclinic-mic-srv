@@ -1,3 +1,5 @@
+// See https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.compute/vm-simple-windows/main.bicep
+
 @description('A UNIQUE name')
 @maxLength(20)
 param appName string = '101-${uniqueString(deployment().name)}'
@@ -109,10 +111,21 @@ param adminUsername string = 'adm_aca'
 param adminPassword string 
 
 // https://github.com/bhummerstone/azure-templates/blob/master/arm/compute/vms/vmlargerdisk.json#L53
-// See also https://docs.microsoft.com/en-us/troubleshoot/system-center/vmm/regional-settings-default-english#resolution-2
 var unattendAutoLogonXML = '<AutoLogon><Password><Value>\'{adminPassword}\')</Value></Password><Domain></Domain><Enabled>true</Enabled><LogonCount>1</LogonCount><Username>\'${adminUsername}\'</Username></AutoLogon>\')]'
 var unattendFirstRunXML = '<FirstLogonCommands><SynchronousCommand><CommandLine>powershell.exe -Command Write-Output \\"select disk 0 \' select partition 1 \' extend\\" | Out-File C:\\diskpart.txt</CommandLine><Description>Create diskpart input file</Description><Order>1</Order></SynchronousCommand><SynchronousCommand><CommandLine>diskpart.exe /s C:\\diskpart.txt</CommandLine><Description>Extend partition</Description><Order>2</Order></SynchronousCommand></FirstLogonCommands>'
-var unattendSetLocalRegion = '<settings pass=\\"oobeSystem\\"><component name=\\"Microsoft-Windows-International-Core\\" processorArchitecture=\\"amd64\\" publicKeyToken=\\"31bf3856ad364e35\\" language=\\"neutral\\" versionScope=\\"nonSxS\\" xmlns:wcm=\\"http://schemas.microsoft.com/WMIConfig/2002/State\\" xmlns:xsi=\\"http://www.w3.org/2001/XMLSchema-instance\\"><InputLocale>fr-FR</InputLocale><SystemLocale>fr-FR</SystemLocale><UILanguage>fr-FR</UILanguage><UILanguageFallback>fr-FR</UILanguageFallback><UserLocale>fr-FR</UserLocale></component></settings><cpi:offlineImage cpi:source=\\"wim:c:/install.wim#Windows 11 Pro\\" xmlns:cpi=\\"urn:schemas-microsoft-com:cpi\\" />'
+
+// XML is trying to set something in the "Microsoft-Windows-International-Core" component, which isn't exposed.
+// the only accepted values for the settingName are AutoLogon and FirstLogonCommands as per https://docs.microsoft.com/en-us/azure/templates/microsoft.compute/virtualmachines?tabs=bicep#additionalunattendcontent
+// See also https://docs.microsoft.com/en-us/troubleshoot/system-center/vmm/regional-settings-default-english#resolution-2
+// https://docs.microsoft.com/en-us/powershell/module/international/set-windefaultinputmethodoverride?view=windowsserver2022-ps
+// https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs?view=windows-11
+// ==> fr-FR: French (040c:0000040c)
+// var unattendSetLocalRegion = '<settings pass=\\"oobeSystem\\"><component name=\\"Microsoft-Windows-International-Core\\" processorArchitecture=\\"amd64\\" publicKeyToken=\\"31bf3856ad364e35\\" language=\\"neutral\\" versionScope=\\"nonSxS\\" xmlns:wcm=\\"http://schemas.microsoft.com/WMIConfig/2002/State\\" xmlns:xsi=\\"http://www.w3.org/2001/XMLSchema-instance\\"><InputLocale>fr-FR</InputLocale><SystemLocale>fr-FR</SystemLocale><UILanguage>fr-FR</UILanguage><UILanguageFallback>fr-FR</UILanguageFallback><UserLocale>fr-FR</UserLocale></component></settings><cpi:offlineImage cpi:source=\\"wim:c:/install.wim#Windows 11 Pro\\" xmlns:cpi=\\"urn:schemas-microsoft-com:cpi\\" />'
+var unattendSetLocalRegionFirstRunXML = '<FirstLogonCommands><SynchronousCommand><CommandLine> powershell.exe -Command Set-WinUserLanguageList -LanguageList fr-FR, en-US -Force</CommandLine><Description>Change language defaults</Description><Order>1</Order></SynchronousCommand></FirstLogonCommands>'
+
+// see also https://github.com/stuartpreston/arm-vm-customregion
+// https://docs.microsoft.com/en-us/windows/win32/intl/table-of-geographical-locations
+var customScript = 'Set-WinSystemLocale en-GB\\r\\nSet-WinUserLanguageList -LanguageList fr-FR -Force\\r\\nSet-Culture -CultureInfo fr-FR\\r\\nSet-WinHomeLocation -GeoId 84\\r\\nRestart-Computer -Force'
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.compute/virtualmachines?tabs=bicep
 resource windowsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = {
@@ -126,13 +139,14 @@ resource windowsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = {
       // computerName: computerName
       adminUsername: adminUsername
       adminPassword: adminPassword
+      customData: [base64(customScript)]
       windowsConfiguration: {
         enableAutomaticUpdates: true
         patchSettings: {
           enableHotpatching: true
           patchMode: 'AutomaticByOS'
         }
-        // timeZone: 'Romance Standard Time'
+        timeZone: 'Romance Standard Time' // GMT Standard Time ==> Run in CMD: tzutil /l https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-time-zones?view=windows-11
         // see sample at https://github.com/bhummerstone/azure-templates/blob/master/arm/compute/vms/vmlargerdisk.json#L183
         additionalUnattendContent: [
           /*
@@ -152,7 +166,7 @@ resource windowsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = {
           {
             passName: 'oobeSystem'
             componentName: 'Microsoft-Windows-Shell-Setup'
-            content: unattendSetLocalRegion
+            content: unattendSetLocalRegionFirstRunXML
             settingName: 'SetLocalRegion'
           }  
         ]
@@ -203,12 +217,6 @@ resource AutoShutdownSchedule 'Microsoft.DevTestLab/schedules@2018-09-15' = {
     timeZoneId: 'Romance Standard Time'
   }
 }
-
-24c80f60-340b-4cdb-ad73-a20ed0c7080d
-az monitor log-analytics query \
-  --workspace 24c80f60-340b-4cdb-ad73-a20ed0c7080d \
-  --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'aca-test-vnet' | project ContainerAppName_s, Log_s, TimeGenerated | take 3" \
-  --out table
 
 /*
 resource nsgrule 'Microsoft.Network/networkSecurityGroups/securityRules@2021-08-01' = {
