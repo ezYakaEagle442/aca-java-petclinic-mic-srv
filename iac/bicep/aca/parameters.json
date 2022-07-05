@@ -6,11 +6,8 @@
         "value": "petcliaca"
       },
       "location": {
-        "value": "centralindia"
+        "value": "westeurope"
       },       
-      "azureContainerAppsRp": {
-        "value": "XXX TODO XXX"
-      },        
       "kvName": {
         "value": "kv-petcliaca-UNIQUEID42"
       },
@@ -94,9 +91,6 @@
       } ,
       "serviceRuntimeNetworkResourceGroup": {
         "value": "rg-aca-svc-run-petclinic"
-      },
-      "azureSpringCloudSkuCapacity": {
-        "value": 25
       }
     }
   }
