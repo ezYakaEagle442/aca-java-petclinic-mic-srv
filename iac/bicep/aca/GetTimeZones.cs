@@ -3,6 +3,9 @@ using System.Globalization;
 using System.IO;
 using System.Collections.ObjectModel;
 
+// https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-time-zones?view=windows-11
+// Run in CMD: tzutil /l
+
 // https://docs.microsoft.com/en-us/dotnet/api/system.timezoneinfo.getsystemtimezones?view=net-6.0
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.compute/virtualmachines?tabs=bicep
 // https://stackoverflow.com/questions/68518905/how-can-i-find-and-use-the-latest-version-of-csc-exe-when-using-visual-studio-co
