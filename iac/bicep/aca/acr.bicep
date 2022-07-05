@@ -4,7 +4,7 @@ param appName string = '101-${uniqueString(deployment().name)}'
 
 // https://docs.microsoft.com/en-us/rest/api/containerregistry/registries/check-name-availability
 @description('The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.')
-param acrName string = 'acr-${appName}' // ==> $acr_registry_name.azurecr.io
+param acrName string = 'acr${appName}' // ==> $acr_registry_name.azurecr.io
 
 @description('The ACR location')
 param location string = resourceGroup().location
@@ -52,4 +52,4 @@ resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' = {
 output acrId string = acr.id
 output acrIdentity string = acr.identity.principalId
 output acrType string = acr.type
-output acrLoginServer string = acr.properties.loginServer
+output acrRegistryUrl string = acr.properties.loginServer
