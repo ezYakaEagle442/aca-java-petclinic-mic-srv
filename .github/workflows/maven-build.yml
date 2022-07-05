@@ -1,0 +1,56 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Java CI with Maven
+
+env:
+  AZURE_CONTAINER_REGISTRY: MY_REGISTRY_NAME # set this to the name of your container registry
+  PROJECT_NAME: MY_PROJECT_NAME              # set this to your project's name
+  RESOURCE_GROUP: MY_RESOURCE_GROUP          # set this to the resource group containing your AKS cluster
+  REGISTRY_URL: MY_REGISTRY_URL              # set this to the URL of your registry
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3 
+      with:
+        java-version: '11'
+        distribution: 'microsoft' # https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#Microsoft
+        cache: maven
+    
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Azure Login
+      uses: azure/login@v1.4.5 # https://github.com/marketplace/actions/azure-login
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Build image on ACR
+      uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
+      with:
+        azcliversion: 2.37.0
+        inlineScript: |
+          az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
+          az acr build -t ${{ env.REGISTRY_URL }}/${{ env.PROJECT_NAME }}:${{ github.sha }} --file XXX
+          build_id=$(az acr task list-runs --registry $acr_registry_name -o json --query [0].name )
+
+          build_id=$(echo $build_id | tr -d '"')
+          echo "Successfully pushed image with ID " $build_id
+          az acr task logs --registry $acr_registry_name --run-id  $build_id
+
+          mkdir deploy
+          export CONTAINER_REGISTRY=${{ env.AZURE_CONTAINER_REGISTRY }}
+          export IMAGE_TAG=$build_id
