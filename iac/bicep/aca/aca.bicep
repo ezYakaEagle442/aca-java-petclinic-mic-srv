@@ -39,10 +39,10 @@ param apiGatewayContainerAppName string = 'aca-${appName}-api-gateway'
 param customersServiceContainerAppName string = 'aca-${appName}-customers-service'
 
 @description('The Azure Container App instance name for vets-service')
-param vetsServiceContainerAppName string = 'aca-env-${appName}-vets-service'
+param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
 
 @description('The Azure Container App instance name for visits-service')
-param visitsServiceContainerAppName string = 'aca-env-${appName}-visits-service'
+param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
 
 @description('The Azure Container App Environment name')
 param azureContainerAppEnvName string = 'aca-env-${appName}'
@@ -52,9 +52,6 @@ param vnetName string = 'vnet-azure-container-apps'
 param zoneRedundant bool = false
 
 param revisionName string = 'poc-aca-101'
-
-@description('The GitHub Action Settings name for XXX Azure Container App instance.')
-param ghaSettingsName string = 'aca-gha-set-xxx'
 
 @description('The GitHub branch name')
 param ghaGitBranchName string = 'main'
@@ -116,7 +113,7 @@ param ghaSettingsCfgRepoUrl string = 'https://github.com/ezYakaEagle442/aca-java
 
 // https://docs.microsoft.com/en-us/rest/api/containerregistry/registries/check-name-availability
 @description('The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.')
-param acrName string = 'acr-${appName}' // ==> $acr_registry_name.azurecr.io
+param acrName string = 'acr${appName}' // ==> $acr_registry_name.azurecr.io
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.operationalinsights/workspaces?tabs=bicep
 resource logAnalyticsWorkspace  'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
@@ -248,13 +245,13 @@ resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
 resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: adminServerContainerAppName
   location: location
-  managedEnvironmentId: corpManagedEnvironment.id 
   identity: {
     // https://docs.microsoft.com/en-us/azure/container-apps/managed-identity?tabs=portal%2Cjava#configure-managed-identities
     type: 'SystemAssigned'
     //userAssignedIdentities: {}
   }
   properties: {
+    managedEnvironmentId: corpManagedEnvironment.id 
     configuration: {
       activeRevisionsMode: 'Multiple'
       /*
@@ -321,8 +318,8 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               //secretRef: 'string'
             }
           ]
-          image: xxx // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
-          name: xxx
+          image: '${acrName}/${adminServerContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          name: adminServerContainerAppName
           probes: [
             {
               failureThreshold: 5
@@ -443,11 +440,11 @@ output AdminServerContainerAppConfigSecrets array = AdminServerContainerApp.prop
 resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: apiGatewayContainerAppName
   location: location
-  managedEnvironmentId: corpManagedEnvironment.id 
   identity: {
     type: 'SystemAssigned'
   }
   properties: {
+    managedEnvironmentId: corpManagedEnvironment.id 
     configuration: {
       activeRevisionsMode: 'Multiple'
       ingress: {
@@ -477,7 +474,6 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         }
       ]
     }
-    }
     template: {
       containers: [
         {
@@ -491,8 +487,8 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               //secretRef: 'string'
             }
           ]
-          image: xxx // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
-          name: xxx
+          image: '${acrName}/${apiGatewayContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          name: apiGatewayContainerAppName
           probes: [
             {
               failureThreshold: 5
@@ -565,11 +561,11 @@ output apiGatewayContainerAppConfigSecrets array = ApiGatewayContainerApp.proper
 resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: configServerContainerAppName
   location: location
-  managedEnvironmentId: corpManagedEnvironment.id 
   identity: {
     type: 'SystemAssigned'
   }
   properties: {
+    managedEnvironmentId: corpManagedEnvironment.id 
     configuration: {
       activeRevisionsMode: 'Multiple'
       ingress: {
@@ -612,8 +608,8 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               //secretRef: 'string'
             }
           ]
-          image: xxx // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
-          name: xxx
+          image: '${acrName}/${apiGatewayContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          name: configServerContainerAppName
           probes: [
             {
               failureThreshold: 5
@@ -687,11 +683,11 @@ output configServerContainerAppConfigSecrets array = ConfigServerContainerApp.pr
 resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: customersServiceContainerAppName
   location: location
-  managedEnvironmentId: corpManagedEnvironment.id 
   identity: {
     type: 'SystemAssigned'
   }
   properties: {
+    managedEnvironmentId: corpManagedEnvironment.id 
     configuration: {
       activeRevisionsMode: 'Multiple'
       ingress: {
@@ -734,8 +730,8 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               //secretRef: 'string'
             }
           ]
-          image: xxx // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
-          name: xxx
+          image: '${acrName}/${customersServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          name: customersServiceContainerAppName
           probes: [
             {
               failureThreshold: 5
@@ -809,11 +805,11 @@ output customersServiceContainerAppConfigSecrets array = CustomersServiceContain
 resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: vetsServiceContainerAppName
   location: location
-  managedEnvironmentId: corpManagedEnvironment.id 
   identity: {
     type: 'SystemAssigned'
   }
   properties: {
+    managedEnvironmentId: corpManagedEnvironment.id
     configuration: {
       activeRevisionsMode: 'Multiple'
       ingress: {
@@ -856,8 +852,8 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               //secretRef: 'string'
             }
           ]
-          image: xxx // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
-          name: xxx
+          image: '${acrName}/${vetsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          name: vetsServiceContainerAppName
           probes: [
             {
               failureThreshold: 5
@@ -920,22 +916,22 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   }
 }
 
-output vetsServiceContainerAppNameContainerAppIdentity string = VetsServiceContainerAppName.identity.principalId
-output vetsServiceContainerAppOutboundIPAddresses array = VetsServiceContainerAppName.properties.outboundIPAddresses
-output vetsServiceContainerAppLatestRevisionName string = VetsServiceContainerAppName.properties.latestRevisionName
-output vetsServiceContainerAppLatestRevisionFqdn string = VetsServiceContainerAppName.properties.latestRevisionFqdn
-output vetsServiceContainerAppIngressFqdn string = VetsServiceContainerAppName.properties.configuration.ingress.fqdn
-output vetsServiceContainerAppConfigSecrets array = VetsServiceContainerAppName.properties.configuration.secrets
+output vetsServiceContainerAppNameContainerAppIdentity string = VetsServiceContainerApp.identity.principalId
+output vetsServiceContainerAppOutboundIPAddresses array = VetsServiceContainerApp.properties.outboundIPAddresses
+output vetsServiceContainerAppLatestRevisionName string = VetsServiceContainerApp.properties.latestRevisionName
+output vetsServiceContainerAppLatestRevisionFqdn string = VetsServiceContainerApp.properties.latestRevisionFqdn
+output vetsServiceContainerAppIngressFqdn string = VetsServiceContainerApp.properties.configuration.ingress.fqdn
+output vetsServiceContainerAppConfigSecrets array = VetsServiceContainerApp.properties.configuration.secrets
 
 
 resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: visitsServiceContainerAppName
   location: location
-  managedEnvironmentId: corpManagedEnvironment.id 
   identity: {
     type: 'SystemAssigned'
   }
   properties: {
+    managedEnvironmentId: corpManagedEnvironment.id 
     configuration: {
       activeRevisionsMode: 'Multiple'
       ingress: {
@@ -978,8 +974,8 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               //secretRef: 'string'
             }
           ]
-          image: xxx // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
-          name: xxx
+          image: '${acrName}/${visitsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          name: visitsServiceContainerAppName
           probes: [
             {
               failureThreshold: 5
