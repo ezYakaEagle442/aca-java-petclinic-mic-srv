@@ -99,6 +99,7 @@ param ghaSettingsCfgPublishType string = 'Image'
 param ghaSettingsCfgRegistryUserName string
 
 @description('The GitHub Action Settings Configuration / Registry Password')
+@secure()
 param ghaSettingsCfgRegistryPassword string
 
 @description('The GitHub Action Settings Configuration / Registry URL')
@@ -112,6 +113,10 @@ param ghaSettingsCfgRegistryRuntimeVersion string = '11-java11'
 
 @description('The GitHub Action Settings / Repo URL')
 param ghaSettingsCfgRepoUrl string = 'https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv'
+
+// https://docs.microsoft.com/en-us/rest/api/containerregistry/registries/check-name-availability
+@description('The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.')
+param acrName string = 'acr-${appName}' // ==> $acr_registry_name.azurecr.io
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.operationalinsights/workspaces?tabs=bicep
 resource logAnalyticsWorkspace  'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
@@ -233,6 +238,13 @@ output corpManagedEnvironmentId string = corpManagedEnvironment.id
 output corpManagedEnvironmentDefaultDomain string = corpManagedEnvironment.properties.defaultDomain
 output corpManagedEnvironmentStaticIp string = corpManagedEnvironment.properties.staticIp
 
+
+resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
+  name: acrName
+}
+
+
+
 resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: adminServerContainerAppName
   location: location
@@ -277,18 +289,17 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       }
       registries: [
         {
-          passwordSecretRef: 'container-registry-connection-string'
-          server: 'string'
-          username: 'string'
+          passwordSecretRef: 'registrypassword'
+          server: ghaSettingsCfgRegistryUrl
+          username: ghaSettingsCfgRegistryUserName
         }
       ]
       secrets: [
         {
-          name: 'container-registry-connection-string'
-          value: XXX
+          name: 'registrypassword'
+          value: ghaSettingsCfgRegistryPassword
         }
       ]
-      
     }
     template: {
       containers: [
@@ -454,18 +465,18 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       }
       registries: [
         {
-          passwordSecretRef: 'container-registry-connection-string'
-          server: 'string'
-          username: 'string'
+          passwordSecretRef: 'registrypassword'
+          server: ghaSettingsCfgRegistryUrl
+          username: ghaSettingsCfgRegistryUserName
         }
       ]
       secrets: [
         {
-          name: 'container-registry-connection-string'
-          value: XXX
+          name: 'registrypassword'
+          value: ghaSettingsCfgRegistryPassword
         }
       ]
-      
+    }
     }
     template: {
       containers: [
@@ -576,18 +587,17 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       }
       registries: [
         {
-          passwordSecretRef: 'container-registry-connection-string'
-          server: 'string'
-          username: 'string'
+          passwordSecretRef: 'registrypassword'
+          server: ghaSettingsCfgRegistryUrl
+          username: ghaSettingsCfgRegistryUserName
         }
       ]
       secrets: [
         {
-          name: 'container-registry-connection-string'
-          value: XXX
+          name: 'registrypassword'
+          value: ghaSettingsCfgRegistryPassword
         }
       ]
-      
     }
     template: {
       containers: [
@@ -699,18 +709,17 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
       }
       registries: [
         {
-          passwordSecretRef: 'container-registry-connection-string'
-          server: 'string'
-          username: 'string'
+          passwordSecretRef: 'registrypassword'
+          server: ghaSettingsCfgRegistryUrl
+          username: ghaSettingsCfgRegistryUserName
         }
       ]
       secrets: [
         {
-          name: 'container-registry-connection-string'
-          value: XXX
+          name: 'registrypassword'
+          value: ghaSettingsCfgRegistryPassword
         }
       ]
-      
     }
     template: {
       containers: [
@@ -797,7 +806,7 @@ output customersServiceContainerAppIngressFqdn string = CustomersServiceContaine
 output customersServiceContainerAppConfigSecrets array = CustomersServiceContainerApp.properties.configuration.secrets
 
 
-resource VetsServiceContainerAppName 'Microsoft.App/containerApps@2022-03-01' = {
+resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: vetsServiceContainerAppName
   location: location
   managedEnvironmentId: corpManagedEnvironment.id 
@@ -822,18 +831,17 @@ resource VetsServiceContainerAppName 'Microsoft.App/containerApps@2022-03-01' = 
       }
       registries: [
         {
-          passwordSecretRef: 'container-registry-connection-string'
-          server: 'string'
-          username: 'string'
+          passwordSecretRef: 'registrypassword'
+          server: ghaSettingsCfgRegistryUrl
+          username: ghaSettingsCfgRegistryUserName
         }
       ]
       secrets: [
         {
-          name: 'container-registry-connection-string'
-          value: XXX
+          name: 'registrypassword'
+          value: ghaSettingsCfgRegistryPassword
         }
       ]
-      
     }
     template: {
       containers: [
@@ -945,18 +953,17 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       }
       registries: [
         {
-          passwordSecretRef: 'container-registry-connection-string'
-          server: 'string'
-          username: 'string'
+          passwordSecretRef: 'registrypassword'
+          server: ghaSettingsCfgRegistryUrl
+          username: ghaSettingsCfgRegistryUserName
         }
       ]
       secrets: [
         {
-          name: 'container-registry-connection-string'
-          value: XXX
+          name: 'registrypassword'
+          value: ghaSettingsCfgRegistryPassword
         }
       ]
-      
     }
     template: {
       containers: [
@@ -1043,9 +1050,9 @@ output visitsServiceContainerAppIngressFqdn string = VisitsServiceContainerApp.p
 output visitsServiceContainerAppConfigSecrets array = VisitsServiceContainerApp.properties.configuration.secrets
 
 
-resource githubActionSettings 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
-  name: 'xxxGitHubActionSettings'
-  parent: xxxContainerApp
+resource githubActionSettingsCustomers 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
+  name: 'aca-gha-set-customers-svc'
+  parent: CustomersServiceContainerApp
   properties: {
     branch: ghaGitBranchName
     githubActionConfiguration: {
@@ -1055,7 +1062,7 @@ resource githubActionSettings 'Microsoft.App/containerApps/sourcecontrols@2022-0
         subscriptionId: subscriptionId
         tenantId: tenantId
       }
-      dockerfilePath: ghaSettingsCfgDockerFilePathXXX
+      dockerfilePath: ghaSettingsCfgDockerFilePathCustomersService
       os: 'Linux'
       registryInfo: {
         registryPassword: ghaSettingsCfgRegistryPassword
@@ -1068,9 +1075,9 @@ resource githubActionSettings 'Microsoft.App/containerApps/sourcecontrols@2022-0
   }
 }
 
-resource githubActionSettings 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
-  name: 'xxxGitHubActionSettings'
-  parent: xxxContainerApp
+resource githubActionSettingsVets 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
+  name: 'aca-gha-set-vets-svc'
+  parent: VetsServiceContainerApp
   properties: {
     branch: ghaGitBranchName
     githubActionConfiguration: {
@@ -1080,7 +1087,7 @@ resource githubActionSettings 'Microsoft.App/containerApps/sourcecontrols@2022-0
         subscriptionId: subscriptionId
         tenantId: tenantId
       }
-      dockerfilePath: ghaSettingsCfgDockerFilePathXXX
+      dockerfilePath: ghaSettingsCfgDockerFilePathVetsService
       os: 'Linux'
       registryInfo: {
         registryPassword: ghaSettingsCfgRegistryPassword
@@ -1092,6 +1099,29 @@ resource githubActionSettings 'Microsoft.App/containerApps/sourcecontrols@2022-0
   }
 }
 
+resource githubActionSettings 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
+  name: 'aca-gha-set-visits-svc'
+  parent: VisitsServiceContainerApp
+  properties: {
+    branch: ghaGitBranchName
+    githubActionConfiguration: {
+      azureCredentials: {
+        clientId:ghaSettingsCfgCredClientId
+        clientSecret: ghaSettingsCfgCredClientSecret
+        subscriptionId: subscriptionId
+        tenantId: tenantId
+      }
+      dockerfilePath: ghaSettingsCfgDockerFilePathVisitsService
+      os: 'Linux'
+      registryInfo: {
+        registryPassword: ghaSettingsCfgRegistryPassword
+        registryUrl: ghaSettingsCfgRegistryUrl
+        registryUserName: ghaSettingsCfgRegistryUserName
+      }
+    }
+    repoUrl: ghaSettingsCfgRepoUrl
+  }
+}
 
 module dnsprivatezone './dns.bicep' = {
   name: 'dns-private-zone'
