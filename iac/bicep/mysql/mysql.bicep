@@ -59,7 +59,7 @@ resource server 'Microsoft.DBforMySQL/servers@2017-12-01' = {
 }
 */
 
-resource mysqlserver 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = {
+resource mysqlserver 'Microsoft.DBforMySQL/flexibleServers@2021-12-01-preview' = {
   name: serverName
   location: location
   sku: {
@@ -86,7 +86,7 @@ resource mysqlserver 'Microsoft.DBforMySQL/flexibleServers@2021-05-01' = {
 output mySQLResourceID string = mysqlserver.id
 
 // Add firewall config to allow Azure Container Apps :
-// virtualNetwor FirewallRules to Allow public access from Azure services 
+// virtualNetwork FirewallRules to Allow public access from Azure services 
 resource fwRuleAzureContainerApps 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-05-01' = {
   name: 'Allow-Azure-Container-Apps'
   parent: mysqlserver
