@@ -41,12 +41,13 @@ COPY "spring-petclinic-admin-server/target/*.jar" /tmp/app/app.jar
 # https://spring.io/blog/2020/01/27/creating-docker-images-with-spring-boot-2-3-0-m1
 # https://www.baeldung.com/docker-layers-spring-boot
 RUN java -Djarmode=layertools -jar "/tmp/app/app.jar" extract
-
+RUN curl -SL --output "/tmp/app/applicationinsights-agent-3.3.0.jar" https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.3.0/applicationinsights-agent-3.3.0.jar
 
 # wget is not installed on adoptopenjdk:11-jre-hotspot
 FROM mcr.microsoft.com/openjdk/jdk:11-mariner
 WORKDIR /tmp/app
 # VOLUME /tmp
+COPY --from=builder /tmp/app/applicationinsights-agent-3.3.0.jar ./
 COPY --from=builder /tmp/app/dependencies/ ./
 COPY --from=builder /tmp/app/snapshot-dependencies/ ./
 COPY --from=builder /tmp/app/spring-boot-loader/ ./

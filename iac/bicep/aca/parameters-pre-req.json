@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appName": {
+      "value": "petcliaca"
+    },
+    "location": {
+      "value": "westeurope"
+    },
+    "acrName": {
+      "value": "acrpetcliaca"
+    },    
+    "azureContainerAppEnvName": {
+      "value": "aca-env-corp"
+    },       
+    "administratorLogin": {
+      "value": "mys_adm"
+    },         
+    "administratorLoginPassword": {
+      "value": "IsTrator42!"
+    },
+    "clientIPAddress": {
+      "value": "xxx SET HERE YOUR WORKSTATION IP ADDRESS FOR DEV/TEST"
+    },
+    "startIpAddress": {
+      "value": "10.42.1.0"
+    },
+    "endIpAddress": {
+      "value": "10.42.1.255"
+    },
+    "vnetName": {
+      "value": "vnet-aca"
+    },
+    "vnetCidr": {
+      "value": "10.42.0.0/21"
+    },
+    "platformReservedDnsIP" : {
+      "value": "10.42.0.10"
+    },
+    "dockerBridgeCidr" : {
+      "value": "10.42.0.0/23"
+    },
+    "infrastructureSubnetCidr": {
+      "value": "10.42.0.0/23"
+    },
+    "runtimeSubnetCidr": {
+      "value": "10.42.0.0/23"
+    },
+    "infrastructureSubnetName": {
+      "value": "snet-infra"
+    },
+    "runtimeSubnetName": {
+      "value": "snet-app"
+    }                             
+  }
+}

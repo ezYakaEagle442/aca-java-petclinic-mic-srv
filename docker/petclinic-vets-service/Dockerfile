@@ -13,9 +13,11 @@ RUN mkdir /tmp/app
 WORKDIR /tmp/app
 COPY "./spring-petclinic-vets-service/target/*.jar" /tmp/app/app.jar
 RUN java -Djarmode=layertools -jar "/tmp/app/app.jar" extract
+RUN curl -SL --output "/tmp/app/applicationinsights-agent-3.3.0.jar" https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.3.0/applicationinsights-agent-3.3.0.jar
 
 FROM mcr.microsoft.com/openjdk/jdk:11-mariner
 WORKDIR /tmp/app
+COPY --from=builder /tmp/app/applicationinsights-agent-3.3.0.jar ./
 COPY --from=builder /tmp/app/dependencies/ ./
 COPY --from=builder /tmp/app/snapshot-dependencies/ ./
 COPY --from=builder /tmp/app/spring-boot-loader/ ./
