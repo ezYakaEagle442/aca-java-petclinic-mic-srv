@@ -12,7 +12,7 @@ param appName string = '101-${uniqueString(deployment().name)}'
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
 
-param vnetName string = 'vnet-azure-container-apps'
+param vnetName string = 'vnet-aca'
 
 @description('The Azure Container App instance name for admin-server')
 param adminServerContainerAppName string = 'aca-${appName}-admin-server'
@@ -27,10 +27,10 @@ param configServerContainerAppName string = 'aca-${appName}-config-server'
 param customersServiceContainerAppName string = 'aca-${appName}-customers-service'
 
 @description('The Azure Container App Environment name for vets-service')
-param vetsServiceContainerAppName string = 'aca-env-${appName}-vets-service'
+param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
 
 @description('The Azure Container App Environment name for visits-service')
-param visitsServiceContainerAppName string = 'aca-env-${appName}-visits-service'
+param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
 
 @description('Static IP of the Environment')
 param corpManagedEnvironmentStaticIp string
@@ -46,7 +46,6 @@ resource acaPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
   //<env>.<RANDOM>.<REGION>.azurecontainerapps.io. Ex: https://aca-test-vnet.wittyhill-01dfb8c1.westeurope.azurecontainerapps.io
   name: '${location}.azurecontainerapps.io' // 'private.azurecontainerapps.io'
   location:location
-  // properties: {}
 }
 
 resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing =  {

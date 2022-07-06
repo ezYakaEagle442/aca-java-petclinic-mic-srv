@@ -21,9 +21,9 @@
 
 @maxLength(20)
 // to get a unique name each time ==> param appName string = 'demo${uniqueString(resourceGroup().id, deployment().name)}'
-param appName string = 'petclinic${uniqueString(resourceGroup().id)}'
+param appName string = 'petcliaca${uniqueString(resourceGroup().id)}'
 
-param location string = 'centralindia'
+param location string = 'westeurope'
 // param rgName string = 'rg-${appName}'
 
 @maxLength(24)
@@ -33,7 +33,7 @@ param kvName string // = 'kv-${appName}'
 @description('The name of the KV RG')
 param kvRGName string
 
-param setKVAccessPolicies bool = false
+param setKVAccessPolicies bool = true
 
 @description('Is KV Network access public ?')
 @allowed([
@@ -56,68 +56,39 @@ param secretsObject object
 @description('The Azure Active Directory tenant ID that should be used for authenticating requests to the Key Vault.')
 param tenantId string = subscription().tenantId
 
-@description('The MySQL DB Admin Login.')
-param administratorLogin string = 'mys_adm'
-
 @description('The Log Analytics workspace name used by Azure Container App instance')
 param logAnalyticsWorkspaceName string = 'log-${appName}'
 
-param appInsightsName string = 'appi-${appName}'
-param appInsightsDiagnosticSettingsName string = 'dgs-${appName}-send-logs-and-metrics-to-log-analytics'
+@description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
+param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.3.0.jar'
 
-param acrName string = 'acr${appName}'
+@secure()
+@description('The Application Insights Intrumention Key. see https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string')
+param appInsightsInstrumentationKey string
 
-@description('The Azure Container App instance name for admin-server')
-param adminServerContainerAppName string = 'aca-${appName}-admin-server'
-
-@description('The Azure Container App instance name for config-server')
-param configServerContainerAppName string = 'aca-${appName}-config-server'
-
-@description('The Azure Container App instance name for discovery-server')
-param discoveryServerContainerAppName string = 'aca-${appName}-discovery-server'
-
-@description('The Azure Container App instance name for api-gateway')
-param apiGatewayContainerAppName string = 'aca-${appName}-api-gateway'
-
-@description('The Azure Container App instance name for customers-service')
-param customersServiceContainerAppName string = 'aca-${appName}-customers-service'
-
-@description('The Azure Container App instance name for vets-service')
-param vetsServiceContainerAppName string = 'aca-env-${appName}-vets-service'
-
-@description('The Azure Container App instance name for visits-service')
-param visitsServiceContainerAppName string = 'aca-env-${appName}-visits-service'
+// https://docs.microsoft.com/en-us/rest/api/containerregistry/registries/check-name-availability
+@description('The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.')
+param acrName string = 'acr${appName}' // ==> $acr_registry_name.azurecr.io
 
 @description('The Azure Container App Environment name')
 param azureContainerAppEnvName string = 'aca-env-${appName}'
 
 param vnetName string = 'vnet-aca'
-param vnetCidr string = '10.42.0.0/21' // /16 minimum ?
-
-@description('Resource ID of a subnet for infrastructure components. This subnet must be in the same VNET as the subnet defined in runtimeSubnetId. Must not overlap with any other provided IP ranges.')
-param infrastructureSubnetName string = 'snet-infra' // used for the AKS nodes
-param infrastructureSubnetCidr string = '10.42.1.0/23' // The CIDR prefix must be smaller than or equal to 23
-@description('Resource ID of a subnet that Container App containers are injected into. This subnet must be in the same VNET as the subnet defined in infrastructureSubnetId. Must not overlap with any other provided IP ranges.')
-param runtimeSubnetCidr string = '10.42.2.0/23'
 param runtimeSubnetName string = 'snet-run'
 
-@description('An IP address from the IP range defined by platformReservedCidr that will be reserved for the internal DNS server')
-param platformReservedDnsIP string = '10.42.1.10'
+param revisionName string = 'poc-aca-101'
 
-param zoneRedundant bool = false
+@description('The GitHub Action Settings Configuration / Registry User Name')
+param ghaSettingsCfgRegistryUserName string
 
+@description('The GitHub Action Settings Configuration / Registry Password')
 @secure()
-@description('The MySQL DB Admin Password.')
-param administratorLoginPassword string
+param ghaSettingsCfgRegistryPassword string
 
-@description('Allow client workstation to MySQL for local Dev/Test only')
-param clientIPAddress string
-
-@description('Allow Azure Container App subnet to access MySQL DB')
-param startIpAddress string = '10.42.1.0'
-
-@description('Allow Azure Container App subnet to access MySQL DB')
-param endIpAddress string = '10.42.1.255'
+@description('The GitHub Action Settings Configuration / Registry URL')
+param ghaSettingsCfgRegistryUrl string
+@description('The GitHub Action Settings / Repo URL')
+param ghaSettingsCfgRepoUrl string = 'https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv'
 
 @description('The GitHub branch name')
 param ghaGitBranchName string = 'main'
@@ -148,19 +119,6 @@ param ghaSettingsCfgDockerFilePathVetsService string = './docker/petclinic-vets-
 
 @description('The GitHub Action Settings Configuration / Docker file Path for visits-service Azure Container App ')
 param ghaSettingsCfgDockerFilePathVisitsService string = './docker/petclinic-visits-service/Dockerfile'
-
-@description('The GitHub Action Settings Configuration / Registry User Name')
-param ghaSettingsCfgRegistryUserName string
-
-@description('The GitHub Action Settings Configuration / Registry Password')
-@secure()
-param ghaSettingsCfgRegistryPassword string
-
-@description('The GitHub Action Settings Configuration / Registry URL')
-param ghaSettingsCfgRegistryUrl string
-
-@description('The GitHub Action Settings / Repo URL')
-param ghaSettingsCfgRepoUrl string = 'https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv'
 
 @description('The GitHub Action Settings Configuration / Publish Type')
 param ghaSettingsCfgPublishType string = 'Image'
@@ -197,45 +155,31 @@ param ghaSettingsCfgRegistryRuntimeStack string = 'JAVA'
 @description('The GitHub Action Settings Configuration / Runtime Version')
 param ghaSettingsCfgRegistryRuntimeVersion string = '11-java11'
 
-/*
-module rg 'rg.bicep' = {
-  name: 'rg-bicep-${appName}'
-  scope: subscription()
-  params: {
-    rgName: rgName
-    location: location
-  }
-}
-*/
 
-// https://docs.microsoft.com/en-us/azure/spring-cloud/how-to-deploy-in-azure-virtual-network?tabs=azure-portal#virtual-network-requirements
-module vnet 'vnet.bicep' = {
-  name: 'vnet-aca'
-  // scope: resourceGroup(rg.name)
-  params: {
-     location: location
-     vnetName: vnetName
-     vnetCidr: vnetCidr
-     infrastructureSubnetCidr: infrastructureSubnetCidr
-     infrastructureSubnetName: infrastructureSubnetName
-     runtimeSubnetCidr: runtimeSubnetCidr
-     runtimeSubnetName: runtimeSubnetName
-     platformReservedDnsIP: platformReservedDnsIP
-  }   
-}
+@description('The Azure Container App instance name for admin-server')
+param adminServerContainerAppName string = 'aca-${appName}-admin-server'
 
-module ACR 'acr.bicep' = {
-  name: acrName
-  params: {
-    appName: appName
-    acrName: acrName
-    location: location
-    tenantId: tenantId
-    networkRuleSetCidr: runtimeSubnetCidr
-  }
-}
-// /!\ Once ACR is created, you need to build the Apps and to push the images to ACR
+@description('The Azure Container App instance name for config-server')
+param configServerContainerAppName string = 'aca-${appName}-config-server'
 
+@description('The Azure Container App instance name for discovery-server')
+param discoveryServerContainerAppName string = 'aca-${appName}-discovery-server'
+
+@description('The Azure Container App instance name for api-gateway')
+param apiGatewayContainerAppName string = 'aca-${appName}-api-gateway'
+
+@description('The Azure Container App instance name for customers-service')
+param customersServiceContainerAppName string = 'aca-${appName}-customers-service'
+
+@description('The Azure Container App instance name for vets-service')
+param vetsServiceContainerAppName string = 'aca-env-${appName}-vets-service'
+
+@description('The Azure Container App instance name for visits-service')
+param visitsServiceContainerAppName string = 'aca-env-${appName}-visits-service'
+
+resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = {
+  name: vnetName
+}
 
 module azurecontainerapp 'aca.bicep' = {
   name: 'azurecontainerapp'
@@ -243,11 +187,17 @@ module azurecontainerapp 'aca.bicep' = {
   params: {
     appName: appName
     location: location
-    logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
-    appInsightsName: appInsightsName
     azureContainerAppEnvName: azureContainerAppEnvName
+    logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
+    appInsightsInstrumentationKey: appInsightsInstrumentationKey
+    applicationInsightsAgentJarFilePath: applicationInsightsAgentJarFilePath
+    springCloudAzureClientId:
+    springCloudAzureClientSecret:
+    springCloudAzureKeyVaultEndpoint:
+    springCloudAzureTenantId:
+    revisionName: revisionName
     vnetName: vnetName
-    zoneRedundant: zoneRedundant
+    acrName: acrName
     ghaGitBranchName: ghaGitBranchName
     ghaSettingsCfgCredClientId: ghaSettingsCfgCredClientId
     ghaSettingsCfgRegistryUserName: ghaSettingsCfgRegistryUserName
@@ -273,14 +223,6 @@ module azurecontainerapp 'aca.bicep' = {
     vetsServiceContainerAppName: vetsServiceContainerAppName
     visitsServiceContainerAppName: visitsServiceContainerAppName
   }
-  dependsOn: [
-    ACR
-  ]
-}
-
-resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' = {
-  name: azureContainerAppEnvName
-  location: location
 }
 
 resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
@@ -312,38 +254,10 @@ module roleAssignments 'roleAssignments.bicep' = {
     acaVisitsServicePrincipalId: VisitsServiceContainerApp.identity.principalId
   }
   dependsOn: [
-    vnet
-    ACR
     azurecontainerapp
   ]  
 }
 
-module mysql '../mysql/mysql.bicep' = {
-  name: 'mysqldb'
-  params: {
-    appName: appName
-    location: location
-    clientIPAddress: clientIPAddress
-    startIpAddress: startIpAddress
-    endIpAddress: endIpAddress
-    administratorLogin: administratorLogin
-    administratorLoginPassword: administratorLoginPassword
-    azureContainerAppsOutboundPubIP: corpManagedEnvironment.properties.staticIp // CustomersServiceContainerApp.properties.outboundIPAddresses[0]
-  }
-}
-
-
-
-var vNetRules = [
-  {
-    'id': vnet.outputs.infrastructureSubnetId
-    'ignoreMissingVnetServiceEndpoint': false
-  }
-  {
-    'id': vnet.outputs.runtimeSubnetId
-    'ignoreMissingVnetServiceEndpoint': false
-  }  
-]
 
 // https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/key-vault-parameter?tabs=azure-cli
 /*
@@ -407,6 +321,16 @@ var accessPoliciesObject = {
   ]
 }
 
+var vNetRules = [
+  {
+    'id': vnet.properties.subnets[0].id
+    'ignoreMissingVnetServiceEndpoint': false
+  }
+  {
+    'id': vnet.properties.subnets[1].id
+    'ignoreMissingVnetServiceEndpoint': false
+  }  
+]
 
 // allow to Azure Container App subnetID and azureContainerAppIdentity
 module KeyVault '../kv/kv.bicep'= {
@@ -420,7 +344,7 @@ module KeyVault '../kv/kv.bicep'= {
     tenantId: tenantId
     publicNetworkAccess: publicNetworkAccess
     vNetRules: vNetRules
-    setKVAccessPolicies: true
+    setKVAccessPolicies: setKVAccessPolicies
     accessPoliciesObject: accessPoliciesObject
   } 
 }

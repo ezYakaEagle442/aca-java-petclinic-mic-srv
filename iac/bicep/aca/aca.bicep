@@ -6,50 +6,55 @@ param appName string = '101-${uniqueString(deployment().name)}'
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
 
-// https://docs.microsoft.com/en-us/azure/container-apps/managed-identity?tabs=portal%2Cjava#configure-managed-identities
-@description('The Azure Active Directory tenant ID that should be used to store the GH Actions SPN credentials and to manage Azure Container Apps Identities.')
-param tenantId string = subscription().tenantId
-
-param subscriptionId string = subscription().id
-
-@description('The Log Analytics workspace name used by Azure Container Apps')
-param logAnalyticsWorkspaceName string = 'log-aca-${appName}'
-
-@allowed([
-  'log-analytics'
-])
-param logDestination string = 'log-analytics'
-
-param appInsightsName string = 'appi-${appName}'
-param appInsightsDiagnosticSettingsName string = 'dgs-${appName}-send-logs-and-metrics-to-log-analytics'
-
-@description('The Azure Container App instance name for admin-server')
-param adminServerContainerAppName string = 'aca-${appName}-admin-server'
-
-@description('The Azure Container App instance name for config-server')
-param configServerContainerAppName string = 'aca-${appName}-config-server'
-
-@description('The Azure Container App instance name for discovery-server')
-param discoveryServerContainerAppName string = 'aca-${appName}-discovery-server'
-
-@description('The Azure Container App instance name for api-gateway')
-param apiGatewayContainerAppName string = 'aca-${appName}-api-gateway'
-
-@description('The Azure Container App instance name for customers-service')
-param customersServiceContainerAppName string = 'aca-${appName}-customers-service'
-
-@description('The Azure Container App instance name for vets-service')
-param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
-
-@description('The Azure Container App instance name for visits-service')
-param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
+// https://docs.microsoft.com/en-us/rest/api/containerregistry/registries/check-name-availability
+@description('The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.')
+param acrName string = 'acr${appName}' // ==> $acr_registry_name.azurecr.io
 
 @description('The Azure Container App Environment name')
 param azureContainerAppEnvName string = 'aca-env-${appName}'
 
-param vnetName string = 'vnet-azure-container-apps'
+param vnetName string = 'vnet-aca'
 
-param zoneRedundant bool = false
+// Spring Cloud for Azure params required to get secrets from Key Vault.
+// https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#basic-usage-3
+// https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#advanced-usage
+// https://github.com/ezYakaEagle442/spring-cloud-az-kv
+// Use - instead of . in secret name. . isn’t supported in secret name. If your application have property name which contains ., 
+// like spring.datasource.url, just replace . to - when save secret in Azure Key Vault. 
+// For example: Save spring-datasource-url in Azure Key Vault. In your application, you can still use spring.datasource.url to retrieve property value.
+@secure()
+param springCloudAzureTenantId string
+@secure()
+param springCloudAzureClientId string
+@secure()
+param springCloudAzureClientSecret string
+@secure()
+param springCloudAzureKeyVaultEndpoint string
+
+// https://docs.microsoft.com/en-us/azure/container-apps/managed-identity?tabs=portal%2Cjava#configure-managed-identities
+@description('The Azure Active Directory tenant ID that should be used to store the GH Actions SPN credentials and to manage Azure Container Apps Identities.')
+param tenantId string = subscription().tenantId
+param subscriptionId string = subscription().id
+
+@description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
+param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.3.0.jar'
+
+@secure()
+@description('The Application Insights Intrumention Key. see https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string')
+param appInsightsInstrumentationKey string
+
+@description('The GitHub Action Settings / Repo URL')
+param ghaSettingsCfgRepoUrl string = 'https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv'
+
+@description('The GitHub Action Settings Configuration / Registry User Name')
+param ghaSettingsCfgRegistryUserName string
+
+@description('The GitHub Action Settings Configuration / Registry Password')
+@secure()
+param ghaSettingsCfgRegistryPassword string
+
+@description('The GitHub Action Settings Configuration / Registry URL')
+param ghaSettingsCfgRegistryUrl string
 
 param revisionName string = 'poc-aca-101'
 
@@ -92,15 +97,27 @@ runtimeVersion: ghaSettingsCfgRegistryRuntimeVersion
 @description('The GitHub Action Settings Configuration / Publish Type')
 param ghaSettingsCfgPublishType string = 'Image'
 
-@description('The GitHub Action Settings Configuration / Registry User Name')
-param ghaSettingsCfgRegistryUserName string
+@description('The Azure Container App instance name for admin-server')
+param adminServerContainerAppName string = 'aca-${appName}-admin-server'
 
-@description('The GitHub Action Settings Configuration / Registry Password')
-@secure()
-param ghaSettingsCfgRegistryPassword string
+@description('The Azure Container App instance name for config-server')
+param configServerContainerAppName string = 'aca-${appName}-config-server'
 
-@description('The GitHub Action Settings Configuration / Registry URL')
-param ghaSettingsCfgRegistryUrl string
+// should be useless as we rely on tha ACA/AKS/K8S native discovery services
+@description('The Azure Container App instance name for discovery-server')
+param discoveryServerContainerAppName string = 'aca-${appName}-discovery-server'
+
+@description('The Azure Container App instance name for api-gateway')
+param apiGatewayContainerAppName string = 'aca-${appName}-api-gateway'
+
+@description('The Azure Container App instance name for customers-service')
+param customersServiceContainerAppName string = 'aca-${appName}-customers-service'
+
+@description('The Azure Container App instance name for vets-service')
+param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
+
+@description('The Azure Container App instance name for visits-service')
+param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
 
 @description('The GitHub Action Settings Configuration / Runtime Stack')
 param ghaSettingsCfgRegistryRuntimeStack string = 'JAVA'
@@ -108,139 +125,9 @@ param ghaSettingsCfgRegistryRuntimeStack string = 'JAVA'
 @description('The GitHub Action Settings Configuration / Runtime Version')
 param ghaSettingsCfgRegistryRuntimeVersion string = '11-java11'
 
-@description('The GitHub Action Settings / Repo URL')
-param ghaSettingsCfgRepoUrl string = 'https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv'
-
-// https://docs.microsoft.com/en-us/rest/api/containerregistry/registries/check-name-availability
-@description('The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.')
-param acrName string = 'acr${appName}' // ==> $acr_registry_name.azurecr.io
-
-// https://docs.microsoft.com/en-us/azure/templates/microsoft.operationalinsights/workspaces?tabs=bicep
-resource logAnalyticsWorkspace  'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
-  name: logAnalyticsWorkspaceName
-  location: location
-  properties: any({
-    retentionInDays: 30
-    features: {
-      searchVersion: 1
-    }
-    sku: {
-      name: 'PerGB2018'
-      /*
-      Pricing tier: PerGB2018 or legacy tiers (Free, Standalone, PerNode, Standard or Premium) which are not available to all customers."allowedValues": [
-        "pergb2018",
-        "Free",
-        "Standalone",
-        "PerNode",
-        "Standard",
-        "Premium"
-        */
-    }
-  })
-}
-output logAnalyticsWorkspaceResourceId string = logAnalyticsWorkspace.id
-output logAnalyticsWorkspaceCustomerId string = logAnalyticsWorkspace.properties.customerId
-
-// https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/components?tabs=bicep
-resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' = {
-  name: appInsightsName
-  location: location
-  kind: 'web'
-  properties: { 
-    Application_Type: 'web'
-  }
-}
-output appInsightsId string = appInsights.id
-output appInsightsConnectionString string = appInsights.properties.ConnectionString
-output appInsightsInstrumentationKey string = appInsights.properties.InstrumentationKey
-
-
-// https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/diagnosticsettings?tabs=bicep
-resource appInsightsDiagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: appInsightsDiagnosticSettingsName
-  // scope: xxxContainerApp
-  properties: {
-    logAnalyticsDestinationType: 'AzureDiagnostics'
-    workspaceId: logAnalyticsWorkspace.id
-    logs: [
-      {
-        category: 'ApplicationConsole'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'SystemLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'IngressLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }    
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-    ]
-  }
-}
-
-
-resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing =  {
-  name: vnetName
-}
-
-resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' = {
+resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' existing = {
   name: azureContainerAppEnvName
-  location: location
-  properties: {
-    appLogsConfiguration: {
-      destination: logDestination
-      logAnalyticsConfiguration: {
-        customerId: logAnalyticsWorkspace.properties.customerId
-        sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
-      }
-      zoneRedundant: zoneRedundant
-    }
-    
-    daprAIInstrumentationKey: appInsights.properties.InstrumentationKey
-    vnetConfiguration: {
-      // The Docker bridge network address represents the default docker0 bridge network address present in all Docker installations. While docker0 bridge is not used by AKS clusters or the pods themselves, you must set this address to continue to support scenarios such as docker build within the AKS cluster. It is required to select a CIDR for the Docker bridge network address because otherwise Docker will pick a subnet automatically, which could conflict with other CIDRs. You must pick an address space that does not collide with the rest of the CIDRs on your networks, including the cluster's service CIDR and pod CIDR. Default of 172.17.0.1/16. You can reuse this range across different AKS clusters.
-      // dockerBridgeCidr: '10.42.0.1/16'
-      infrastructureSubnetId: vnet.properties.subnets[0].id
-      internal: true // set to true if the environnement is private, i.e vnet injected. Boolean indicating the environment only has an internal load balancer. These environments do not have a public static IP resource. They must provide runtimeSubnetId and infrastructureSubnetId if enabling this property
-      platformReservedCidr: vnet.properties.subnets[0].properties.addressPrefix
-      platformReservedDnsIP: vnet.properties.dhcpOptions.dnsServers[0]
-      runtimeSubnetId: vnet.properties.subnets[1].id
-    }
-  }
 }
-output corpManagedEnvironmentId string = corpManagedEnvironment.id 
-output corpManagedEnvironmentDefaultDomain string = corpManagedEnvironment.properties.defaultDomain
-output corpManagedEnvironmentStaticIp string = corpManagedEnvironment.properties.staticIp
-
-
-resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
-  name: acrName
-}
-
-
 
 resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: adminServerContainerAppName
@@ -274,7 +161,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         ]
         */
         external: true
-        targetPort: 8080
+        targetPort: 9090
         traffic: [
           {
             latestRevision: true
@@ -296,6 +183,26 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           name: 'registrypassword'
           value: ghaSettingsCfgRegistryPassword
         }
+        {
+          name: 'appinscon'
+          value: appInsightsInstrumentationKey
+        }
+        {
+          name: 'AZURE_TENANT_ID'
+          value: springCloudAzureTenantId
+        }
+        {
+          name: 'AZURE_CLIENT_ID'
+          value: springCloudAzureClientId
+        }
+        {
+          name: 'AZURE_CLIENT_SECRET'
+          value: springCloudAzureClientSecret
+        } 
+        {
+          name: 'AZURE_KEYVAULT_ENDPOINT'
+          value: springCloudAzureKeyVaultEndpoint
+        }                
       ]
     }
     template: {
@@ -309,14 +216,34 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           ]
           */
           command: [
-            'ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            'ENTRYPOINT ["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
               name: 'SPRING_PROFILES_ACTIVE'
               value: 'docker,mysql'
-              //secretRef: 'string'
             }
+            {
+              // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
+              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+              secretRef: 'appinscon'
+            }
+            {
+              name: 'AZURE_TENANT_ID'
+              secretRef: 'AZURE_TENANT_ID'
+            }  
+            {
+              name: 'AZURE_CLIENT_ID'
+              secretRef: 'AZURE_CLIENT_ID'
+            }
+            {
+              name: 'AZURE_CLIENT_SECRET'
+              secretRef: 'AZURE_CLIENT_SECRET'
+            }  
+            {
+              name: 'AZURE_KEYVAULT_ENDPOINT'
+              secretRef: 'AZURE_KEYVAULT_ENDPOINT'
+            }                                 
           ]
           image: '${acrName}/${adminServerContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: adminServerContainerAppName
@@ -472,20 +399,60 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           name: 'registrypassword'
           value: ghaSettingsCfgRegistryPassword
         }
+        {
+          name: 'appinscon'
+          value: appInsightsInstrumentationKey
+        }
+        {
+          name: 'AZURE_TENANT_ID'
+          value: springCloudAzureTenantId
+        }
+        {
+          name: 'AZURE_CLIENT_ID'
+          value: springCloudAzureClientId
+        }
+        {
+          name: 'AZURE_CLIENT_SECRET'
+          value: springCloudAzureClientSecret
+        } 
+        {
+          name: 'AZURE_KEYVAULT_ENDPOINT'
+          value: springCloudAzureKeyVaultEndpoint
+        }            
       ]
     }
     template: {
       containers: [
         {
           command: [
-            'ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            'ENTRYPOINT ["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
               name: 'SPRING_PROFILES_ACTIVE'
               value: 'docker,mysql'
-              //secretRef: 'string'
             }
+            {
+              // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
+              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+              secretRef: 'appinscon'
+            }
+            {
+              name: 'AZURE_TENANT_ID'
+              secretRef: 'AZURE_TENANT_ID'
+            }  
+            {
+              name: 'AZURE_CLIENT_ID'
+              secretRef: 'AZURE_CLIENT_ID'
+            }
+            {
+              name: 'AZURE_CLIENT_SECRET'
+              secretRef: 'AZURE_CLIENT_SECRET'
+            }  
+            {
+              name: 'AZURE_KEYVAULT_ENDPOINT'
+              secretRef: 'AZURE_KEYVAULT_ENDPOINT'
+            }                    
           ]
           image: '${acrName}/${apiGatewayContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: apiGatewayContainerAppName
@@ -571,7 +538,7 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       ingress: {
         allowInsecure: true
         external: true
-        targetPort: 8080
+        targetPort: 8888
         traffic: [
           {
             latestRevision: true
@@ -593,22 +560,62 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           name: 'registrypassword'
           value: ghaSettingsCfgRegistryPassword
         }
+        {
+          name: 'appinscon'
+          value: appInsightsInstrumentationKey
+        }
+        {
+          name: 'AZURE_TENANT_ID'
+          value: springCloudAzureTenantId
+        }
+        {
+          name: 'AZURE_CLIENT_ID'
+          value: springCloudAzureClientId
+        }
+        {
+          name: 'AZURE_CLIENT_SECRET'
+          value: springCloudAzureClientSecret
+        } 
+        {
+          name: 'AZURE_KEYVAULT_ENDPOINT'
+          value: springCloudAzureKeyVaultEndpoint
+        }        
       ]
     }
     template: {
       containers: [
         {
           command: [
-            'ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            'ENTRYPOINT ["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8888", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
               name: 'SPRING_PROFILES_ACTIVE'
               value: 'docker,mysql'
-              //secretRef: 'string'
+            }
+            {
+              // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
+              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+              secretRef: 'appinscon'
+            }
+            {
+              name: 'AZURE_TENANT_ID'
+              secretRef: 'AZURE_TENANT_ID'
+            }
+            {
+              name: 'AZURE_CLIENT_ID'
+              secretRef: 'AZURE_CLIENT_ID'
+            }
+            {
+              name: 'AZURE_CLIENT_SECRET'
+              secretRef: 'AZURE_CLIENT_SECRET'
+            } 
+            {
+              name: 'AZURE_KEYVAULT_ENDPOINT'
+              secretRef: 'AZURE_KEYVAULT_ENDPOINT'
             }
           ]
-          image: '${acrName}/${apiGatewayContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: '${acrName}/${configServerContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: configServerContainerAppName
           probes: [
             {
@@ -687,7 +694,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
     type: 'SystemAssigned'
   }
   properties: {
-    managedEnvironmentId: corpManagedEnvironment.id 
+    managedEnvironmentId: corpManagedEnvironment.id
     configuration: {
       activeRevisionsMode: 'Multiple'
       ingress: {
@@ -715,20 +722,60 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
           name: 'registrypassword'
           value: ghaSettingsCfgRegistryPassword
         }
+        {
+          name: 'appinscon'
+          value: appInsightsInstrumentationKey
+        }
+        {
+          name: 'AZURE_TENANT_ID'
+          value: springCloudAzureTenantId
+        }
+        {
+          name: 'AZURE_CLIENT_ID'
+          value: springCloudAzureClientId
+        }
+        {
+          name: 'AZURE_CLIENT_SECRET'
+          value: springCloudAzureClientSecret
+        } 
+        {
+          name: 'AZURE_KEYVAULT_ENDPOINT'
+          value: springCloudAzureKeyVaultEndpoint
+        }         
       ]
     }
     template: {
       containers: [
         {
           command: [
-            'ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            'ENTRYPOINT ["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
               name: 'SPRING_PROFILES_ACTIVE'
               value: 'docker,mysql'
-              //secretRef: 'string'
             }
+            {
+              // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
+              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+              secretRef: 'appinscon'
+            }
+            {
+              name: 'AZURE_TENANT_ID'
+              secretRef: 'AZURE_TENANT_ID'
+            }  
+            {
+              name: 'AZURE_CLIENT_ID'
+              secretRef: 'AZURE_CLIENT_ID'
+            }
+            {
+              name: 'AZURE_CLIENT_SECRET'
+              secretRef: 'AZURE_CLIENT_SECRET'
+            }  
+            {
+              name: 'AZURE_KEYVAULT_ENDPOINT'
+              secretRef: 'AZURE_KEYVAULT_ENDPOINT'
+            }                     
           ]
           image: '${acrName}/${customersServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: customersServiceContainerAppName
@@ -837,20 +884,60 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           name: 'registrypassword'
           value: ghaSettingsCfgRegistryPassword
         }
+        {
+          name: 'appinscon'
+          value: appInsightsInstrumentationKey
+        }
+        {
+          name: 'AZURE_TENANT_ID'
+          value: springCloudAzureTenantId
+        }
+        {
+          name: 'AZURE_CLIENT_ID'
+          value: springCloudAzureClientId
+        }
+        {
+          name: 'AZURE_CLIENT_SECRET'
+          value: springCloudAzureClientSecret
+        } 
+        {
+          name: 'AZURE_KEYVAULT_ENDPOINT'
+          value: springCloudAzureKeyVaultEndpoint
+        }                
       ]
     }
     template: {
       containers: [
         {
           command: [
-            'ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            'ENTRYPOINT ["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
               name: 'SPRING_PROFILES_ACTIVE'
               value: 'docker,mysql'
-              //secretRef: 'string'
             }
+            {
+              // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
+              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+              secretRef: 'appinscon'
+            }
+            {
+              name: 'AZURE_TENANT_ID'
+              secretRef: 'AZURE_TENANT_ID'
+            }  
+            {
+              name: 'AZURE_CLIENT_ID'
+              secretRef: 'AZURE_CLIENT_ID'
+            }
+            {
+              name: 'AZURE_CLIENT_SECRET'
+              secretRef: 'AZURE_CLIENT_SECRET'
+            }  
+            {
+              name: 'AZURE_KEYVAULT_ENDPOINT'
+              secretRef: 'AZURE_KEYVAULT_ENDPOINT'
+            }                        
           ]
           image: '${acrName}/${vetsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: vetsServiceContainerAppName
@@ -959,20 +1046,60 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           name: 'registrypassword'
           value: ghaSettingsCfgRegistryPassword
         }
+        {
+          name: 'appinscon'
+          value: appInsightsInstrumentationKey
+        }
+        {
+          name: 'AZURE_TENANT_ID'
+          value: springCloudAzureTenantId
+        }
+        {
+          name: 'AZURE_CLIENT_ID'
+          value: springCloudAzureClientId
+        }
+        {
+          name: 'AZURE_CLIENT_SECRET'
+          value: springCloudAzureClientSecret
+        } 
+        {
+          name: 'AZURE_KEYVAULT_ENDPOINT'
+          value: springCloudAzureKeyVaultEndpoint
+        }                
       ]
     }
     template: {
       containers: [
         {
           command: [
-            'ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            'ENTRYPOINT ["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
               name: 'SPRING_PROFILES_ACTIVE'
               value: 'docker,mysql'
-              //secretRef: 'string'
             }
+            {
+              // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
+              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+              secretRef: 'appinscon'
+            }
+            {
+              name: 'AZURE_TENANT_ID'
+              secretRef: 'AZURE_TENANT_ID'
+            }  
+            {
+              name: 'AZURE_CLIENT_ID'
+              secretRef: 'AZURE_CLIENT_ID'
+            }
+            {
+              name: 'AZURE_CLIENT_SECRET'
+              secretRef: 'AZURE_CLIENT_SECRET'
+            }  
+            {
+              name: 'AZURE_KEYVAULT_ENDPOINT'
+              secretRef: 'AZURE_KEYVAULT_ENDPOINT'
+            }                        
           ]
           image: '${acrName}/${visitsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: visitsServiceContainerAppName
@@ -1045,6 +1172,21 @@ output visitsServiceContainerAppLatestRevisionFqdn string = VisitsServiceContain
 output visitsServiceContainerAppIngressFqdn string = VisitsServiceContainerApp.properties.configuration.ingress.fqdn
 output visitsServiceContainerAppConfigSecrets array = VisitsServiceContainerApp.properties.configuration.secrets
 
+module dnsprivatezone './dns.bicep' = {
+  name: 'dns-private-zone'
+  params: {
+     location: location
+     vnetName: vnetName
+     corpManagedEnvironmentStaticIp: corpManagedEnvironment.properties.staticIp
+     appName: appName
+     adminServerContainerAppName: adminServerContainerAppName
+     apiGatewayContainerAppName: apiGatewayContainerAppName
+     configServerContainerAppName: configServerContainerAppName
+     customersServiceContainerAppName: customersServiceContainerAppName
+     vetsServiceContainerAppName: vetsServiceContainerAppName
+     visitsServiceContainerAppName: visitsServiceContainerAppName
+  }     
+}
 
 resource githubActionSettingsCustomers 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
   name: 'aca-gha-set-customers-svc'
@@ -1118,20 +1260,3 @@ resource githubActionSettings 'Microsoft.App/containerApps/sourcecontrols@2022-0
     repoUrl: ghaSettingsCfgRepoUrl
   }
 }
-
-module dnsprivatezone './dns.bicep' = {
-  name: 'dns-private-zone'
-  params: {
-     location: location
-     vnetName: vnetName
-     corpManagedEnvironmentStaticIp: corpManagedEnvironment.properties.staticIp
-     appName: appName
-     adminServerContainerAppName: adminServerContainerAppName
-     apiGatewayContainerAppName: apiGatewayContainerAppName
-     configServerContainerAppName: configServerContainerAppName
-     customersServiceContainerAppName: customersServiceContainerAppName
-     vetsServiceContainerAppName: vetsServiceContainerAppName
-     visitsServiceContainerAppName: visitsServiceContainerAppName
-  }     
-}
-
