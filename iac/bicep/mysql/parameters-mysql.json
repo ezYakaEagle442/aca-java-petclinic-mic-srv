@@ -15,13 +15,13 @@
         "value": "IsTrator42!"
       },
       "clientIPAddress": {
-        "value": "xxx"
+        "value": "xxx SET HERE YOUR WORKSTATION IP ADDRESS FOR DEV/TEST"
       },  
       "startIpAddress": {
-        "value": "10.42.1.0"
-      }, 
+        "value": "10.42.2.0"
+      },
       "endIpAddress": {
-        "value": "10.42.1.15"
-      }     
+        "value": "10.42.3.255"
+      }    
     }
   }
