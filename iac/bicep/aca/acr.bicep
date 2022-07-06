@@ -22,14 +22,9 @@ resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' = {
   sku: {
     name: 'Basic'
   }
-  /*
   identity: {
-    principalId: xxx
-    tenantId: tenantId
     type: 'SystemAssigned'
-    userAssignedIdentities: {}
   }
-  */
   properties: {
     adminUserEnabled: true // This registry must have the Admin User enabled, or the integration with ACA won’t work.
     dataEndpointEnabled: false // data endpoint rule is not supported for the SKU Basic
