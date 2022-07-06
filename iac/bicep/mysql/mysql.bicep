@@ -87,14 +87,16 @@ output mySQLResourceID string = mysqlserver.id
 
 // Add firewall config to allow Azure Container Apps :
 // virtualNetwork FirewallRules to Allow public access from Azure services 
+/*
 resource fwRuleAzureContainerApps 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-05-01' = {
-  name: 'Allow-Azure-Container-Apps'
+  name: 'Allow-Azure-Container-AppsIpRange'
   parent: mysqlserver
   properties: {
     startIpAddress: startIpAddress
     endIpAddress: endIpAddress
   }
 }
+*/
 
 // Allow client workstation with IP 'clientIPAddress' for local Dev/Test only
 resource fwRuleClientIPAddress 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-05-01' = {
@@ -108,7 +110,7 @@ resource fwRuleClientIPAddress 'Microsoft.DBforMySQL/flexibleServers/firewallRul
 
  // Allow Azure Container Apps
  resource fwRuleAllowAzureContainerApps 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-05-01' = {
-  name: 'Allow Azure Container Apps'
+  name: 'Allow-Azure-Container-Apps-OutboundPubIP'
   parent: mysqlserver
   properties: {
     startIpAddress: azureContainerAppsOutboundPubIP
