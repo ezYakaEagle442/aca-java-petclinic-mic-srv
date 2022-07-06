@@ -13,6 +13,10 @@ param acrName string = 'acr${appName}' // ==> $acr_registry_name.azurecr.io
 @description('The Azure Container App Environment name')
 param azureContainerAppEnvName string = 'aca-env-${appName}'
 
+@description('The Log Analytics workspace name used by Azure Container App instance')
+param logAnalyticsWorkspaceName string = 'log-${appName}'
+
+param appInsightsName string = 'appi-${appName}'
 param vnetName string = 'vnet-aca'
 
 // Spring Cloud for Azure params required to get secrets from Key Vault.
@@ -1186,6 +1190,60 @@ module dnsprivatezone './dns.bicep' = {
      vetsServiceContainerAppName: vetsServiceContainerAppName
      visitsServiceContainerAppName: visitsServiceContainerAppName
   }     
+}
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing = {
+  name: appInsightsName
+}
+
+resource logAnalyticsWorkspace  'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' existing = {
+  name: logAnalyticsWorkspaceName
+}
+
+// https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/diagnosticsettings?tabs=bicep
+resource appInsDgsAdminServer 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'dgs-${appName}-send-${adminServerContainerAppName}-logs-and-metrics-to-log-analytics'
+  scope: AdminServerContainerApp
+  properties: {
+    logAnalyticsDestinationType: 'AzureDiagnostics'
+    workspaceId: logAnalyticsWorkspace.id
+    logs: [
+      {
+        category: 'ApplicationConsole'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'SystemLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'IngressLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }    
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+    ]
+  }
 }
 
 resource githubActionSettingsCustomers 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
