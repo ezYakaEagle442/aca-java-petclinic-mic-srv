@@ -24,34 +24,31 @@
       "value": "xxx SET HERE YOUR WORKSTATION IP ADDRESS FOR DEV/TEST"
     },
     "startIpAddress": {
-      "value": "10.42.1.0"
+      "value": "10.42.2.0"
     },
     "endIpAddress": {
-      "value": "10.42.1.255"
+      "value": "10.42.3.255"
     },
     "vnetName": {
       "value": "vnet-aca"
     },
     "vnetCidr": {
-      "value": "10.42.0.0/21"
-    },
-    "platformReservedDnsIP" : {
-      "value": "10.42.0.10"
-    },
-    "dockerBridgeCidr" : {
-      "value": "10.42.0.0/23"
+      "value": "10.42.0.0/16"
     },
     "infrastructureSubnetCidr": {
-      "value": "10.42.0.0/23"
-    },
-    "runtimeSubnetCidr": {
-      "value": "10.42.0.0/23"
+      "value": "10.42.2.0/23"
     },
     "infrastructureSubnetName": {
       "value": "snet-infra"
     },
-    "runtimeSubnetName": {
-      "value": "snet-app"
-    }                             
+    "dockerBridgeCidr" : {
+      "value": "10.42.42.0/28"
+    },
+    "platformReservedCidr" : {
+      "value": "10.90.0.0/21"
+    },
+    "platformReservedDnsIP" : {
+      "value": "10.90.0.10"
+    }
   }
 }
