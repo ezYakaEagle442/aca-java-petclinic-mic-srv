@@ -66,6 +66,27 @@ param endIpAddress string
 
 param zoneRedundant bool = false
 
+
+@description('emailRecipient ainformed before the VM shutdown')
+param autoShutdownNotificationEmail string
+
+@description('Windows client VM deployed to the VNet. Computer name cannot be more than 15 characters long')
+param windowsVMName string = 'vm-win-aca-petcli'
+
+@description('The VM Admin user name')
+param adminUsername string = 'adm_aca'
+
+@secure()
+@description('The VM password length must be between 12 and 123.')
+param adminPassword string 
+
+@description('The CIDR or source IP range. Asterisk "*" can also be used to match all source IPs. Default tags such as "VirtualNetwork", "AzureLoadBalancer" and "Internet" can also be used. If this is an ingress rule, specifies where network traffic originates from.')
+param nsgRuleSourceAddressPrefix string
+param nsgName string = 'nsg-aca-${appName}-app-client'
+param nsgRuleName string = 'Allow RDP from local dev station'
+
+param nicName string = 'nic-aca-${appName}-client-vm'
+
 @description('The Azure Active Directory tenant ID that should be used for authenticating requests to the Key Vault.')
 param tenantId string = subscription().tenantId
 
@@ -180,4 +201,23 @@ module mysql '../mysql/mysql.bicep' = {
     administratorLoginPassword: administratorLoginPassword
     azureContainerAppsOutboundPubIP: corpManagedEnvironment.properties.staticIp // CustomersServiceContainerApp.properties.outboundIPAddresses[0]
   }
+}
+
+module clientVM 'client-vm.bicep' = {
+  name: 'vm-client'
+  // scope: resourceGroup(rg.name)
+  params: {
+     location: location
+     appName: appName
+     vnetName: vnetName
+     infrastructureSubnetName: infrastructureSubnetName
+     windowsVMName: windowsVMName
+     autoShutdownNotificationEmail: autoShutdownNotificationEmail
+     adminUsername: adminUsername
+     adminPassword: adminPassword
+     nsgRuleSourceAddressPrefix: nsgRuleSourceAddressPrefix
+     nicName: nicName
+     nsgName: nsgName
+     nsgRuleName: nsgRuleName
+  }   
 }

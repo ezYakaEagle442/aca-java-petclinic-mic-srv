@@ -10,7 +10,31 @@
     },
     "acrName": {
       "value": "acrpetcliaca"
-    },    
+    },
+    "autoShutdownNotificationEmail": {
+      "value": "sre-ops-admin@groland.grd"
+    },
+    "windowsVMName": {
+      "value": "vm-win-aca-petcli"
+    },
+    "adminUsername": {
+      "value": "adm_aca"
+    },
+    "adminPassword": {
+      "value": "changeIT"
+    },
+    "nsgName": {
+      "value": "nsg-aca-petcliaca-app-client"
+    },
+    "nsgRuleName": {
+      "value": "Allow RDP"
+    },        
+    "nicName": {
+      "value": "nic-aca-petcliaca-client-vm"
+    }, 
+    "nsgRuleSourceAddressPrefix": {
+      "value": "10.0.0.0/16"
+    },
     "azureContainerAppEnvName": {
       "value": "aca-env-corp"
     },       

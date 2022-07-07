@@ -7,13 +7,25 @@ param appName string = '101-${uniqueString(deployment().name)}'
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
 
-param vnetName string = 'vnet-azure-container-apps'
+param vnetName string = 'vnet-aca'
 
-@description('Subnet that Container App containers are injected into. This subnet must be in the same VNET as the subnet defined in infrastructureSubnetId. Must not overlap with any other provided IP ranges.')
-param runtimeSubnetName string = 'snet-run'
+@description('Resource ID of a subnet for infrastructure components. This subnet must be in the same VNET as the subnet defined in runtimeSubnetId. Must not overlap with any other provided IP ranges.')
+param infrastructureSubnetName string = 'snet-infra' // used for the AKS nodes
+
+@description('Windows client VM deployed to the VNet. Computer name cannot be more than 15 characters long')
+param windowsVMName string = 'vm-win-aca-petcli'
+
+@description('The VM Admin user name')
+param adminUsername string = 'adm_aca'
+
+@secure()
+@description('The VM password length must be between 12 and 123.')
+param adminPassword string 
 
 param nsgName string = 'nsg-aca-${appName}-app-client'
 param nsgRuleName string = 'Allow RDP from local dev station'
+
+@description('The CIDR or source IP range. Asterisk "*" can also be used to match all source IPs. Default tags such as "VirtualNetwork", "AzureLoadBalancer" and "Internet" can also be used. If this is an ingress rule, specifies where network traffic originates from.')
 param nsgRuleSourceAddressPrefix string
 
 param nicName string = 'nic-aca-${appName}-client-vm'
@@ -27,18 +39,15 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing =  {
 output vnetId string = vnet.id
 output vnetGUID string = vnet.properties.resourceGuid
 
-
 resource subnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing =  {
-  name: runtimeSubnetName
+  name: infrastructureSubnetName
 }
 output subnetId string = subnet.id
 output subnetIpCfgId string = subnet.properties.ipConfigurations[0].id
 
-
-
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.network/publicipaddresses?tabs=bicep#publicipaddresssku
-resource pip 'Microsoft.Network/publicIPAddresses@2021-08-01' {
-  name: 'pip-vm-aca-petcli'
+resource pip 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
+  name: 'pip-vm-aca-petclinic-client'
   location: location
   sku: {
     name: 'Basic'
@@ -49,7 +58,6 @@ resource pip 'Microsoft.Network/publicIPAddresses@2021-08-01' {
     deleteOption: 'Delete'
   }
 }
-
 
 resource NSG 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
   name: nsgName
@@ -97,19 +105,6 @@ resource NIC1 'Microsoft.Network/networkInterfaces@2021-08-01' = {
   }
 }
 
-
-@description('Windows computer name cannot be more than 15 characters long')
-param windowsVMName string = 'vm-win-aca-petcli'
-
-// @description('Specifies the host OS name of the virtual machine, Defaults to the name of the VM. This name cannot be updated after the VM is created. Max-length (Windows): 15 characters Max-length (Linux): 64 characters. For naming conventions and restrictions see https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules#microsoftcompute')
-// param computerName string = 'foo'
-
-@description('The VM Admin user name')
-param adminUsername string = 'adm_aca'
-
-@description('The VM password length must be between 12 and 123.')
-param adminPassword string 
-
 // https://github.com/bhummerstone/azure-templates/blob/master/arm/compute/vms/vmlargerdisk.json#L53
 var unattendAutoLogonXML = '<AutoLogon><Password><Value>\'{adminPassword}\')</Value></Password><Domain></Domain><Enabled>true</Enabled><LogonCount>1</LogonCount><Username>\'${adminUsername}\'</Username></AutoLogon>\')]'
 var unattendFirstRunXML = '<FirstLogonCommands><SynchronousCommand><CommandLine>powershell.exe -Command Write-Output \\"select disk 0 \' select partition 1 \' extend\\" | Out-File C:\\diskpart.txt</CommandLine><Description>Create diskpart input file</Description><Order>1</Order></SynchronousCommand><SynchronousCommand><CommandLine>diskpart.exe /s C:\\diskpart.txt</CommandLine><Description>Extend partition</Description><Order>2</Order></SynchronousCommand></FirstLogonCommands>'
@@ -136,7 +131,6 @@ resource windowsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = {
       vmSize: 'Standard_B2s'
     }
     osProfile: {
-      // computerName: computerName
       adminUsername: adminUsername
       adminPassword: adminPassword
       customData: [base64(customScript)]
@@ -245,6 +239,10 @@ resource nsgrule 'Microsoft.Network/networkSecurityGroups/securityRules@2021-08-
 # az vm image list-offers --publisher Canonical --location $location --output table
 # az vm image list --publisher Canonical --offer UbuntuServer --location $location --output table
 # az vm image list --publisher Canonical --offer 0001-com-ubuntu-server-focal --location northeurope --output table --all
+
+# az vm image list-publishers --location $location --output table | grep -i RedHat
+# az vm image list-offers --publisher RedHat --location $location --output table
+# az vm image list --publisher RedHat --offer rh-rhel-8-main-2 --location $location --output table --all
 
 # az vm image list-publishers --location northeurope --output table | grep -i "Mariner"
 # az vm image list-offers --publisher MicrosoftCBLMariner --location $location --output table
