@@ -7,24 +7,25 @@
 
 # https://docs.microsoft.com/en-us/java/openjdk/containers
 FROM mcr.microsoft.com/openjdk/jdk:11-mariner as builder
+ENV APP_INSIGHTS_AGENT_JAR_FILE_PATH string = "/tmp/app/applicationinsights-agent-3.3.0.jar"
 LABEL Maintainer="pinpin <noname@microsoft.com>"
 LABEL Description="PetClinic Config Server: Java Spring Boot microservice built from MS OpenJDK 11-Mariner"
 RUN mkdir /tmp/app
 WORKDIR /tmp/app
 COPY "./spring-petclinic-config-server/target/*.jar" /tmp/app/app.jar
 RUN java -Djarmode=layertools -jar "/tmp/app/app.jar" extract
-RUN curl -SL --output "/tmp/app/applicationinsights-agent-3.3.0.jar" https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.3.0/applicationinsights-agent-3.3.0.jar
+RUN curl -SL --output ${APP_INSIGHTS_AGENT_JAR_FILE_PATH} https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.3.0/applicationinsights-agent-3.3.0.jar
 
 FROM mcr.microsoft.com/openjdk/jdk:11-mariner
 WORKDIR /tmp/app
-COPY --from=builder /tmp/app/applicationinsights-agent-3.3.0.jar ./
+COPY --from=builder ${APP_INSIGHTS_AGENT_JAR_FILE_PATH} ./
 COPY --from=builder /tmp/app/dependencies/ ./
 COPY --from=builder /tmp/app/snapshot-dependencies/ ./
 COPY --from=builder /tmp/app/spring-boot-loader/ ./
 COPY --from=builder /tmp/app/application/ ./
 EXPOSE 80 8080 8081 8082 8083 8084 8888 9090
 
-ENV SPRING_PROFILES_ACTIVE docker,mysql
-
-ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher", "--server.port=8888", "--spring.profiles.active=docker,mysql"]
+ENV SPRING_PROFILES_ACTIVE = "docker,mysql"
+ENV APP_INSIGHTS_AGENT_JAR_FILE_PATH = "/tmp/app/applicationinsights-agent-3.3.0.jar"
+ENTRYPOINT ["java", "-javaagent:${APP_INSIGHTS_AGENT_JAR_FILE_PATH}", "org.springframework.boot.loader.JarLauncher", "--server.port=8888", "--spring.profiles.active=docker,mysql"]
 # ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/tmp/app/app.jar"]
