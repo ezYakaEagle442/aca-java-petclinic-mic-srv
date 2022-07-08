@@ -1,15 +1,20 @@
 # Azure Spring Apps
 
 TODO : Use [Pipelines do deploy Infras with GitHub Actions](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/deploy-github-actions?tabs=CLI)
-```sh
 
-```
+```sh
 
 In the [Bicep parameter file](./aca/parameters.json) :
 - set your laptop/dev station IP adress to the field "clientIPAddress"
 - Instead of putting a secure value (like a password) directly in your Bicep file or parameter file, you can retrieve the value from an Azure Key Vault during a deployment. When a module expects a string parameter with secure:true modifier, you can use the getSecret function to obtain a key vault secret. The value is never exposed because you only reference its key vault ID.
 
 TODO: replace secrets values with references to secrets stored in Azure Key Vault, see the [Azure doc](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/key-vault-parameter?tabs=azure-cli)
+
+A Private-DNS Zone is created during the [Bicep pre-req deployment](./iac/bicep/aca/pre-req.bicep), see [./iac/bicep/aca/dns.bicep](./iac/bicep/aca/dns.bicep)
+
+/!\ IMPORTANT: Set location to 'global' instead of '${location}'. This is because Azure DNS is a global service. 
+Otherwise you will hit this error:
+```
 
 ```console
 {"code":"DeploymentFailed","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/DeployOperations for usage details.","details":[{"code":"MissingRegistrationForLocation","message":"The subscription is not registered for the resource type 'privateDnsZones' in the location 'westeurope'. Please re-register for this provider in order to have access to this location."}]}
