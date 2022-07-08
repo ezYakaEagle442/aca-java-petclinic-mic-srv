@@ -1,4 +1,4 @@
-# Azure Spring Apps
+# Azure Container Apps
 
 TODO : Use [Pipelines do deploy Infras with GitHub Actions](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/deploy-github-actions?tabs=CLI)
 
