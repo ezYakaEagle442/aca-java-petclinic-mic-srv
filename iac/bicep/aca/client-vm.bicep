@@ -92,7 +92,9 @@ resource NIC1 'Microsoft.Network/networkInterfaces@2021-08-01' = {
       {
         name: 'ipcfg-vm-aca-petcli'
         properties: {
-          publicIPAddress: pip
+          publicIPAddress: {
+            id: pip.id // https://github.com/Azure/bicep/issues/285
+          }
           privateIPAllocationMethod: 'Dynamic'
           primary: true
           subnet: {
