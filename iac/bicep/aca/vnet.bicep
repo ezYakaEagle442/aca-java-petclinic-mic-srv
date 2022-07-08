@@ -10,9 +10,6 @@ param vnetCidr string = '10.42.0.0/21' // /16 minimum ?
 param infrastructureSubnetName string = 'snet-infra' // used for the AKS nodes
 param infrastructureSubnetCidr string = '10.42.1.0/23' // The CIDR prefix must be smaller than or equal to 23
 
-@description('An IP address from the IP range defined by platformReservedCidr that will be reserved for the internal DNS server')
-param platformReservedDnsIP string = '10.42.1.10'
-
 // https://docs.microsoft.com/en-us/azure/spring-cloud/how-to-deploy-in-azure-virtual-network?tabs=azure-portal#virtual-network-requirements
 var infrastructureSubnet = {
   name: infrastructureSubnetName
@@ -60,3 +57,9 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' = {
 output vnetId string = vnet.id
 output infrastructureSubnetId string = vnet.properties.subnets[0].id
 output infrastructureSubnetAddressPrefix string = vnet.properties.subnets[0].properties.addressPrefix
+
+resource subnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing =  {
+  name: infrastructureSubnetName
+}
+
+// output subnetIpCfgId string = subnet.properties.ipConfigurations[0].id
