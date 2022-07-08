@@ -74,10 +74,24 @@ jobs:
     - name: maven build, clean
       run: |
         mvn clean
-        mvn clean package -DskipTests -Denv=cloud
         echo "github.workspace = ${{ github.workspace }}"
         pwd
         ls -al
+        ls -al spring-petclinic-admin-server/target/*.jar
+        ls -al spring-petclinic-api-gateway/target/*.jar
+        ls -al spring-petclinic-config-server/target/*.jar
+        ls -al spring-petclinic-customers-service/target/*.jar
+        ls -al spring-petclinic-vets-service/target/*.jar
+        ls -al spring-petclinic-visits-service/target/*.jar
+
+        mvn clean package -DskipTests -Denv=cloud
+        
+        ls -al spring-petclinic-admin-server/target/*.jar
+        ls -al spring-petclinic-api-gateway/target/*.jar
+        ls -al spring-petclinic-config-server/target/*.jar
+        ls -al spring-petclinic-customers-service/target/*.jar
+        ls -al spring-petclinic-vets-service/target/*.jar
+        ls -al spring-petclinic-visits-service/target/*.jar
 
     - name: Build XXX image and push it to ACR
       uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
