@@ -14,6 +14,10 @@ param location string = resourceGroup().location
 
 param vnetName string = 'vnet-aca'
 
+@description('Static IP of the Environment')
+param corpManagedEnvironmentStaticIp string
+
+/*
 @description('The Azure Container App instance name for admin-server')
 param adminServerContainerAppName string = 'aca-${appName}-admin-server'
 
@@ -31,21 +35,12 @@ param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
 
 @description('The Azure Container App Environment name for visits-service')
 param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
-
-@description('Static IP of the Environment')
-param corpManagedEnvironmentStaticIp string
-
-/*
-@description('The resource group where all network resources for apps will be created in')
-param appNetworkResourceGroup string = 'rg-aca-petclinic'
-
-@description('The resource group where all network resources for Azure Container App service runtime will be created in. Ex: MC_wittyhill-01dfb8c1-rg_wittyhill-01dfb8c1_westeurope')
-param serviceRuntimeNetworkResourceGroup string
 */
+
 resource acaPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
   //<env>.<RANDOM>.<REGION>.azurecontainerapps.io. Ex: https://aca-test-vnet.wittyhill-01dfb8c1.westeurope.azurecontainerapps.io
   name: '${location}.azurecontainerapps.io' // 'private.azurecontainerapps.io'
-  location:location
+  location: 'global'  // /!\ 'global' instead of '${location}'. This is because Azure DNS is a global service. otherwise you will hit this error:"MissingRegistrationForLocation. "The subscription is not registered for the resource type 'privateDnsZones' in the location 'westeurope' 
 }
 
 resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing =  {
@@ -55,7 +50,7 @@ output vnetId string = vnet.id
 
 resource DnsVNetLinklnkACA 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
   name: 'dns-vnet-lnk-aca-petclinic'
-  location: location
+  location: 'global'  // /!\ 'global' instead of '${location}'. This is because Azure DNS is a global service.
   parent: acaPrivateDnsZone
   properties: {
     registrationEnabled: false
