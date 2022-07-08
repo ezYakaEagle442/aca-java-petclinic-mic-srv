@@ -26,14 +26,7 @@
     </modules>
 
     <properties>
-        <java.version>11</java.version>
-        <maven.compiler.release>11</maven.compiler.release>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <assertj.version>3.17.1</assertj.version>
-        <lombok.version>1.18.22</lombok.version>
 
-        <spring-boot.version>2.6.6</spring-boot.version>
         <!-- 
         https://github.com/Azure/azure-sdk-for-java/wiki/Spring-Versions-Mapping#which-version-of-spring-cloud-azure-should-i-use 
         https://spring.io/projects/spring-cloud#adding-spring-cloud-to-an-existing-spring-boot-application 
@@ -41,8 +34,17 @@
         -->
         <spring-cloud.version>2021.0.3</spring-cloud.version>
         <spring-cloud-azure.version>4.3.0</spring-cloud-azure.version>
-        <chaos-monkey-spring-boot.version>2.6.1</chaos-monkey-spring-boot.version>
+        <spring-boot.version>2.6.6</spring-boot.version>
 
+        <java.version>11</java.version>
+        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+
+        <assertj.version>3.17.1</assertj.version>
+        <lombok.version>1.18.22</lombok.version>
+        <chaos-monkey-spring-boot.version>2.6.1</chaos-monkey-spring-boot.version>
+        
         <docker.image.prefix>springcommunity</docker.image.prefix>
         <docker.image.exposed.port>9090</docker.image.exposed.port>
         <docker.image.dockerfile.dir>${basedir}</docker.image.dockerfile.dir>
