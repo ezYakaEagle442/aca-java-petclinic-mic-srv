@@ -23,23 +23,44 @@
       "kvSkuName": {
         "value": "standard"
       },
-      "appInsightsInstrumentationKey": {
-        "value": "xxx SET HERE YOUR App Insights Connection String"
-      },          
+      "secretsObject": {
+        "value": {
+          "secrets": [
+            {
+              "secretName": "MYSQL-SERVER-NAME",
+              "secretValue": "petcliasa"
+            },
+            {
+              "secretName": "MYSQL-SERVER-FULL-NAME",
+              "secretValue": "petcliasa.mysql.database.azure.com"
+            },            
+            {
+              "secretName": "MYSQL-DATABASE-NAME",
+              "secretValue": "petclinic"
+            },
+            {
+              "secretName": "MYSQL-SERVER-ADMIN-NAME",
+              "secretValue": "mys_adm"
+            },
+            {
+              "secretName": "MYSQL-SERVER-ADMIN-LOGIN-NAME",
+              "secretValue": "mys_adm"
+            },            
+            {
+              "secretName": "MYSQL-SERVER-ADMIN-PASSWORD",
+              "secretValue": "changeIT"
+            }                        
+          ]
+        }
+      },                   
       "revisionName": {
         "value": "poc-aca-101"
-      },
-      "ghaSettingsCfgRegistryUserName": {
-        "value": "xxx"
-      },      
-      "ghaSettingsCfgRegistryPassword": {
-        "value": "xxx"
       }, 
       "acrName": {
         "value": "acrpetcliaca"
       }, 
       "ghaSettingsCfgRegistryUrl": {
-        "value": "petcliaca.azurecr.io"
+        "value": "acrpetcliaca.azurecr.io"
       }, 
       "ghaSettingsCfgRepoUrl": {
         "value": "https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv"
