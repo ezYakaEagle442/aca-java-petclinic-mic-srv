@@ -26,7 +26,7 @@ resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' = {
     type: 'SystemAssigned'
   }
   properties: {
-    adminUserEnabled: true // This registry must have the Admin User enabled, or the integration with ACA won’t work.
+    adminUserEnabled: true // This registry must have the Admin User enabled, or the integration with ACA won’t work. 
     dataEndpointEnabled: false // data endpoint rule is not supported for the SKU Basic
     /*
     networkRuleSet: {
