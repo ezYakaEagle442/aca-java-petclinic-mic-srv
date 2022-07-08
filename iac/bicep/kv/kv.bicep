@@ -85,7 +85,6 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
 
 output keyVault object = kv
 
-
 // create accessPolicies https://docs.microsoft.com/en-us/azure/templates/microsoft.keyvault/vaults/accesspolicies?tabs=bicep
 // /!\ Preview feature: When enableRbacAuthorization is true in KV, the key vault will use RBAC for authorization of data actions, and the access policies specified in vault properties will be ignored
 // https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/loops#loop-with-condition
@@ -98,5 +97,16 @@ resource kvAccessPolicies 'Microsoft.KeyVault/vaults/accessPolicies@2021-06-01-p
         objectId: accessPolicy.objectId
         permissions: accessPolicy.permissions
       }]
+  }
+}
+
+// https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scenarios-secrets
+module KeyVaultsecrets '../kv/kv_sec_key.bicep'= {
+  name: 'KeyVaultsecrets'
+  scope: resourceGroup(kvRGName)
+  params: {
+    kvName: kvName
+    appName: appName
+    secretsObject: secretsObject
   }
 }
