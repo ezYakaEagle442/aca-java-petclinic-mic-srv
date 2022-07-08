@@ -99,14 +99,3 @@ resource kvAccessPolicies 'Microsoft.KeyVault/vaults/accessPolicies@2021-06-01-p
       }]
   }
 }
-
-// https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scenarios-secrets
-module KeyVaultsecrets '../kv/kv_sec_key.bicep'= {
-  name: 'KeyVaultsecrets'
-  scope: resourceGroup(kvRGName)
-  params: {
-    kvName: kvName
-    appName: appName
-    secretsObject: secretsObject
-  }
-}
