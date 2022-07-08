@@ -56,8 +56,6 @@ resource pip 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
 output pipId string = pip.id
 output pipGUID string = pip.properties.resourceGuid
 output pipAddress string = pip.properties.ipAddress
-output pippublicIPAddressName string = pip.properties.ipConfiguration.properties.publicIPAddress.name
-
 
 resource NSG 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
   name: nsgName
@@ -199,7 +197,7 @@ resource windowsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = {
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.devtestlab/schedules?tabs=bicep
 resource AutoShutdownSchedule 'Microsoft.DevTestLab/schedules@2018-09-15' = {
-  name: 'shutdown-vm-${windowsVMName}'
+  name: 'shutdown-computevm-${windowsVMName}'
   location: location
   properties: {
     dailyRecurrence: {
