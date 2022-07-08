@@ -13,7 +13,7 @@ param vnetName string = 'vnet-aca'
 param infrastructureSubnetID string
 
 @description('Windows client VM deployed to the VNet. Computer name cannot be more than 15 characters long')
-param windowsVMName string = 'vm-win-aca-petcli'
+param windowsVMName string = 'vm-winacapetcli'
 
 @description('The VM Admin user name')
 param adminUsername string = 'adm_aca'
@@ -45,11 +45,11 @@ resource pip 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
   name: 'pip-vm-aca-petclinic-client'
   location: location
   sku: {
-    name: 'Basic'
+    name: 'Basic' // https://docs.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-addresses
     tier: 'Regional'
   }
   properties: {
-    publicIPAllocationMethod: 'Dynamic'
+    publicIPAllocationMethod: 'Dynamic' // Standard IP muste be STATIC
     deleteOption: 'Delete'
   }
 }
@@ -87,7 +87,7 @@ resource NIC1 'Microsoft.Network/networkInterfaces@2021-08-01' = {
   location: location
   name: nicName
   properties: {
-    enableAcceleratedNetworking: true
+    enableAcceleratedNetworking: false // Standard_B2s, which is not compatible with enabling accelerated networking on network interface(s) on the VM
     ipConfigurations: [
       {
         name: 'ipcfg-vm-aca-petcli'
@@ -136,13 +136,14 @@ resource windowsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = {
     }
     // userData: [base64(customScript)]
     osProfile: {
+      computerName: windowsVMName // Defaults to the name of the VM.
       adminUsername: adminUsername
       adminPassword: adminPassword
-      customData: [base64(customScript)]
-      windowsConfiguration: {
+      customData: base64(customScript)
+      windowsConfiguration: { // https://github.com/Azure/bicep/issues/7520
         enableAutomaticUpdates: true
         patchSettings: {
-          enableHotpatching: true
+          enableHotpatching: false // The selected VM Windows-11 image is not supported for hotpatching. Learn more at: https://aka.ms/HotpatchCompatibility
           patchMode: 'AutomaticByOS'
         }
         timeZone: 'Romance Standard Time' // GMT Standard Time ==> Run in CMD: tzutil /l https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-time-zones?view=windows-11
