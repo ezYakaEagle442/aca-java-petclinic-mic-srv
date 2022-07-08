@@ -101,7 +101,6 @@ module vnetModule 'vnet.bicep' = {
      infrastructureSubnetName: infrastructureSubnetName
      // runtimeSubnetCidr: runtimeSubnetCidr
      // runtimeSubnetName: runtimeSubnetName
-     platformReservedDnsIP: platformReservedDnsIP
   }   
 }
 
@@ -202,6 +201,16 @@ module mysql '../mysql/mysql.bicep' = {
   }
 }
 
+module DNS 'dns.bicep' = {
+  name: 'privatedns'
+  params: {
+    appName: appName
+    location: location
+    vnetName: vnetName
+    corpManagedEnvironmentStaticIp: corpManagedEnvironment.properties.staticIp
+  }
+}
+
 module clientVM 'client-vm.bicep' = {
   name: 'vm-client'
   // scope: resourceGroup(rg.name)
@@ -209,7 +218,7 @@ module clientVM 'client-vm.bicep' = {
      location: location
      appName: appName
      vnetName: vnetName
-     infrastructureSubnetName: infrastructureSubnetName
+     infrastructureSubnetID: vnet.properties.subnets[0].id
      windowsVMName: windowsVMName
      autoShutdownNotificationEmail: autoShutdownNotificationEmail
      adminUsername: adminUsername

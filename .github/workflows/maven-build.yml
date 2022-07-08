@@ -4,10 +4,35 @@
 name: Java CI with Maven
 
 env:
-  AZURE_CONTAINER_REGISTRY: MY_REGISTRY_NAME # set this to the name of your container registry
-  PROJECT_NAME: MY_PROJECT_NAME              # set this to your project's name
-  RESOURCE_GROUP: MY_RESOURCE_GROUP          # set this to the resource group containing your AKS cluster
-  REGISTRY_URL: MY_REGISTRY_URL              # set this to the URL of your registry
+  AZURE_CONTAINER_REGISTRY: acrpetcliaca # set this to the name of your container registry
+  REGISTRY_URL: acrpetcliaca.azurecr.io  # set this to the URL of your registry
+  PROJECT_NAME: petclinic                # set this to your project's name
+  
+  # ==== APPS ====
+  ADMIN_SERVER: aca-petclinic-admin-server
+  CONFIG_SERVER: aca-petclinic-config-server
+  DISCOVERY_SERVER: aca-petclinic-discovery-server
+
+  API_GATEWAY: aca-petclinic-api-gateway
+  CUSTOMERS_SERVICE: aca-petclinic-customers-service
+  VETS_SERVICE: aca-petclinic-vets-service
+  VISITS_SERVICE: aca-petclinic-visits-service
+
+  # ==== Versions ====
+  DEPLOYMENT_VERSION: 2.6.6
+  AZ_CLI_VERSION: 2.37.0
+  JAVA_VERSION: 11
+
+  # https://github.com/Azure/actions-workflow-samples/blob/master/assets/create-secrets-for-GitHub-workflows.md#consume-secrets-in-your-workflow
+  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-secrets
+  # ==== Secrets ====
+  credentials: ${{ secrets.AZURE_CREDENTIALS }}
+
+  # ==== Versions ====
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  ENDPOINT: ${{ secrets.AZURE_KEY_VAULT_ENDPOINT }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
 on:
   push:
@@ -22,11 +47,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+    # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
+    # /!\ IMPORTANT:  The step that creates or updates the environment variable does not have access to the new value, but all subsequent steps in a job will have access.
+    - name: Set Base environment variables
+      run: |
+        echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV        
+      shell: bash
+
     - uses: actions/checkout@v3
-    - name: Set up JDK 11
+    - name: Set up JDK
       uses: actions/setup-java@v3 
       with:
-        java-version: '11'
+        java-version: ${{ env.JAVA_VERSION }}
         distribution: 'microsoft' # https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#Microsoft
         cache: maven
     
@@ -38,18 +71,34 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Build image on ACR
+    - name: maven build, clean
+      run: |
+        mvn clean package -DskipTests -Denv=cloud
+        echo "github.workspace = ${{ github.workspace }}"
+        pwd
+        ls -al
+
+    - name: Build XXX image and push it to ACR
       uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
       with:
-        azcliversion: 2.37.0
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
         inlineScript: |
+
+          # tenantId=$(az account show --query tenantId -o tsv)
+          # echo AZURE_TENANT_ID >> $GITHUB_ENV
+
           az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
-          az acr build -t ${{ env.REGISTRY_URL }}/${{ env.PROJECT_NAME }}:${{ github.sha }} --file XXX
+          az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
+          az acr build -t ${{ env.REGISTRY_URL }}/${{ env.PROJECT_NAME }}:${{ github.sha }} --file "./docker/petclinic-admin-server/Dockerfile"
           build_id=$(az acr task list-runs --registry $acr_registry_name -o json --query [0].name )
 
           build_id=$(echo $build_id | tr -d '"')
           echo "Successfully pushed image with ID " $build_id
           az acr task logs --registry $acr_registry_name --run-id  $build_id
+
+          # verify
+          az acr repository list  ${{ env.AZURE_CONTAINER_REGISTRY }} --output table
+          az acr repository show --name ${{ env.AZURE_CONTAINER_REGISTRY }} --repository ${{ env.PROJECT_NAME }}
 
           mkdir deploy
           export CONTAINER_REGISTRY=${{ env.AZURE_CONTAINER_REGISTRY }}

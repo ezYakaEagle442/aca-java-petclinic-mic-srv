@@ -10,7 +10,7 @@ param location string = resourceGroup().location
 param vnetName string = 'vnet-aca'
 
 @description('Resource ID of a subnet for infrastructure components. This subnet must be in the same VNET as the subnet defined in runtimeSubnetId. Must not overlap with any other provided IP ranges.')
-param infrastructureSubnetName string = 'snet-infra' // used for the AKS nodes
+param infrastructureSubnetID string
 
 @description('Windows client VM deployed to the VNet. Computer name cannot be more than 15 characters long')
 param windowsVMName string = 'vm-win-aca-petcli'
@@ -38,12 +38,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing =  {
 }
 output vnetId string = vnet.id
 output vnetGUID string = vnet.properties.resourceGuid
-
-resource subnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing =  {
-  name: infrastructureSubnetName
-}
-output subnetId string = subnet.id
-output subnetIpCfgId string = subnet.properties.ipConfigurations[0].id
+output subnetId string = vnet.properties.subnets[0].id
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.network/publicipaddresses?tabs=bicep#publicipaddresssku
 resource pip 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
@@ -58,6 +53,11 @@ resource pip 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
     deleteOption: 'Delete'
   }
 }
+output pipId string = pip.id
+output pipGUID string = pip.properties.resourceGuid
+output pipAddress string = pip.properties.ipAddress
+output pippublicIPAddressName string = pip.properties.ipConfiguration.properties.publicIPAddress.name
+
 
 resource NSG 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
   name: nsgName
@@ -84,7 +84,7 @@ resource NSG 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.network/networkinterfaces?tabs=bicep
 resource NIC1 'Microsoft.Network/networkInterfaces@2021-08-01' = {
-  location: resourceGroup().location
+  location: location
   name: nicName
   properties: {
     enableAcceleratedNetworking: true
@@ -94,9 +94,9 @@ resource NIC1 'Microsoft.Network/networkInterfaces@2021-08-01' = {
         properties: {
           publicIPAddress: pip
           privateIPAllocationMethod: 'Dynamic'
-          // privateIPAddress: privateIPAddress
+          primary: true
           subnet: {
-            id: subnet.id
+            id: infrastructureSubnetID
           }
         }
       }

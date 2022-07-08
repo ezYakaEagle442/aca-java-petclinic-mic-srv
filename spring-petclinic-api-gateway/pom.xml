@@ -17,24 +17,24 @@
     <properties>
         <!-- skip test ApiGatewayControllerTest because there is no service yet to serve /api/gateway/ -->
         <maven.test.skip>true</maven.test.skip>
-        <webjars-bootstrap.version>5.1.3</webjars-bootstrap.version>
+        <webjars-bootstrap.version>3.3.7-1</webjars-bootstrap.version> <!-- 5.1.3 -->
         <webjars-jquery.version>3.6.0</webjars-jquery.version>
         <webjars-angular.version>1.8.2</webjars-angular.version>
         <webjars-angular-ui-router.version>1.0.20</webjars-angular-ui-router.version>
-        <wro4j.version>1.10.1</wro4j.version> <!-- 1.8.0-->
+        <wro4j.version>1.8.0</wro4j.version> <!-- 1.10.1-->
         <!-- https://stackoverflow.com/questions/60587334/getting-compatible-version-issue-when-running-spring-boot-application-however-in -->
         <!-- https://stackoverflow.com/questions/68741978/issue-with-io-github-resilience4j-version-1-7-2-spelresolverconfigurationonmiss -->
         <resilience4j.version>1.7.1</resilience4j.version>
         <docker.image.exposed.port>8081</docker.image.exposed.port>
         <docker.image.dockerfile.dir>${basedir}/../docker</docker.image.dockerfile.dir>
-
+        <!-- <mockito.version>4.6.1</mockito.version> 3.1.0, 3.6.28, 3.12.4, 4.6.1 -->
         <!-- Some tweak for wro4j 1.8 compatibility with Java 9+ -->
         <!-- 
             https://github.com/wro4j/wro4j/issues/1039 4.6.1 or 2.76 
             https://github.com/wro4j/wro4j/issues/1130
+            
         -->
-        <mockito.version>3.9.0</mockito.version>
-
+        
     </properties>
 
     <dependencies>
@@ -44,26 +44,7 @@
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <!--
-         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        -->    
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
@@ -76,25 +57,36 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>        
-        <!--
-        <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-web-reactive</artifactId>
-        <version>5.0.0.M4</version>
-        </dependency>
-        -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
-            <version>2.6.6</version>
+            <version>${spring-boot.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <version>4.0.0-M4</version> 
-            <scope>provided</scope>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!--
+         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        -->    
 
         <!-- Third parties -->
         <dependency>
@@ -107,12 +99,16 @@
             <scope>provided</scope>
         </dependency>
 
+        <!--
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
+        -->
 
-        <!--Spring resilience4j dependency https://github.com/resilience4j/resilience4j/issues/848 -->
+        <!--Spring resilience4j dependency
+            The Resilience4j dependencies comes from the spring-cloud-dependencies pom
+            https://github.com/resilience4j/resilience4j/issues/848
         <dependency>
             <groupId>io.github.resilience4j</groupId>
             <artifactId>resilience4j-spring-boot2</artifactId>
@@ -133,6 +129,7 @@
             <artifactId>resilience4j-micrometer</artifactId>
             <version>${resilience4j.version}</version>
         </dependency>
+        -->
 
         <!-- Webjars -->
         <dependency>
@@ -179,41 +176,6 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <!--
-                    This plugin's configuration is used to store Eclipse 
-                    m2e settings only. It has no influence on the Maven build itself. 
-                    https://stackoverflow.com/questions/6352208/how-to-solve-plugin-execution-not-covered-by-lifecycle-configuration-for-sprin
-                -->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>ro.isdc.wro4j</groupId>
-                                        <artifactId>wro4j-maven-plugin</artifactId>
-                                        <versionRange>[1.8,)</versionRange>
-                                        <goals>
-                                            <goal>test-compile</goal>
-                                            <goal>compile</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <execute />
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
         <plugins>
             <plugin>
                 <groupId>ro.isdc.wro4j</groupId>
@@ -221,8 +183,6 @@
                 <version>${wro4j.version}</version>
                 <executions>
                     <execution>
-                        <!-- https://stackoverflow.com/questions/6352208/how-to-solve-plugin-execution-not-covered-by-lifecycle-configuration-for-sprin -->
-                        <?m2e ignore?>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>run</goal>
@@ -237,45 +197,13 @@
                     <contextFolder>${basedir}/src/main/less</contextFolder>
                 </configuration>
                 <dependencies>
-                    <!-- https://github.com/wro4j/wro4j/issues/947 -->
-                    <dependency>
-                        <groupId>org.webjars</groupId>
-                        <artifactId>emberjs</artifactId>
-                        <version>1.9.0-1</version>
-                        <exclusions>
-                            <exclusion>
-                                <groupId>org.webjars</groupId>
-                                <artifactId>jquery</artifactId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>                
                     <dependency>
                         <groupId>org.webjars</groupId>
                         <artifactId>bootstrap</artifactId>
                         <version>${webjars-bootstrap.version}</version>
-                        <exclusions>
-                            <exclusion>
-                                <groupId>org.webjars.npm</groupId>
-                                <artifactId>minimatch</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>org.webjars.npm</groupId>
-                                <artifactId>jshint</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>org.webjars.npm</groupId>
-                                <artifactId>glob</artifactId>
-                            </exclusion>                                                   
-                            <exclusion>
-                                <groupId>org.webjars.cli</groupId>
-                                <artifactId>minimatch</artifactId>
-                            </exclusion>                            
-                        </exclusions> 
-                    </dependency>                   
+                    </dependency>
                     <!-- Some tweak for wro4j 1.8 compatibility with Java 9+ -->
-                    <!-- https://github.com/wro4j/wro4j/issues/1039 
-                        https://github.com/wro4j/wro4j/issues/1130
-                    -->
+                    <!-- See https://github.com/wro4j/wro4j/issues/1039  https://github.com/wro4j/wro4j/issues/1130 -->
                     <dependency>
                         <groupId>org.mockito</groupId>
                         <artifactId>mockito-core</artifactId>
