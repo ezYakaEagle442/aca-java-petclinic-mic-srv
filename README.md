@@ -18,6 +18,7 @@ see the [ACA doc](https://docs.microsoft.com/en-us/azure/container-apps/firewall
 ## Starting services locally without Docker
 
 Quick local test just to verify that the jar files can be run (the routing will not work out of a K8S cluster, and also the apps will fail to start as soon as management port 8081 will be already in use by config server ...) : 
+
 ```sh
 mvn package -Dmaven.test.skip=true
 java -jar spring-petclinic-config-server\target\spring-petclinic-config-server-2.6.6.jar --server.port=8888
@@ -26,6 +27,11 @@ java -jar spring-petclinic-visits-service\target\spring-petclinic-visits-service
 java -jar spring-petclinic-vets-service\target\spring-petclinic-vets-service-2.6.6.jar --server.port=8083
 java -jar spring-petclinic-customers-service\target\spring-petclinic-customers-service-2.6.6.jar --server.port=8084
 java -jar spring-petclinic-api-gateway\target\spring-petclinic-api-gateway-2.6.6.jar --server.port=8085
+```
+
+Note: tip to verify the dependencies
+```sh
+mvn dependency:tree
 ```
 
 Every microservice is a Spring Boot application and can be started locally. 
@@ -240,7 +246,21 @@ Read the docs :
 
 ## DNS Management
 
-A Private-DNS Zone is created, see iac\bicep\aca\dns.bicep
+A Private-DNS Zone is created during the [Bicep pre-req deployment](./iac/bicep/aca/pre-req.bicep), see [./iac/bicep/aca/dns.bicep](./iac/bicep/aca/dns.bicep)
+
+/!\ IMPORTANT: Set location to 'global' instead of '${location}'. This is because Azure DNS is a global service. 
+Otherwise you will hit this error:
+```sh
+"MissingRegistrationForLocation. "The subscription is not registered for the resource type 'privateDnsZones' in the location 'westeurope' 
+```
+
+```sh
+resource acaPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  //<env>.<RANDOM>.<REGION>.azurecontainerapps.io. Ex: https://aca-test-vnet.wittyhill-01dfb8c1.westeurope.azurecontainerapps.io
+  name: '${location}.azurecontainerapps.io' // 'private.azurecontainerapps.io'
+  location: 'global'  
+}
+```
 
 ### Custom metrics
 Spring Boot registers a lot number of core metrics: JVM, CPU, Tomcat, Logback... 
