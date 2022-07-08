@@ -42,10 +42,10 @@
       "value": "mys_adm"
     },         
     "administratorLoginPassword": {
-      "value": "IsTrator42!"
+      "value": "changeIT"
     },
     "clientIPAddress": {
-      "value": "xxx SET HERE YOUR WORKSTATION IP ADDRESS FOR DEV/TEST"
+      "value": "9.9.9.9 SET HERE YOUR WORKSTATION IP ADDRESS FOR DEV/TEST"
     },
     "startIpAddress": {
       "value": "10.42.2.0"
