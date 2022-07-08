@@ -66,7 +66,6 @@ param endIpAddress string
 
 param zoneRedundant bool = false
 
-
 @description('emailRecipient ainformed before the VM shutdown')
 param autoShutdownNotificationEmail string
 
