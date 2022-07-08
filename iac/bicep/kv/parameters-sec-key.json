@@ -25,7 +25,7 @@
             },
             {
               "secretName": "MYSQL-SERVER-ADMIN-PASSWORD",
-              "secretValue": "IsTrator42!"
+              "secretValue": "changeIT"
             }                        
           ]
         }
