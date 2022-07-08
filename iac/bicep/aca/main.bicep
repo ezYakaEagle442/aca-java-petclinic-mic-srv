@@ -62,9 +62,7 @@ param logAnalyticsWorkspaceName string = 'log-${appName}'
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
 param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.3.0.jar'
 
-@secure()
-@description('The Application Insights Intrumention Key. see https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string')
-param appInsightsInstrumentationKey string
+param appInsightsName string = 'appi-${appName}'
 
 // https://docs.microsoft.com/en-us/rest/api/containerregistry/registries/check-name-availability
 @description('The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.')
@@ -74,19 +72,26 @@ param acrName string = 'acr${appName}' // ==> $acr_registry_name.azurecr.io
 param azureContainerAppEnvName string = 'aca-env-${appName}'
 
 param vnetName string = 'vnet-aca'
-param runtimeSubnetName string = 'snet-run'
+param infrastructureSubnetName string = 'snet-infra'
+
+// Spring Cloud for Azure params required to get secrets from Key Vault.
+// https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#basic-usage-3
+// https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#advanced-usage
+// https://github.com/ezYakaEagle442/spring-cloud-az-kv
+// Use - instead of . in secret name. . isn’t supported in secret name. If your application have property name which contains ., 
+// like spring.datasource.url, just replace . to - when save secret in Azure Key Vault. 
+// For example: Save spring-datasource-url in Azure Key Vault. In your application, you can still use spring.datasource.url to retrieve property value.
+@secure()
+param springCloudAzureTenantId string
+@secure()
+param springCloudAzureClientId string
+@secure()
+param springCloudAzureClientSecret string
+@secure()
+param springCloudAzureKeyVaultEndpoint string
 
 param revisionName string = 'poc-aca-101'
 
-@description('The GitHub Action Settings Configuration / Registry User Name')
-param ghaSettingsCfgRegistryUserName string
-
-@description('The GitHub Action Settings Configuration / Registry Password')
-@secure()
-param ghaSettingsCfgRegistryPassword string
-
-@description('The GitHub Action Settings Configuration / Registry URL')
-param ghaSettingsCfgRegistryUrl string
 @description('The GitHub Action Settings / Repo URL')
 param ghaSettingsCfgRepoUrl string = 'https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv'
 
@@ -181,6 +186,14 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = {
   name: vnetName
 }
 
+resource ACR 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
+  name: acrName
+}
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing = {
+  name: appInsightsName
+}
+
 module azurecontainerapp 'aca.bicep' = {
   name: 'azurecontainerapp'
   // scope: resourceGroup(rg.name)
@@ -189,20 +202,20 @@ module azurecontainerapp 'aca.bicep' = {
     location: location
     azureContainerAppEnvName: azureContainerAppEnvName
     logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
-    appInsightsInstrumentationKey: appInsightsInstrumentationKey
+    appInsightsInstrumentationKey: appInsights.properties.ConnectionString
     applicationInsightsAgentJarFilePath: applicationInsightsAgentJarFilePath
-    springCloudAzureClientId:
-    springCloudAzureClientSecret:
-    springCloudAzureKeyVaultEndpoint:
-    springCloudAzureTenantId:
+    springCloudAzureClientId: springCloudAzureClientId
+    springCloudAzureClientSecret: springCloudAzureClientSecret
+    springCloudAzureKeyVaultEndpoint: springCloudAzureKeyVaultEndpoint
+    springCloudAzureTenantId: springCloudAzureTenantId
     revisionName: revisionName
     vnetName: vnetName
     acrName: acrName
     ghaGitBranchName: ghaGitBranchName
     ghaSettingsCfgCredClientId: ghaSettingsCfgCredClientId
-    ghaSettingsCfgRegistryUserName: ghaSettingsCfgRegistryUserName
-    ghaSettingsCfgRegistryPassword: ghaSettingsCfgRegistryPassword
-    ghaSettingsCfgRegistryUrl: ghaSettingsCfgRegistryUrl
+    ghaSettingsCfgRegistryUserName: ACR.listCredentials().username
+    ghaSettingsCfgRegistryPassword: ACR.listCredentials().passwords[0].value
+    ghaSettingsCfgRegistryUrl: ACR.properties.loginServer
     ghaSettingsCfgCredClientSecret: ghaSettingsCfgCredClientSecret
     ghaSettingsCfgDockerFilePathAdminServer: ghaSettingsCfgDockerFilePathAdminServer
     ghaSettingsCfgDockerFilePathApiGateway: ghaSettingsCfgDockerFilePathApiGateway
@@ -242,7 +255,7 @@ module roleAssignments 'roleAssignments.bicep' = {
   name: 'role-assignments'
   params: {
     vnetName: vnetName
-    subnetName: runtimeSubnetName
+    subnetName: infrastructureSubnetName
     acrName: acrName
     kvName: kvName
     kvRGName: kvRGName
