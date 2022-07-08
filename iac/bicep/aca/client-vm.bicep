@@ -103,7 +103,9 @@ resource NIC1 'Microsoft.Network/networkInterfaces@2021-08-01' = {
         }
       }
     ]
-    networkSecurityGroup: NSG
+    networkSecurityGroup: {
+      id: NSG.id
+    }
   }
 }
 
@@ -132,6 +134,7 @@ resource windowsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = {
     hardwareProfile: {
       vmSize: 'Standard_B2s'
     }
+    // userData: [base64(customScript)]
     osProfile: {
       adminUsername: adminUsername
       adminPassword: adminPassword
@@ -147,23 +150,23 @@ resource windowsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = {
         additionalUnattendContent: [
           /*
           {
-            passName: 'oobeSystem'
+            passName: 'OobeSystem'
             componentName: 'Microsoft-Windows-Shell-Setup'
             content: unattendAutoLogonXML
             settingName: 'AutoLogon'
           }
           {
-            passName: 'oobeSystem'
+            passName: 'OobeSystem'
             componentName: 'Microsoft-Windows-Shell-Setup'
             content: unattendFirstRunXML
             settingName: 'FirstLogonCommands'
           } 
           */  
           {
-            passName: 'oobeSystem'
+            passName: 'OobeSystem'
             componentName: 'Microsoft-Windows-Shell-Setup'
             content: unattendSetLocalRegionFirstRunXML
-            settingName: 'SetLocalRegion'
+            settingName: 'FirstLogonCommands'
           }  
         ]
       }
