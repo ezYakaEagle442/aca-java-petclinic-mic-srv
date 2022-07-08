@@ -15,7 +15,7 @@
       "value": "sre-ops-admin@groland.grd"
     },
     "windowsVMName": {
-      "value": "vm-win-aca-petcli"
+      "value": "vm-winacapetcli"
     },
     "adminUsername": {
       "value": "adm_aca"
