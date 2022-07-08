@@ -73,6 +73,7 @@ jobs:
 
     - name: maven build, clean
       run: |
+        mvn clean
         mvn clean package -DskipTests -Denv=cloud
         echo "github.workspace = ${{ github.workspace }}"
         pwd
