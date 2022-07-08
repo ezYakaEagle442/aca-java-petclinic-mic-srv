@@ -52,6 +52,15 @@
     <!-- https://www.baeldung.com/maven-dependencymanagement-vs-dependencies-tags -->
     <dependencyManagement>
         <dependencies>
+            <!--
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-bootstrap</artifactId>
+                <version>3.1.3</version>
+                <scope>provided</scope>
+                <type>pom</type>                
+            </dependency>
+            -->
 
             <!-- 
             spring-cloud-context version is managed by spring-cloud-commons-dependencies
@@ -65,14 +74,6 @@
             </dependency>
             -->
 
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-starter-bootstrap</artifactId>
-                <version>3.1.3</version>
-                <scope>provided</scope>
-                <type>pom</type>                
-            </dependency>
-            
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
@@ -109,7 +110,7 @@
             This is configured already in the child pom -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-web</artifactId>
+                <artifactId>spring-boot-starter-web</artifactId> <!-- spring-boot-dependencies -->
                 <version>${spring-boot.version}</version>
             </dependency>
             <dependency>
@@ -146,9 +147,9 @@
         </dependencies>
     </dependencyManagement>
 
-    
     <dependencies>
- 
+
+        <!--
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-dependencies</artifactId>
@@ -156,6 +157,11 @@
         <dependency>
             <groupId>com.azure.spring</groupId>
             <artifactId>spring-cloud-azure-dependencies</artifactId>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>com.azure.spring</groupId>
+            <artifactId>spring-cloud-azure-starter-keyvault-secrets</artifactId>              
         </dependency>
 
         <dependency>
