@@ -4,13 +4,13 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.samples.petclinic.vets</groupId>
-	<artifactId>spring-petclinic-vets-service</artifactId>
+	<artifactId>aca-spring-petclinic-vets-service</artifactId>
 	<packaging>jar</packaging>
 	<description>Spring PetClinic Vets Service</description>
 
 	<parent>
 		<groupId>org.springframework.samples</groupId>
-		<artifactId>spring-petclinic-microservices</artifactId>
+		<artifactId>aca-spring-petclinic-microservices</artifactId>
         <version>2.6.6</version>
 	</parent>
 
