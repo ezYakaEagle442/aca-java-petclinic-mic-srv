@@ -122,7 +122,7 @@ var unattendSetLocalRegionFirstRunXML = '<FirstLogonCommands><SynchronousCommand
 
 // see also https://github.com/stuartpreston/arm-vm-customregion
 // https://docs.microsoft.com/en-us/windows/win32/intl/table-of-geographical-locations
-var customScript = 'Set-WinSystemLocale en-GB\\r\\nSet-WinUserLanguageList -LanguageList fr-FR -Force\\r\\nSet-Culture -CultureInfo fr-FR\\r\\nSet-WinHomeLocation -GeoId 84\\r\\nRestart-Computer -Force'
+var customScript = 'Set-WinSystemLocale fr-FR\\r\\nSet-WinUserLanguageList -LanguageList fr-FR -Force\\r\\nSet-Culture -CultureInfo fr-FR\\r\\nSet-WinHomeLocation -GeoId 84\\r\\nRestart-Computer -Force'
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.compute/virtualmachines?tabs=bicep
 resource windowsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = {
