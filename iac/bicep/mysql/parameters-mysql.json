@@ -12,10 +12,13 @@
         "value": "mys_adm"
       },
       "administratorLoginPassword": {
-        "value": "IsTrator42!"
+        "value": "changeIT"
       },
+      "setFwRuleClient": {
+        "value": "false"
+      },  
       "clientIPAddress": {
-        "value": "xxx SET HERE YOUR WORKSTATION IP ADDRESS FOR DEV/TEST"
+        "value": "SET HERE YOUR WORKSTATION IP ADDRESS FOR DEV/TEST AND set the above param setFwRuleClient=true"
       },  
       "startIpAddress": {
         "value": "10.42.2.0"

@@ -8,25 +8,48 @@
       "kvName": {
         "value": "kv-petcliaca-UNIQUEID42"
       },
+      "secretExpiryDate": {
+        "value": "1672444800"
+      },
       "secretsObject": {
         "value": {
           "secrets": [
             {
-              "secretName": "MYSQL-SERVER-FULL-NAME",
+              "secretName": "MYSQL-SERVER-NAME",
               "secretValue": "petcliaca"
             },
             {
-              "secretName": "MYSQL-DATABASE-NAME",
-              "secretValue": "petclinic"
+              "secretName": "MYSQL-SERVER-FULL-NAME",
+              "secretValue": "petcliaca.mysql.database.azure.com"
+            },            
+            {
+              "secretName": "SPRING-DATASOURCE-URL",
+              "secretValue": ""
             },
             {
-              "secretName": "MYSQL-SERVER-ADMIN-LOGIN-NAME",
+              "secretName": "SPRING-DATASOURCE-USERNAME",
               "secretValue": "mys_adm"
             },
             {
-              "secretName": "MYSQL-SERVER-ADMIN-PASSWORD",
-              "secretValue": "changeIT"
-            }                        
+              "secretName": "SPRING-DATASOURCE-PASSWORD",
+              "secretValue": ""
+            }, 
+            {
+              "secretName": "SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT",
+              "secretValue": ""
+            },
+            {
+              "secretName": "SPRING-CLOUD-AZURE-TENANT-ID",
+              "secretValue": ""
+            },
+            {
+              "secretName": "VM-ADMIN-USER-NAME",
+              "secretValue": ""
+            },
+            {
+              "secretName": "VM-ADMIN-PASSWORD",
+              "secretValue": ""
+            }
           ]
         }
       }        

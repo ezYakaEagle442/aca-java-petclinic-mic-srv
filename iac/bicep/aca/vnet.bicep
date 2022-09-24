@@ -1,10 +1,10 @@
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.app/managedenvironments?tabs=bicep#vnetconfiguration
 // https://docs.microsoft.com/en-us/azure/container-apps/vnet-custom?tabs=bash&pivots=azure-portal
 
-param location string = 'centralindia'
+param location string = resourceGroup().location
 
 param vnetName string = 'vnet-aca'
-param vnetCidr string = '10.42.0.0/21' // /16 minimum ?
+param vnetCidr string = '10.42.0.0/21' // /16 minimum ? soon /27 see https://github.com/microsoft/azure-container-apps/issues/247
 
 @description('Resource ID of a subnet for infrastructure components. This subnet must be in the same VNET as the subnet defined in runtimeSubnetId. Must not overlap with any other provided IP ranges.')
 param infrastructureSubnetName string = 'snet-infra' // used for the AKS nodes

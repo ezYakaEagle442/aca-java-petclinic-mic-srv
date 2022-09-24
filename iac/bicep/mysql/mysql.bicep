@@ -6,17 +6,25 @@ param appName string = 'iacdemo${uniqueString(resourceGroup().id)}'
 @description('The location of the MySQL DB.')
 param location string = resourceGroup().location
 
+@secure()
 @description('The MySQL DB Admin Login.')
-param administratorLogin string = 'mys_adm'
+param administratorLogin string
 
 @secure()
 @description('The MySQL DB Admin Password.')
 param administratorLoginPassword string
 
+@secure()
+@description('The MySQL DB Server name.')
+param serverName string
+
 @description('Azure Container Apps Outbound Public IP')
 param azureContainerAppsOutboundPubIP string
 
-@description('Allow client workstation for local Dev/Test only')
+@description('Should a MySQL Firewall be set to allow client workstation for local Dev/Test only')
+param setFwRuleClient bool = false
+
+@description('Allow client workstation IP adress for local Dev/Test only, requires setFwRuleClient=true')
 param clientIPAddress string
 
 @description('Allow Azure Container Apps from Apps subnet to access MySQL DB')
@@ -25,39 +33,9 @@ param startIpAddress string
 @description('Allow Azure Container Apps from Apps subnet to access MySQL DB')
 param endIpAddress string
 
-var serverName = '${appName}'
 var databaseSkuName = 'Standard_B1ms' //  'GP_Gen5_2' for single server
 var databaseSkuTier = 'Burstable' // 'GeneralPurpose'
 var mySqlVersion = '5.7' // https://docs.microsoft.com/en-us/azure/mysql/concepts-supported-versions
-
-/* 
-var databaseSkuFamily = 'Gen5'
-var databaseSkuSizeMB = 51200
-var databaseSkucapacity = 2
-resource server 'Microsoft.DBforMySQL/servers@2017-12-01' = {
-  location: location
-  name: serverName
-  sku: {
-    name: databaseSkuName
-    tier: databaseSkuTier
-    capacity: databaseSkucapacity
-    size: string(databaseSkuSizeMB)
-    family: databaseSkuFamily
-  }
-  properties: {
-    createMode: 'Default'
-    version: mySqlVersion
-    administratorLogin: administratorLogin
-    administratorLoginPassword: administratorLoginPassword
-    storageProfile: {
-      storageMB: databaseSkuSizeMB
-      backupRetentionDays: 7
-      geoRedundantBackup: 'Disabled'
-    }
-    sslEnforcement: 'Disabled'
-  }
-}
-*/
 
 resource mysqlserver 'Microsoft.DBforMySQL/flexibleServers@2021-12-01-preview' = {
   name: serverName
@@ -99,7 +77,7 @@ resource fwRuleAzureContainerApps 'Microsoft.DBforMySQL/flexibleServers/firewall
 */
 
 // Allow client workstation with IP 'clientIPAddress' for local Dev/Test only
-resource fwRuleClientIPAddress 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-05-01' = {
+resource fwRuleClientIPAddress 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-05-01' = if (setFwRuleClient) {
   name: 'ClientIPAddress'
   parent: mysqlserver
   properties: {

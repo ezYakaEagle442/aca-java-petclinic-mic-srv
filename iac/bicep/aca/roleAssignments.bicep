@@ -1,4 +1,18 @@
 @allowed([
+  'AcrPull'
+  'AcrPush'
+])
+@description('ACR Built-in role to assign')
+param acrRoleType string
+
+param acrName string
+
+param acaCustomersServicePrincipalId string
+param acaVetsServicePrincipalId string
+param acaVisitsServicePrincipalId string
+
+/*
+@allowed([
   'Owner'
   'Contributor'
   'NetworkContributor'
@@ -22,35 +36,8 @@ param kvName string
 @description('The name of the KV RG')
 param kvRGName string
 
-@allowed([
-  'AcrPull'
-  'AcrPush'
-])
-@description('ACR Built-in role to assign')
-param acrRoleType string
+*/
 
-param acrName string
-
-param acaCustomersServicePrincipalId string
-param acaVetsServicePrincipalId string
-param acaVisitsServicePrincipalId string
-
-resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = {
-  name: vnetName
-}
-
-resource appSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-02-01' existing = {
-  name: '${vnetName}/${subnetName}'
-}
-
-resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
-  name: acrName
-}
-
-resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
-  name: kvName
-  scope: resourceGroup(kvRGName)
-}
 
 // https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 var role = {
@@ -64,6 +51,9 @@ var role = {
   KeyVaultSecretsUser: '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/4633458b-17de-408a-b874-0445c86b69e6'
 }
 
+resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
+  name: acrName
+}
  // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
  resource AcrPullRoleAssignmentCustomersService 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
   name: guid(acr.id, acrRoleType , acaCustomersServicePrincipalId)
@@ -96,6 +86,24 @@ var role = {
     principalType: 'ServicePrincipal'
   }
 }
+
+
+/*
+/!\ TO BE FIXED: should apply only when deployToVNet=true
+resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = {
+  name: vnetName
+}
+
+resource appSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-02-01' existing = {
+  name: '${vnetName}/${subnetName}'
+}
+
+resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
+  name: kvName
+  scope: resourceGroup(kvRGName)
+}
+
+*/
 
 // You need Key Vault Administrator permission to be able to see the Keys/Secrets/Certificates in the Azure Portal
 /*

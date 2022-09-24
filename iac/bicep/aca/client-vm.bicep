@@ -15,8 +15,9 @@ param infrastructureSubnetID string
 @description('Windows client VM deployed to the VNet. Computer name cannot be more than 15 characters long')
 param windowsVMName string = 'vm-winacapetcli'
 
+@secure()
 @description('The VM Admin user name')
-param adminUsername string = 'adm_aca'
+param adminUsername string
 
 @secure()
 @description('The VM password length must be between 12 and 123.')
@@ -121,7 +122,7 @@ var unattendFirstRunXML = '<FirstLogonCommands><SynchronousCommand><CommandLine>
 var unattendSetLocalRegionFirstRunXML = '<FirstLogonCommands><SynchronousCommand><CommandLine> powershell.exe -Command Set-WinUserLanguageList -LanguageList fr-FR, en-US -Force</CommandLine><Description>Change language defaults</Description><Order>1</Order></SynchronousCommand></FirstLogonCommands>'
 
 // see also https://github.com/stuartpreston/arm-vm-customregion
-// https://docs.microsoft.com/en-us/windows/win32/intl/table-of-geographical-locations
+// https://docs.microsoft.com/en-us/windows/win32/intl/table-of-geographical-locations + https://docs.microsoft.com/en-us/powershell/module/international/set-winsystemlocale?view=windowsserver2022-ps
 var customScript = 'Set-WinSystemLocale fr-FR\\r\\nSet-WinUserLanguageList -LanguageList fr-FR -Force\\r\\nSet-Culture -CultureInfo fr-FR\\r\\nSet-WinHomeLocation -GeoId 84\\r\\nRestart-Computer -Force'
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.compute/virtualmachines?tabs=bicep

@@ -18,8 +18,11 @@ param logAnalyticsWorkspaceName string = 'log-${appName}'
 param logDestination string = 'log-analytics'
 
 param appInsightsName string = 'appi-${appName}'
+
+@description('Should the service be deployed to a Corporate VNet ?')
+param deployToVNet bool = false
 param vnetName string = 'vnet-aca'
-param vnetCidr string = '10.42.0.0/21' // /16 minimum ?
+param vnetCidr string = '10.42.0.0/21' // /16 minimum ? soon /27 see https://github.com/microsoft/azure-container-apps/issues/247
 
 
 // /!\ The following properties must be set together, or not set at all (they will be set by the platform): 
@@ -48,14 +51,10 @@ param runtimeSubnetCidr string = '10.42.4.0/23'
 param runtimeSubnetName string = 'snet-run' // used to deploy the Apps to Pods
 */
 
-@description('The MySQL DB Admin Login.')
-param administratorLogin string = 'mys_adm'
+@description('Should a MySQL Firewall be set to allow client workstation for local Dev/Test only')
+param setFwRuleClient bool = false
 
-@secure()
-@description('The MySQL DB Admin Password.')
-param administratorLoginPassword string
-
-@description('Allow client workstation to MySQL for local Dev/Test only')
+@description('Allow client workstation IP adress for local Dev/Test only, requires setFwRuleClient=true')
 param clientIPAddress string
 
 @description('Allow Azure Container App subnet to access MySQL DB')
@@ -66,18 +65,11 @@ param endIpAddress string
 
 param zoneRedundant bool = false
 
-@description('emailRecipient ainformed before the VM shutdown')
+@description('emailRecipient informed before the VM shutdown')
 param autoShutdownNotificationEmail string
 
 @description('Windows client VM deployed to the VNet. Computer name cannot be more than 15 characters long')
 param windowsVMName string = 'vm-win-aca-petcli'
-
-@description('The VM Admin user name')
-param adminUsername string = 'adm_aca'
-
-@secure()
-@description('The VM password length must be between 12 and 123.')
-param adminPassword string 
 
 @description('The CIDR or source IP range. Asterisk "*" can also be used to match all source IPs. Default tags such as "VirtualNetwork", "AzureLoadBalancer" and "Internet" can also be used. If this is an ingress rule, specifies where network traffic originates from.')
 param nsgRuleSourceAddressPrefix string
@@ -89,23 +81,12 @@ param nicName string = 'nic-aca-${appName}-client-vm'
 @description('The Azure Active Directory tenant ID that should be used for authenticating requests to the Key Vault.')
 param tenantId string = subscription().tenantId
 
-// https://docs.microsoft.com/en-us/azure/spring-cloud/how-to-deploy-in-azure-virtual-network?tabs=azure-portal#virtual-network-requirements
-module vnetModule 'vnet.bicep' = {
-  name: 'vnet-aca'
-  // scope: resourceGroup(rg.name)
-  params: {
-     location: location
-     vnetName: vnetName
-     vnetCidr: vnetCidr
-     infrastructureSubnetCidr: infrastructureSubnetCidr
-     infrastructureSubnetName: infrastructureSubnetName
-     // runtimeSubnetCidr: runtimeSubnetCidr
-     // runtimeSubnetName: runtimeSubnetName
-  }   
-}
+@maxLength(24)
+@description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
+param kvName string = 'kv-${appName}'
 
-resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = {
-  name: vnetName
+resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
+  name: kvName
 }
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.operationalinsights/workspaces?tabs=bicep
@@ -156,64 +137,82 @@ module ACR 'acr.bicep' = {
   }
 }
 
-resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' = {
-  name: azureContainerAppEnvName
-  location: location
-  properties: {
-    appLogsConfiguration: {
-      destination: logDestination
-      logAnalyticsConfiguration: {
-        customerId: logAnalyticsWorkspace.properties.customerId
-        sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
-      }
-    }
-    zoneRedundant: zoneRedundant
-    daprAIInstrumentationKey: appInsights.properties.InstrumentationKey
-    vnetConfiguration: {
-      // The Docker bridge network address represents the default docker0 bridge network address present in all Docker installations. While docker0 bridge is not used by AKS clusters or the pods themselves, you must set this address to continue to support scenarios such as docker build within the AKS cluster. It is required to select a CIDR for the Docker bridge network address because otherwise Docker will pick a subnet automatically, which could conflict with other CIDRs. You must pick an address space that does not collide with the rest of the CIDRs on your networks, including the cluster's service CIDR and pod CIDR. Default of 172.17.0.1/16. You can reuse this range across different AKS clusters.
-      internal: true // set to true if the environnement is private, i.e vnet injected. Boolean indicating the environment only has an internal load balancer. These environments do not have a public static IP resource. They must provide runtimeSubnetId and infrastructureSubnetId if enabling this property
-      dockerBridgeCidr: dockerBridgeCidr
-      platformReservedCidr: platformReservedCidr
-      platformReservedDnsIP: platformReservedDnsIP
-      infrastructureSubnetId: vnet.properties.subnets[0].id
-      // runtimeSubnetId: vnet.properties.subnets[1].id The “runtime subnet” field is currently deprecated and not used. If you provide a value there during creation of your container apps environment it will be ignored. Only the infrastructure subnet is required if you wish to provide your own VNET.
-    }
+module defaultPublicManagedEnvironment 'acaPublicEnv.bicep' = if (!deployToVNet) {
+  name: 'aca-pub-env'
+  params: {
+    appName: appName
+    location: location
+    azureContainerAppEnvName: azureContainerAppEnvName
+    appInsightsName: appInsightsName
+    logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
+    logDestination: logDestination
   }
-  dependsOn: [
-    vnetModule
-  ]
 }
-output corpManagedEnvironmentId string = corpManagedEnvironment.id 
-output corpManagedEnvironmentDefaultDomain string = corpManagedEnvironment.properties.defaultDomain
-output corpManagedEnvironmentStaticIp string = corpManagedEnvironment.properties.staticIp
 
 module mysql '../mysql/mysql.bicep' = {
   name: 'mysqldb'
   params: {
     appName: appName
     location: location
+    setFwRuleClient: setFwRuleClient
     clientIPAddress: clientIPAddress
     startIpAddress: startIpAddress
     endIpAddress: endIpAddress
-    administratorLogin: administratorLogin
-    administratorLoginPassword: administratorLoginPassword
-    azureContainerAppsOutboundPubIP: corpManagedEnvironment.properties.staticIp // CustomersServiceContainerApp.properties.outboundIPAddresses[0]
+    serverName: kv.getSecret('MYSQL-SERVER-NAME')
+    administratorLogin: kv.getSecret('SPRING-DATASOURCE-USERNAME')
+    administratorLoginPassword: kv.getSecret('SPRING-DATASOURCE-PASSWORD')
+    azureContainerAppsOutboundPubIP: corpManagedEnvironment.outputs.corpManagedEnvironmentStaticIp // CustomersServiceContainerApp.properties.outboundIPAddresses[0]
   }
 }
 
-module DNS 'dns.bicep' = {
-  name: 'privatedns'
+// https://docs.microsoft.com/en-us/azure/spring-cloud/how-to-deploy-in-azure-virtual-network?tabs=azure-portal#virtual-network-requirements
+module vnetModule 'vnet.bicep' = if (deployToVNet) {
+  name: 'vnet-aca'
+  // scope: resourceGroup(rg.name)
+  params: {
+     location: location
+     vnetName: vnetName
+     vnetCidr: vnetCidr
+     infrastructureSubnetCidr: infrastructureSubnetCidr
+     infrastructureSubnetName: infrastructureSubnetName
+  }   
+}
+
+resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = if (deployToVNet) {
+  name: vnetName
+}
+
+module corpManagedEnvironment 'acaVNetEnv.bicep' = if (deployToVNet) {
+  name: 'aca-corp-env'
+  params: {
+    appName: appName
+    location: location
+    azureContainerAppEnvName: azureContainerAppEnvName
+    appInsightsName: appInsightsName
+    logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
+    logDestination: logDestination
+    vnetName: vnetName
+    vnetCidr: vnetCidr
+    infrastructureSubnetCidr: infrastructureSubnetCidr
+    infrastructureSubnetName: infrastructureSubnetName
+    zoneRedundant: zoneRedundant
+    platformReservedCidr: platformReservedCidr
+    platformReservedDnsIP: platformReservedDnsIP
+    dockerBridgeCidr: dockerBridgeCidr
+  }
+}
+module dnsprivatezone 'dns.bicep' = if (deployToVNet) {
+  name: 'dns-private-zone'
   params: {
     appName: appName
     location: location
     vnetName: vnetName
-    corpManagedEnvironmentStaticIp: corpManagedEnvironment.properties.staticIp
+    corpManagedEnvironmentStaticIp: corpManagedEnvironment.outputs.corpManagedEnvironmentStaticIp
   }
 }
 
-module clientVM 'client-vm.bicep' = {
+module clientVM 'client-vm.bicep' = if (deployToVNet) {
   name: 'vm-client'
-  // scope: resourceGroup(rg.name)
   params: {
      location: location
      appName: appName
@@ -221,8 +220,8 @@ module clientVM 'client-vm.bicep' = {
      infrastructureSubnetID: vnet.properties.subnets[0].id
      windowsVMName: windowsVMName
      autoShutdownNotificationEmail: autoShutdownNotificationEmail
-     adminUsername: adminUsername
-     adminPassword: adminPassword
+     adminUsername: kv.getSecret('VM-ADMIN-USER-NAME')
+     adminPassword: kv.getSecret('VM-ADMIN-PASSWORD')
      nsgRuleSourceAddressPrefix: nsgRuleSourceAddressPrefix
      nicName: nicName
      nsgName: nsgName

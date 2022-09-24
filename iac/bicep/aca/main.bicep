@@ -30,6 +30,15 @@ param location string = 'westeurope'
 @description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
 param kvName string // = 'kv-${appName}'
 
+@description('Specifies all KV secrets {"secretName":"","secretValue":""} wrapped in a secure object.')
+@secure()
+param secretsObject object
+
+// https://learn.microsoft.com/en-us/azure/key-vault/secrets/secrets-best-practices#secrets-rotation
+// Because secrets are sensitive to leakage or exposure, it's important to rotate them often, at least every 60 days. 
+@description('Expiry date in seconds since 1970-01-01T00:00:00Z. Ex: 1672444800 ==> 31/12/2022')
+param secretExpiryDate int = 1672444800
+
 @description('The name of the KV RG')
 param kvRGName string
 
@@ -49,10 +58,6 @@ param publicNetworkAccess string = 'enabled'
 ])
 param kvSkuName string = 'standard'
 
-@description('Specifies all KV secrets {"secretName":"","secretValue":""} wrapped in a secure object.')
-@secure()
-param secretsObject object
-
 @description('The Azure Active Directory tenant ID that should be used for authenticating requests to the Key Vault.')
 param tenantId string = subscription().tenantId
 
@@ -71,25 +76,12 @@ param acrName string = 'acr${appName}' // ==> $acr_registry_name.azurecr.io
 @description('The Azure Container App Environment name')
 param azureContainerAppEnvName string = 'aca-env-${appName}'
 
+@description('Should the service be deployed to a Corporate VNet ?')
+param deployToVNet bool = false
+
 param vnetName string = 'vnet-aca'
-param infrastructureSubnetName string = 'snet-infra'
 
-// Spring Cloud for Azure params required to get secrets from Key Vault.
-// https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#basic-usage-3
-// https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#advanced-usage
-// https://github.com/ezYakaEagle442/spring-cloud-az-kv
-// Use - instead of . in secret name. . isn’t supported in secret name. If your application have property name which contains ., 
-// like spring.datasource.url, just replace . to - when save secret in Azure Key Vault. 
-// For example: Save spring-datasource-url in Azure Key Vault. In your application, you can still use spring.datasource.url to retrieve property value.
-@secure()
-param springCloudAzureTenantId string
-@secure()
-param springCloudAzureClientId string
-@secure()
-param springCloudAzureClientSecret string
-@secure()
-param springCloudAzureKeyVaultEndpoint string
-
+@description('The GitHub Action Settings / git Revision')
 param revisionName string = 'poc-aca-101'
 
 @description('The GitHub Action Settings / Repo URL')
@@ -98,9 +90,11 @@ param ghaSettingsCfgRepoUrl string = 'https://github.com/ezYakaEagle442/aca-java
 @description('The GitHub branch name')
 param ghaGitBranchName string = 'main'
 
+@secure()
 @description('The GitHub Action Settings Configuration / Azure Credentials / Client Id')
 param ghaSettingsCfgCredClientId string
 
+@secure()
 @description('The GitHub Action Settings Configuration / Azure Credentials / Client Secret')
 param ghaSettingsCfgCredClientSecret string
 
@@ -182,7 +176,7 @@ param vetsServiceContainerAppName string = 'aca-env-${appName}-vets-service'
 @description('The Azure Container App instance name for visits-service')
 param visitsServiceContainerAppName string = 'aca-env-${appName}-visits-service'
 
-resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = {
+resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = if (deployToVNet) {
   name: vnetName
 }
 
@@ -194,6 +188,17 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing
   name: appInsightsName
 }
 
+resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
+  name: kvName
+}
+
+// Spring Cloud for Azure params required to get secrets from Key Vault.
+// https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#basic-usage-3
+// https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#advanced-usage
+// https://github.com/ezYakaEagle442/spring-cloud-az-kv
+// Use - instead of . in secret name. . isn’t supported in secret name. If your application have property name which contains ., 
+// like spring.datasource.url, just replace . to - when save secret in Azure Key Vault. 
+// For example: Save spring-datasource-url in Azure Key Vault. In your application, you can still use spring.datasource.url to retrieve property value.
 module azurecontainerapp 'aca.bicep' = {
   name: 'azurecontainerapp'
   // scope: resourceGroup(rg.name)
@@ -204,19 +209,17 @@ module azurecontainerapp 'aca.bicep' = {
     logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
     appInsightsInstrumentationKey: appInsights.properties.ConnectionString
     applicationInsightsAgentJarFilePath: applicationInsightsAgentJarFilePath
-    springCloudAzureClientId: springCloudAzureClientId
-    springCloudAzureClientSecret: springCloudAzureClientSecret
-    springCloudAzureKeyVaultEndpoint: springCloudAzureKeyVaultEndpoint
-    springCloudAzureTenantId: springCloudAzureTenantId
+    springCloudAzureKeyVaultEndpoint: kv.getSecret('SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT')
+    springCloudAzureTenantId: kv.getSecret('SPRING-CLOUD-AZURE-TENANT-ID')
     revisionName: revisionName
     vnetName: vnetName
     acrName: acrName
     ghaGitBranchName: ghaGitBranchName
     ghaSettingsCfgCredClientId: ghaSettingsCfgCredClientId
+    ghaSettingsCfgCredClientSecret: ghaSettingsCfgCredClientSecret
     ghaSettingsCfgRegistryUserName: ACR.listCredentials().username
     ghaSettingsCfgRegistryPassword: ACR.listCredentials().passwords[0].value
     ghaSettingsCfgRegistryUrl: ACR.properties.loginServer
-    ghaSettingsCfgCredClientSecret: ghaSettingsCfgCredClientSecret
     ghaSettingsCfgDockerFilePathAdminServer: ghaSettingsCfgDockerFilePathAdminServer
     ghaSettingsCfgDockerFilePathApiGateway: ghaSettingsCfgDockerFilePathApiGateway
     ghaSettingsCfgDockerFilePathConfigserver: ghaSettingsCfgDockerFilePathConfigserver
@@ -254,17 +257,19 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' exis
 module roleAssignments 'roleAssignments.bicep' = {
   name: 'role-assignments'
   params: {
-    vnetName: vnetName
-    subnetName: infrastructureSubnetName
     acrName: acrName
-    kvName: kvName
-    kvRGName: kvRGName
-    networkRoleType: 'Owner'
-    kvRoleType: 'KeyVaultReader'
     acrRoleType: 'AcrPull'
     acaCustomersServicePrincipalId: CustomersServiceContainerApp.identity.principalId
     acaVetsServicePrincipalId: VetsServiceContainerApp.identity.principalId
     acaVisitsServicePrincipalId: VisitsServiceContainerApp.identity.principalId
+    /*
+    vnetName: vnetName
+    subnetName: infrastructureSubnetName
+    kvName: kvName
+    kvRGName: kvRGName
+    networkRoleType: 'Owner'
+    kvRoleType: 'KeyVaultReader'
+    */
   }
   dependsOn: [
     azurecontainerapp
@@ -334,6 +339,7 @@ var accessPoliciesObject = {
   ]
 }
 
+// /!\ TO BE FIXED: should apply only when deployToVNet=true
 var vNetRules = [
   {
     'id': vnet.properties.subnets[0].id
@@ -346,6 +352,7 @@ var vNetRules = [
 ]
 
 // allow to Azure Container App subnetID and azureContainerAppIdentity
+// /!\ TO BE FIXED: should apply only when deployToVNet=true
 module KeyVault '../kv/kv.bicep'= {
   name: 'KeyVault'
   scope: resourceGroup(kvRGName)
@@ -356,19 +363,10 @@ module KeyVault '../kv/kv.bicep'= {
     skuName: kvSkuName
     tenantId: tenantId
     publicNetworkAccess: publicNetworkAccess
-    vNetRules: vNetRules
+    vNetRules: vNetRules // /!\ TO BE FIXED: should apply only when deployToVNet=true
     setKVAccessPolicies: setKVAccessPolicies
     accessPoliciesObject: accessPoliciesObject
-  } 
-}
-
-// https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scenarios-secrets
-module KeyVaultsecrets '../kv/kv_sec_key.bicep'= {
-  name: 'KeyVaultsecrets'
-  scope: resourceGroup(kvRGName)
-  params: {
-    kvName: kvName
-    appName: appName
     secretsObject: secretsObject
-  }
+    secretExpiryDate: secretExpiryDate
+  } 
 }

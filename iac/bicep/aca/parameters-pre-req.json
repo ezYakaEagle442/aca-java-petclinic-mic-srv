@@ -11,54 +11,30 @@
     "acrName": {
       "value": "acrpetcliaca"
     },
-    "autoShutdownNotificationEmail": {
-      "value": "sre-ops-admin@groland.grd"
-    },
-    "windowsVMName": {
-      "value": "vm-winacapetcli"
-    },
-    "adminUsername": {
-      "value": "adm_aca"
-    },
-    "adminPassword": {
-      "value": "changeIT"
-    },
-    "nsgName": {
-      "value": "nsg-aca-petcliaca-app-client"
-    },
-    "nsgRuleName": {
-      "value": "Allow RDP"
-    },        
-    "nicName": {
-      "value": "nic-aca-petcliaca-client-vm"
-    }, 
-    "nsgRuleSourceAddressPrefix": {
-      "value": "10.0.0.0/16"
-    },
     "azureContainerAppEnvName": {
       "value": "aca-env-corp"
     },       
-    "administratorLogin": {
-      "value": "mys_adm"
-    },         
-    "administratorLoginPassword": {
-      "value": "changeIT"
-    },
+    "setFwRuleClient": {
+      "value": "false"
+    },  
     "clientIPAddress": {
-      "value": "9.9.9.9 SET HERE YOUR WORKSTATION IP ADDRESS FOR DEV/TEST"
-    },
-    "startIpAddress": {
-      "value": "10.42.2.0"
-    },
-    "endIpAddress": {
-      "value": "10.42.3.255"
-    },
+      "value": "SET HERE YOUR WORKSTATION IP ADDRESS FOR DEV/TEST AND set the above param setFwRuleClient=true"
+    }, 
+    "deployToVNet": {
+      "value": "false"
+    },    
     "vnetName": {
       "value": "vnet-aca"
     },
     "vnetCidr": {
       "value": "10.42.0.0/16"
     },
+    "startIpAddress": {
+      "value": "10.42.2.0"
+    },
+    "endIpAddress": {
+      "value": "10.42.3.255"
+    },    
     "infrastructureSubnetCidr": {
       "value": "10.42.2.0/23"
     },
@@ -73,6 +49,24 @@
     },
     "platformReservedDnsIP" : {
       "value": "10.90.0.10"
+    },
+    "autoShutdownNotificationEmail": {
+      "value": "sre-ops-admin@groland.grd"
+    },
+    "windowsVMName": {
+      "value": "vm-winacapetcli"
+    },
+    "nsgName": {
+      "value": "nsg-aca-petcliaca-app-client"
+    },
+    "nsgRuleName": {
+      "value": "Allow RDP"
+    },        
+    "nicName": {
+      "value": "nic-aca-petcliaca-client-vm"
+    }, 
+    "nsgRuleSourceAddressPrefix": {
+      "value": "10.0.0.0/16"
     }
   }
 }

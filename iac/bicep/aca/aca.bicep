@@ -16,9 +16,6 @@ param azureContainerAppEnvName string = 'aca-env-${appName}'
 @description('The Log Analytics workspace name used by Azure Container App instance')
 param logAnalyticsWorkspaceName string = 'log-${appName}'
 
-param appInsightsName string = 'appi-${appName}'
-param vnetName string = 'vnet-aca'
-
 // Spring Cloud for Azure params required to get secrets from Key Vault.
 // https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#basic-usage-3
 // https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#advanced-usage
@@ -26,12 +23,18 @@ param vnetName string = 'vnet-aca'
 // Use - instead of . in secret name. . isn’t supported in secret name. If your application have property name which contains ., 
 // like spring.datasource.url, just replace . to - when save secret in Azure Key Vault. 
 // For example: Save spring-datasource-url in Azure Key Vault. In your application, you can still use spring.datasource.url to retrieve property value.
-@secure()
-param springCloudAzureTenantId string
+
+/*
+useless as no Service Principal is Used, ManagedIdentities are used
 @secure()
 param springCloudAzureClientId string
 @secure()
 param springCloudAzureClientSecret string
+*/
+
+@secure()
+param springCloudAzureTenantId string
+
 @secure()
 param springCloudAzureKeyVaultEndpoint string
 
@@ -72,25 +75,25 @@ param ghaSettingsCfgCredClientId string
 param ghaSettingsCfgCredClientSecret string
 
 @description('The GitHub Action Settings Configuration / Docker file Path for admin-server Azure Container App ')
-param ghaSettingsCfgDockerFilePathAdminServer string = './docker/petclinic-admin-server/Dockerfile'
+param ghaSettingsCfgDockerFilePathAdminServer string = '../../docker/petclinic-admin-server/Dockerfile'
 
 @description('The GitHub Action Settings Configuration / Docker file Path for discovery-server Azure Container App ')
-param ghaSettingsCfgDockerFilePathDiscoveryServer string = './docker/petclinic-discovery-server/Dockerfile'
+param ghaSettingsCfgDockerFilePathDiscoveryServer string = '../../docker/petclinic-discovery-server/Dockerfile'
 
 @description('The GitHub Action Settings Configuration / Docker file Path for api-gateway Azure Container App ')
-param ghaSettingsCfgDockerFilePathApiGateway string = './docker/petclinic-api-gateway/Dockerfile'
+param ghaSettingsCfgDockerFilePathApiGateway string = '../../docker/petclinic-api-gateway/Dockerfile'
 
 @description('The GitHub Action Settings Configuration / Docker file Path for  config-server Azure Container App ')
-param ghaSettingsCfgDockerFilePathConfigserver string = './docker/petclinic-config-server/Dockerfile'
+param ghaSettingsCfgDockerFilePathConfigserver string = '../../docker/petclinic-config-server/Dockerfile'
 
 @description('The GitHub Action Settings Configuration / Docker file Path for customers-service Azure Container App ')
-param ghaSettingsCfgDockerFilePathCustomersService string = './docker/petclinic-customers-service/Dockerfile'
+param ghaSettingsCfgDockerFilePathCustomersService string = '../../docker/petclinic-customers-service/Dockerfile'
 
 @description('The GitHub Action Settings Configuration / Docker file Path for vets-service Azure Container App ')
-param ghaSettingsCfgDockerFilePathVetsService string = './docker/petclinic-vets-service/Dockerfile'
+param ghaSettingsCfgDockerFilePathVetsService string = '../../docker/petclinic-vets-service/Dockerfile'
 
 @description('The GitHub Action Settings Configuration / Docker file Path for visits-service Azure Container App ')
-param ghaSettingsCfgDockerFilePathVisitsService string = './docker/petclinic-visits-service/Dockerfile'
+param ghaSettingsCfgDockerFilePathVisitsService string = '../../docker/petclinic-visits-service/Dockerfile'
 
 
 /* They seem to be more App Service focused as this interface is shared with App Service.
@@ -195,14 +198,6 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           name: 'AZURE_TENANT_ID'
           value: springCloudAzureTenantId
         }
-        {
-          name: 'AZURE_CLIENT_ID'
-          value: springCloudAzureClientId
-        }
-        {
-          name: 'AZURE_CLIENT_SECRET'
-          value: springCloudAzureClientSecret
-        } 
         {
           name: 'AZURE_KEYVAULT_ENDPOINT'
           value: springCloudAzureKeyVaultEndpoint
@@ -412,14 +407,6 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           value: springCloudAzureTenantId
         }
         {
-          name: 'AZURE_CLIENT_ID'
-          value: springCloudAzureClientId
-        }
-        {
-          name: 'AZURE_CLIENT_SECRET'
-          value: springCloudAzureClientSecret
-        } 
-        {
           name: 'AZURE_KEYVAULT_ENDPOINT'
           value: springCloudAzureKeyVaultEndpoint
         }            
@@ -571,14 +558,6 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         {
           name: 'AZURE_TENANT_ID'
           value: springCloudAzureTenantId
-        }
-        {
-          name: 'AZURE_CLIENT_ID'
-          value: springCloudAzureClientId
-        }
-        {
-          name: 'AZURE_CLIENT_SECRET'
-          value: springCloudAzureClientSecret
         } 
         {
           name: 'AZURE_KEYVAULT_ENDPOINT'
@@ -733,14 +712,6 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
         {
           name: 'AZURE_TENANT_ID'
           value: springCloudAzureTenantId
-        }
-        {
-          name: 'AZURE_CLIENT_ID'
-          value: springCloudAzureClientId
-        }
-        {
-          name: 'AZURE_CLIENT_SECRET'
-          value: springCloudAzureClientSecret
         } 
         {
           name: 'AZURE_KEYVAULT_ENDPOINT'
@@ -897,14 +868,6 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           value: springCloudAzureTenantId
         }
         {
-          name: 'AZURE_CLIENT_ID'
-          value: springCloudAzureClientId
-        }
-        {
-          name: 'AZURE_CLIENT_SECRET'
-          value: springCloudAzureClientSecret
-        } 
-        {
           name: 'AZURE_KEYVAULT_ENDPOINT'
           value: springCloudAzureKeyVaultEndpoint
         }                
@@ -1057,14 +1020,6 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         {
           name: 'AZURE_TENANT_ID'
           value: springCloudAzureTenantId
-        }
-        {
-          name: 'AZURE_CLIENT_ID'
-          value: springCloudAzureClientId
-        }
-        {
-          name: 'AZURE_CLIENT_SECRET'
-          value: springCloudAzureClientSecret
         } 
         {
           name: 'AZURE_KEYVAULT_ENDPOINT'
@@ -1176,25 +1131,6 @@ output visitsServiceContainerAppLatestRevisionFqdn string = VisitsServiceContain
 output visitsServiceContainerAppIngressFqdn string = VisitsServiceContainerApp.properties.configuration.ingress.fqdn
 output visitsServiceContainerAppConfigSecrets array = VisitsServiceContainerApp.properties.configuration.secrets
 
-module dnsprivatezone './dns.bicep' = {
-  name: 'dns-private-zone'
-  params: {
-     location: location
-     vnetName: vnetName
-     corpManagedEnvironmentStaticIp: corpManagedEnvironment.properties.staticIp
-     appName: appName
-     adminServerContainerAppName: adminServerContainerAppName
-     apiGatewayContainerAppName: apiGatewayContainerAppName
-     configServerContainerAppName: configServerContainerAppName
-     customersServiceContainerAppName: customersServiceContainerAppName
-     vetsServiceContainerAppName: vetsServiceContainerAppName
-     visitsServiceContainerAppName: visitsServiceContainerAppName
-  }     
-}
-
-resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing = {
-  name: appInsightsName
-}
 
 resource logAnalyticsWorkspace  'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' existing = {
   name: logAnalyticsWorkspaceName

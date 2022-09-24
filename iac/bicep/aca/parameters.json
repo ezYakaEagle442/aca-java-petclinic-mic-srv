@@ -28,28 +28,40 @@
           "secrets": [
             {
               "secretName": "MYSQL-SERVER-NAME",
-              "secretValue": "petcliasa"
+              "secretValue": "petcliaca"
             },
             {
               "secretName": "MYSQL-SERVER-FULL-NAME",
-              "secretValue": "petcliasa.mysql.database.azure.com"
+              "secretValue": "petcliaca.mysql.database.azure.com"
             },            
             {
-              "secretName": "MYSQL-DATABASE-NAME",
-              "secretValue": "petclinic"
+              "secretName": "SPRING-DATASOURCE-URL",
+              "secretValue": ""
             },
             {
-              "secretName": "MYSQL-SERVER-ADMIN-NAME",
+              "secretName": "SPRING-DATASOURCE-USERNAME",
               "secretValue": "mys_adm"
             },
             {
-              "secretName": "MYSQL-SERVER-ADMIN-LOGIN-NAME",
-              "secretValue": "mys_adm"
-            },            
+              "secretName": "SPRING-DATASOURCE-PASSWORD",
+              "secretValue": ""
+            }, 
             {
-              "secretName": "MYSQL-SERVER-ADMIN-PASSWORD",
-              "secretValue": "changeIT"
-            }                        
+              "secretName": "SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT",
+              "secretValue": ""
+            },
+            {
+              "secretName": "SPRING-CLOUD-AZURE-TENANT-ID",
+              "secretValue": ""
+            },
+            {
+              "secretName": "VM-ADMIN-USER-NAME",
+              "secretValue": ""
+            },
+            {
+              "secretName": "VM-ADMIN-PASSWORD",
+              "secretValue": ""
+            }                   
           ]
         }
       },                   
