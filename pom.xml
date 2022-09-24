@@ -32,7 +32,7 @@
         https://spring.io/projects/spring-cloud#adding-spring-cloud-to-an-existing-spring-boot-application 
         2021.0.3 should be used, NOT 2022.0.0-M3
         -->
-        <spring-cloud.version>2021.0.3</spring-cloud.version>
+        <spring-cloud.version>2021.0.4</spring-cloud.version>
         <spring-cloud-azure.version>4.3.0</spring-cloud-azure.version>
         <spring-boot.version>2.6.6</spring-boot.version>
 
