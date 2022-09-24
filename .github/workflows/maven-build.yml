@@ -20,7 +20,7 @@ env:
 
   # ==== Versions ====
   DEPLOYMENT_VERSION: 2.6.6
-  AZ_CLI_VERSION: 2.37.0
+  AZ_CLI_VERSION: 2.40.0
   JAVA_VERSION: 11
 
   # https://github.com/Azure/actions-workflow-samples/blob/master/assets/create-secrets-for-GitHub-workflows.md#consume-secrets-in-your-workflow
@@ -64,10 +64,10 @@ jobs:
         cache: maven
     
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B clean package --file pom.xml -DskipTests -Denv=cloud
 
     - name: Azure Login
-      uses: azure/login@v1.4.5 # https://github.com/marketplace/actions/azure-login
+      uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
@@ -84,14 +84,29 @@ jobs:
         ls -al spring-petclinic-vets-service/target/*.jar
         ls -al spring-petclinic-visits-service/target/*.jar
 
-        mvn clean package -DskipTests -Denv=cloud
-        
-        ls -al spring-petclinic-admin-server/target/*.jar
-        ls -al spring-petclinic-api-gateway/target/*.jar
-        ls -al spring-petclinic-config-server/target/*.jar
-        ls -al spring-petclinic-customers-service/target/*.jar
-        ls -al spring-petclinic-vets-service/target/*.jar
-        ls -al spring-petclinic-visits-service/target/*.jar
+    # https://github.com/marketplace/actions/azure-container-registry-login
+    - name: xxx
+      uses: azure/docker-login@v1
+      with:
+        login-server: '<login server>' # default: index.docker.io
+        username: '<username>'
+        password: '<password>'
+
+    # https://github.com/marketplace/actions/azure-container-registry-build
+    - name: ACR build
+      id: acr
+      uses: azure/acr-build@v1
+      with:
+        service_principal: ${{ secrets.service_principal }}
+        service_principal_password: ${{ secrets.service_principal_password }}
+        tenant: ${{ secrets.tenant }}
+        registry: ${{ secrets.registry }}
+        repository: ${{ secrets.repository }}
+        image: image
+        git_access_token: ${{ secrets.git_access_token }}
+        folder: src/docker
+        dockerfile: ../../dockerfiles/Dockerfile
+        branch: main
 
     - name: Build XXX image and push it to ACR
       uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
@@ -103,7 +118,7 @@ jobs:
           # echo AZURE_TENANT_ID >> $GITHUB_ENV
 
           az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
-          az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
+          # az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
           az acr build -t ${{ env.REGISTRY_URL }}/${{ env.PROJECT_NAME }}:${{ github.sha }} --file "./docker/petclinic-admin-server/Dockerfile"
           build_id=$(az acr task list-runs --registry $acr_registry_name -o json --query [0].name )
 
