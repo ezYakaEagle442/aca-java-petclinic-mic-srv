@@ -33,10 +33,23 @@ param springCloudAzureClientSecret string
 */
 
 @secure()
+@description('The Azure Active Directory tenant ID that should be used by Key Vault in the Spring Config')
 param springCloudAzureTenantId string
 
 @secure()
+@description('The Azure Key Vault EndPoint that should be used by Key Vault in the Spring Config. Ex: https://<key-vault-name>.vault.azure.net')
 param springCloudAzureKeyVaultEndpoint string
+
+@secure()
+@description('The Spring Datasource / MySQL DB admin user name  - this is a secret stored in Key Vault')
+param springDataSourceUsr string
+@secure()
+@description('The Spring Datasource / MySQL DB admin user password  - this is a secret stored in Key Vault')
+param springDataSourcePwd string
+@secure()
+@description('The Spring Datasource / MySQL DB URL - this is a secret stored in Key Vault')
+param springDataSourceUrl string
+
 
 // https://docs.microsoft.com/en-us/azure/container-apps/managed-identity?tabs=portal%2Cjava#configure-managed-identities
 @description('The Azure Active Directory tenant ID that should be used to store the GH Actions SPN credentials and to manage Azure Container Apps Identities.')
@@ -98,11 +111,17 @@ param ghaSettingsCfgDockerFilePathVisitsService string = '../../docker/petclinic
 
 /* They seem to be more App Service focused as this interface is shared with App Service.
 https://docs.microsoft.com/en-us/javascript/api/@azure/arm-appservice/githubactioncodeconfiguration?view=azure-node-latest
-runtimeStack: ghaSettingsCfgRegistryRuntimeStack
-runtimeVersion: ghaSettingsCfgRegistryRuntimeVersion
+runtimeStack: ghaSettingsCfgRuntimeStack
+runtimeVersion: ghaSettingsCfgRuntimeVersion
 */
 @description('The GitHub Action Settings Configuration / Publish Type')
 param ghaSettingsCfgPublishType string = 'Image'
+
+@description('The GitHub Action Settings Configuration / Runtime Stack')
+param ghaSettingsCfgRuntimeStack string = 'JAVA'
+
+@description('The GitHub Action Settings Configuration / Runtime Version')
+param ghaSettingsCfgRuntimeVersion string = '11-java11'
 
 @description('The Azure Container App instance name for admin-server')
 param adminServerContainerAppName string = 'aca-${appName}-admin-server'
@@ -126,11 +145,7 @@ param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
 @description('The Azure Container App instance name for visits-service')
 param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
 
-@description('The GitHub Action Settings Configuration / Runtime Stack')
-param ghaSettingsCfgRegistryRuntimeStack string = 'JAVA'
 
-@description('The GitHub Action Settings Configuration / Runtime Version')
-param ghaSettingsCfgRegistryRuntimeVersion string = '11-java11'
 
 resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' existing = {
   name: azureContainerAppEnvName
@@ -692,7 +707,19 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
         {
           name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
           value: springCloudAzureKeyVaultEndpoint
-        }         
+        }
+        {
+          name: 'SPRING-DATASOURCE-USERNAME'
+          value: springDataSourceUsr
+        }
+        {
+          name: 'SPRING-DATASOURCE-PASSWORD'
+          value: springDataSourcePwd
+        } 
+        {
+          name: 'SPRING-DATASOURCE-URL'
+          value: springDataSourceUrl
+        }                              
       ]
     }
     template: {
@@ -713,12 +740,24 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
             }
             {
               name: 'SPRING-CLOUD-AZURE-TENANT-ID'
-              secretRef: 'SPRING-CLOUD-AZURE-TENANT-ID'
+              secretRef: springCloudAzureTenantId
             } 
             {
               name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
-              secretRef: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
-            }                     
+              secretRef: springCloudAzureKeyVaultEndpoint
+            }
+            {
+              name: 'SPRING-DATASOURCE-USERNAME'
+              secretRef: springDataSourceUsr
+            }
+            {
+              name: 'SPRING-DATASOURCE-PASSWORD'
+              secretRef: springDataSourcePwd
+            } 
+            {
+              name: 'SPRING-DATASOURCE-URL'
+              secretRef: springDataSourceUrl
+            }                          
           ]
           image: '${acrName}/${customersServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: customersServiceContainerAppName
@@ -834,11 +873,23 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         {
           name: 'SPRING-CLOUD-AZURE-TENANT-ID'
           value: springCloudAzureTenantId
-        }
+        } 
         {
           name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
           value: springCloudAzureKeyVaultEndpoint
-        }                
+        }
+        {
+          name: 'SPRING-DATASOURCE-USERNAME'
+          value: springDataSourceUsr
+        }
+        {
+          name: 'SPRING-DATASOURCE-PASSWORD'
+          value: springDataSourcePwd
+        } 
+        {
+          name: 'SPRING-DATASOURCE-URL'
+          value: springDataSourceUrl
+        }               
       ]
     }
     template: {
@@ -859,12 +910,24 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }
             {
               name: 'SPRING-CLOUD-AZURE-TENANT-ID'
-              secretRef: 'SPRING-CLOUD-AZURE-TENANT-ID'
-            }   
+              secretRef: springCloudAzureTenantId
+            } 
             {
               name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
-              secretRef: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
-            }                        
+              secretRef: springCloudAzureKeyVaultEndpoint
+            }
+            {
+              name: 'SPRING-DATASOURCE-USERNAME'
+              secretRef: springDataSourceUsr
+            }
+            {
+              name: 'SPRING-DATASOURCE-PASSWORD'
+              secretRef: springDataSourcePwd
+            } 
+            {
+              name: 'SPRING-DATASOURCE-URL'
+              secretRef: springDataSourceUrl
+            }                      
           ]
           image: '${acrName}/${vetsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: vetsServiceContainerAppName
@@ -984,7 +1047,19 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         {
           name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
           value: springCloudAzureKeyVaultEndpoint
-        }                
+        }
+        {
+          name: 'SPRING-DATASOURCE-USERNAME'
+          value: springDataSourceUsr
+        }
+        {
+          name: 'SPRING-DATASOURCE-PASSWORD'
+          value: springDataSourcePwd
+        } 
+        {
+          name: 'SPRING-DATASOURCE-URL'
+          value: springDataSourceUrl
+        }          
       ]
     }
     template: {
@@ -1005,12 +1080,24 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }
             {
               name: 'SPRING-CLOUD-AZURE-TENANT-ID'
-              secretRef: 'SPRING-CLOUD-AZURE-TENANT-ID'
-            }   
+              secretRef: springCloudAzureTenantId
+            } 
             {
               name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
-              secretRef: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
-            }                        
+              secretRef: springCloudAzureKeyVaultEndpoint
+            }
+            {
+              name: 'SPRING-DATASOURCE-USERNAME'
+              secretRef: springDataSourceUsr
+            }
+            {
+              name: 'SPRING-DATASOURCE-PASSWORD'
+              secretRef: springDataSourcePwd
+            } 
+            {
+              name: 'SPRING-DATASOURCE-URL'
+              secretRef: springDataSourceUrl
+            }                           
           ]
           image: '${acrName}/${visitsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: visitsServiceContainerAppName
@@ -1410,6 +1497,7 @@ resource githubActionSettingsVets 'Microsoft.App/containerApps/sourcecontrols@20
         registryUrl: ghaSettingsCfgRegistryUrl
         registryUserName: ghaSettingsCfgRegistryUserName
       }
+      publishType: ghaSettingsCfgPublishType
     }
     repoUrl: ghaSettingsCfgRepoUrl
   }
@@ -1434,6 +1522,7 @@ resource githubActionSettings 'Microsoft.App/containerApps/sourcecontrols@2022-0
         registryUrl: ghaSettingsCfgRegistryUrl
         registryUserName: ghaSettingsCfgRegistryUserName
       }
+      publishType: ghaSettingsCfgPublishType
     }
     repoUrl: ghaSettingsCfgRepoUrl
   }
