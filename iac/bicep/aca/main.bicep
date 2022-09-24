@@ -58,8 +58,31 @@ param publicNetworkAccess string = 'enabled'
 ])
 param kvSkuName string = 'standard'
 
+/*
+@secure()
+@description('The Azure Active Directory tenant ID that should be used by Key Vault in the Spring Config')
+param springCloudAzureTenantId string
+
+@secure()
+@description('The Azure Key Vault EndPoint that should be used by Key Vault in the Spring Config. Ex: https://<key-vault-name>.vault.azure.net')
+param springCloudAzureKeyVaultEndpoint string
+
+@secure()
+@description('The Spring Datasource / MySQL DB admin user name  - this is a secret stored in Key Vault')
+param springDataSourceUsr string
+@secure()
+@description('The Spring Datasource / MySQL DB admin user password  - this is a secret stored in Key Vault')
+param springDataSourcePwd string
+@secure()
+@description('The Spring Datasource / MySQL DB URL - this is a secret stored in Key Vault')
+param springDataSourceUrl string
+*/
+
 @description('The Azure Active Directory tenant ID that should be used for authenticating requests to the Key Vault.')
 param tenantId string = subscription().tenantId
+
+@description('The Azure Subscription ID that should be used for authenticating requests to the Key Vault and used by GitHub Action settings.')
+param subscriptionId string = subscription().id
 
 @description('The Log Analytics workspace name used by Azure Container App instance')
 param logAnalyticsWorkspaceName string = 'log-${appName}'
@@ -205,6 +228,7 @@ module azurecontainerapp 'aca.bicep' = {
   params: {
     appName: appName
     location: location
+    acrName: acrName
     azureContainerAppEnvName: azureContainerAppEnvName
     logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
     appInsightsInstrumentationKey: appInsights.properties.ConnectionString
@@ -212,9 +236,12 @@ module azurecontainerapp 'aca.bicep' = {
     springCloudAzureKeyVaultEndpoint: kv.getSecret('SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT')
     springCloudAzureTenantId: kv.getSecret('SPRING-CLOUD-AZURE-TENANT-ID')
     revisionName: revisionName
-    vnetName: vnetName
-    acrName: acrName
     ghaGitBranchName: ghaGitBranchName
+    springDataSourceUrl: kv.getSecret('SPRING-DATASOURCE-URL')
+    springDataSourceUsr: kv.getSecret('SPRING-DATASOURCE-USERNAME')
+    springDataSourcePwd: kv.getSecret('SPRING-DATASOURCE-PASSWORD')
+    tenantId: tenantId
+    subscriptionId: subscriptionId
     ghaSettingsCfgCredClientId: ghaSettingsCfgCredClientId
     ghaSettingsCfgCredClientSecret: ghaSettingsCfgCredClientSecret
     ghaSettingsCfgRegistryUserName: ACR.listCredentials().username
@@ -228,9 +255,9 @@ module azurecontainerapp 'aca.bicep' = {
     ghaSettingsCfgDockerFilePathDiscoveryServer: ghaSettingsCfgDockerFilePathDiscoveryServer
     ghaSettingsCfgDockerFilePathVisitsService: ghaSettingsCfgDockerFilePathVisitsService
     ghaSettingsCfgRepoUrl: ghaSettingsCfgRepoUrl
-    ghaSettingsCfgRegistryRuntimeStack: ghaSettingsCfgRegistryRuntimeStack
-    ghaSettingsCfgRegistryRuntimeVersion: ghaSettingsCfgRegistryRuntimeVersion
     ghaSettingsCfgPublishType: ghaSettingsCfgPublishType
+    // ghaSettingsCfgRuntimeStack: ghaSettingsCfgRuntimeStack
+    // ghaSettingsCfgRuntimeVersion: ghaSettingsCfgRuntimeVersion
     adminServerContainerAppName: adminServerContainerAppName
     discoveryServerContainerAppName: discoveryServerContainerAppName
     configServerContainerAppName: configServerContainerAppName
