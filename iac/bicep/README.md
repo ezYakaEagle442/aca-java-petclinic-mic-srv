@@ -32,8 +32,9 @@ az deployment group create --name iac-101-kv -f ./kv/kv.bicep -g rg-iac-kv \
 az deployment group create --name iac-101-pre-req -f ./aca/pre-req.bicep -g rg-iac-aca-petclinic-mic-srv \
     --parameters @./aca/parameters-pre-req.json # --debug # --what-if to test like a dry-run
 
-# Then Launch the GitHub workflow to build the project : ./.github/workflows/maven-build.yml Finally Deploy ACA Apps ==> check all the parameter files
+# Then Launch the GitHub workflow to build the project : ./.github/workflows/maven-build.yml 
 
+# Finally Deploy ACA Apps ==> check all the parameter files
 az deployment group create --name iac-101-aca -f ./aca/main.bicep -g rg-iac-aca-petclinic-mic-srv \
     --parameters @./aca/parameters.json --debug # --what-if to test like a dry-run
     
