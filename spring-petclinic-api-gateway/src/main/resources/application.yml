@@ -1,9 +1,9 @@
 spring:      
   cloud:
-    loadbalancer:
+    # loadbalancer: # https://www.baeldung.com/spring-cloud-load-balancer
     ribbon:
       enabled: false
-    gateway:
+    gateway: # https://docs.spring.io/spring-cloud-gateway/docs/current/reference/html/#the-path-route-predicate-factory
       routes:
         - id: vets-service
           uri: http://vets-service
