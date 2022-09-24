@@ -1,0 +1,178 @@
+# This workflow will deploy all the Azure services, including ACA, ACA Env., ACR, KV & secrets, MYSQL (eventually with a Firewall rule to allow your workstation IP)
+# eventually if deployToVNet=true : also VNet, ACA Env. deployed to VNet, private DNS-Zone, client VM deployed to the VNet
+
+name: Deploy IaC with Azure Bicep
+
+env:
+  APP_NAME: petcliaca
+  LOCATION: westeurope
+  RG_KV: rg-iac-kv # RG where to deploy KV
+  RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
+  
+  KV_NAME: kv-petcliaca # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
+  SET_KV_ACCESS_POLICIES: false # let it to false
+
+  AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
+  
+  ACA_ENV_NAME: aca-env-corp # ACA Environment name
+
+  # GitHub Actions settings
+  GHA_SETTINGS_CFG_REGISTRY_URL: acrpetcliaca.azurecr.io
+  GHA_SETTINGS_CFG_REPO_URL: https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv
+  GHA_SETTINGS_CFG_CRED_CLIENT_ID:
+  GHA_SETTINGS_CFG_CRED_CLIENT_SECRET:
+  GHA_REVISION_NAME: poc-aca-101
+
+  # ==== XXX To be checked ====
+ 
+  PROJECT_NAME: petclinic                # set this to your project's name
+  
+  # ==== APPS ====
+  ADMIN_SERVER: aca-petclinic-admin-server
+  CONFIG_SERVER: aca-petclinic-config-server
+  DISCOVERY_SERVER: aca-petclinic-discovery-server
+
+  API_GATEWAY: aca-petclinic-api-gateway
+  CUSTOMERS_SERVICE: aca-petclinic-customers-service
+  VETS_SERVICE: aca-petclinic-vets-service
+  VISITS_SERVICE: aca-petclinic-visits-service
+
+  # https://github.com/Azure/actions-workflow-samples/blob/master/assets/create-secrets-for-GitHub-workflows.md#consume-secrets-in-your-workflow
+  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-secrets
+
+  # ==== Secrets ====
+
+  # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions
+  # Never use structured data as a secret
+  # Structured data can cause secret redaction within logs to fail, because redaction largely relies on finding an exact match for 
+  # the specific secret value. For example, do not use a blob of JSON, XML, or YAML (or similar) to encapsulate a secret value, 
+  # as this significantly reduces the probability the secrets will be properly redacted. Instead, create individual secrets for each sensitive value.
+
+  # Specifies all KV secrets {"secretName":"","secretValue":""} wrapped in a secure object.
+  SECRET_OBJECT: ${{ secrets.SECRET_OBJECT }}
+
+  # https://learn.microsoft.com/en-us/azure/key-vault/secrets/secrets-best-practices#secrets-rotation
+  # Because secrets are sensitive to leakage or exposure, it's important to rotate them often, at least every 60 days. 
+  # Expiry date in seconds since 1970-01-01T00:00:00Z. Ex: 1672444800 ==> 31/12/2022'
+  SECRET_EXPIRY_DATE: 1672444800
+
+  credentials: ${{ secrets.AZURE_CREDENTIALS }}
+
+  # ==== Azure Key VAULT  ====
+  
+  #SPRING-CLOUD-AZURE-CLIENT-ID: ${{ secrets.SPRING-CLOUD-AZURE-CLIENT-ID }}
+  #SPRING-CLOUD-AZURE-CLIENT-SECRET: ${{ secrets.SPRING-CLOUD-AZURE-CLIENT-SECRET }}
+  #SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT: ${{ secrets.SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT }}
+  #SPRING-CLOUD-AZURE-TENANT-ID: ${{ secrets.SPRING-CLOUD-AZURE-TENANT-ID }}
+
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  ENDPOINT: ${{ secrets.AZURE_KEY_VAULT_ENDPOINT }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+  # ==== Versions ====
+  DEPLOYMENT_VERSION: 2.6.6
+  AZ_CLI_VERSION: 2.40.0
+  JAVA_VERSION: 11
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-kv:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
+    # /!\ IMPORTANT: The step that creates or updates the environment variable does not have access to the new value, but all subsequent steps in a job will have access.
+    - name: Set Base environment variables
+      run: |
+        echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV        
+      shell: bash
+
+    - name: Azure Login
+      uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy Azure Key Vault and create secrets
+      uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
+      with:
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        inlineScript: |
+
+          # tenantId=$(az account show --query tenantId -o tsv)
+          # echo AZURE_TENANT_ID >> $GITHUB_ENV
+          mkdir deploy
+
+          # Check, choose a Region with AZ : https://docs.microsoft.com/en-us/azure/availability-zones/az-overview#azure-regions-with-availability-zones
+          az group create --name ${{ env.RG_KV }} --location ${{ env.LOCATION }}
+          az group create --name ${{ env.RG_APP }} --location ${{ env.LOCATION }}
+
+          var accessPoliciesObject = {
+            accessPolicies: [
+              {
+                objectId: fakeDummyAppIdentityId
+                tenantId: fakeDummyTenantId
+                permissions: {
+                  secrets: [
+                    'get'
+                    'list'
+                  ]
+                }
+              }
+            ]
+          }
+
+          az deployment group create --name aca-petclinic-kv -f ../../iac/bicep/kv/kv.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p location=${{ env.LOCATION }} \
+            -p setKVAccessPolicies=false \
+            -p accessPoliciesObject=$accessPoliciesObject \
+            -p secretsObject=${{ secrets.XXX }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+  
+
+          # TODO : Allow GH agent to access KV ...
+          # XXX
+          # XXX
+          # XXX
+
+          # /!\ pre-req:
+          # You need to build the Apps and to push the images to ACR, so ACR must be provisionned before ACA Apps
+          # You also need to deploy AppInsights to get the Instrument Key and to then provide it as param of the ACA Deployment
+          # --debug # --what-if to test like a dry-run
+          az deployment group create --name aca-petclinic-pre-req -f ../../iac/bicep/aca/pre-req.bicep -g ${{ env.RG_APP }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p location=${{ env.LOCATION }} \
+            -p acrName=${{ env.AZURE_CONTAINER_REGISTRY }} \
+            -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
+            -p setFwRuleClient=false \
+            -p deployToVNet=false
+
+            az deployment group show \
+              -g ${{ env.RG_APP }} \
+              -n aca-petclinic-pre-req \
+              --query properties.outputs.appInsightsInstrumentationKey.value
+
+          # Finally Deploy ACA Apps ==> check all the parameter files
+          # --what-if to test like a dry-run   
+          az deployment group create --name aca-petclinic-apps -f ../../iac/bicep/aca/main.bicep -g ${{ env.RG_APP }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p location=${{ env.LOCATION }} \
+            -p acrName=${{ env.AZURE_CONTAINER_REGISTRY }} \
+            -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p kvRGName=${{ env.RG_KV }} \
+            -p secretsObject=${{ secrets.XXX }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }} \
+            -p ghaSettingsCfgRegistryUrl=${{ env.GHA_SETTINGS_CFG_REGISTRY_URL }} \
+            -p ghaSettingsCfgRepoUrl=${{ env.GHA_SETTINGS_CFG_REPO_URL }} \
+            -p ghaSettingsCfgCredClientId=${{ env.XXX }} \
+            -p ghaSettingsCfgCredClientSecret=${{ env.XXX }} \     
+            -p revisionName=${{ env.GHA_REVISION_NAME }} \
+            -p publicNetworkAccess=enabled \
+            -p kvSkuName=standard \
+            -p deployToVNet=false
