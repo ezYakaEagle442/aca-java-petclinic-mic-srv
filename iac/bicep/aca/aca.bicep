@@ -195,11 +195,11 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           value: appInsightsInstrumentationKey
         }
         {
-          name: 'AZURE_TENANT_ID'
+          name: 'SPRING-CLOUD-AZURE-TENANT-ID'
           value: springCloudAzureTenantId
         }
         {
-          name: 'AZURE_KEYVAULT_ENDPOINT'
+          name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
           value: springCloudAzureKeyVaultEndpoint
         }                
       ]
@@ -228,20 +228,12 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'appinscon'
             }
             {
-              name: 'AZURE_TENANT_ID'
-              secretRef: 'AZURE_TENANT_ID'
-            }  
+              name: 'SPRING-CLOUD-AZURE-TENANT-ID'
+              secretRef: 'SPRING-CLOUD-AZURE-TENANT-ID'
+            }   
             {
-              name: 'AZURE_CLIENT_ID'
-              secretRef: 'AZURE_CLIENT_ID'
-            }
-            {
-              name: 'AZURE_CLIENT_SECRET'
-              secretRef: 'AZURE_CLIENT_SECRET'
-            }  
-            {
-              name: 'AZURE_KEYVAULT_ENDPOINT'
-              secretRef: 'AZURE_KEYVAULT_ENDPOINT'
+              name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+              secretRef: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
             }                                 
           ]
           image: '${acrName}/${adminServerContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
@@ -403,11 +395,11 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           value: appInsightsInstrumentationKey
         }
         {
-          name: 'AZURE_TENANT_ID'
+          name: 'SPRING-CLOUD-AZURE-TENANT-ID'
           value: springCloudAzureTenantId
         }
         {
-          name: 'AZURE_KEYVAULT_ENDPOINT'
+          name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
           value: springCloudAzureKeyVaultEndpoint
         }            
       ]
@@ -429,20 +421,12 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'appinscon'
             }
             {
-              name: 'AZURE_TENANT_ID'
-              secretRef: 'AZURE_TENANT_ID'
-            }  
+              name: 'SPRING-CLOUD-AZURE-TENANT-ID'
+              secretRef: 'SPRING-CLOUD-AZURE-TENANT-ID'
+            }   
             {
-              name: 'AZURE_CLIENT_ID'
-              secretRef: 'AZURE_CLIENT_ID'
-            }
-            {
-              name: 'AZURE_CLIENT_SECRET'
-              secretRef: 'AZURE_CLIENT_SECRET'
-            }  
-            {
-              name: 'AZURE_KEYVAULT_ENDPOINT'
-              secretRef: 'AZURE_KEYVAULT_ENDPOINT'
+              name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+              secretRef: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
             }                    
           ]
           image: '${acrName}/${apiGatewayContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
@@ -556,11 +540,11 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           value: appInsightsInstrumentationKey
         }
         {
-          name: 'AZURE_TENANT_ID'
+          name: 'SPRING-CLOUD-AZURE-TENANT-ID'
           value: springCloudAzureTenantId
         } 
         {
-          name: 'AZURE_KEYVAULT_ENDPOINT'
+          name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
           value: springCloudAzureKeyVaultEndpoint
         }        
       ]
@@ -582,20 +566,12 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'appinscon'
             }
             {
-              name: 'AZURE_TENANT_ID'
-              secretRef: 'AZURE_TENANT_ID'
+              name: 'SPRING-CLOUD-AZURE-TENANT-ID'
+              secretRef: 'SPRING-CLOUD-AZURE-TENANT-ID'
             }
             {
-              name: 'AZURE_CLIENT_ID'
-              secretRef: 'AZURE_CLIENT_ID'
-            }
-            {
-              name: 'AZURE_CLIENT_SECRET'
-              secretRef: 'AZURE_CLIENT_SECRET'
-            } 
-            {
-              name: 'AZURE_KEYVAULT_ENDPOINT'
-              secretRef: 'AZURE_KEYVAULT_ENDPOINT'
+              name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+              secretRef: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
             }
           ]
           image: '${acrName}/${configServerContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
@@ -710,11 +686,11 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
           value: appInsightsInstrumentationKey
         }
         {
-          name: 'AZURE_TENANT_ID'
+          name: 'SPRING-CLOUD-AZURE-TENANT-ID'
           value: springCloudAzureTenantId
         } 
         {
-          name: 'AZURE_KEYVAULT_ENDPOINT'
+          name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
           value: springCloudAzureKeyVaultEndpoint
         }         
       ]
@@ -736,20 +712,12 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               secretRef: 'appinscon'
             }
             {
-              name: 'AZURE_TENANT_ID'
-              secretRef: 'AZURE_TENANT_ID'
-            }  
+              name: 'SPRING-CLOUD-AZURE-TENANT-ID'
+              secretRef: 'SPRING-CLOUD-AZURE-TENANT-ID'
+            } 
             {
-              name: 'AZURE_CLIENT_ID'
-              secretRef: 'AZURE_CLIENT_ID'
-            }
-            {
-              name: 'AZURE_CLIENT_SECRET'
-              secretRef: 'AZURE_CLIENT_SECRET'
-            }  
-            {
-              name: 'AZURE_KEYVAULT_ENDPOINT'
-              secretRef: 'AZURE_KEYVAULT_ENDPOINT'
+              name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+              secretRef: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
             }                     
           ]
           image: '${acrName}/${customersServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
@@ -864,11 +832,11 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           value: appInsightsInstrumentationKey
         }
         {
-          name: 'AZURE_TENANT_ID'
+          name: 'SPRING-CLOUD-AZURE-TENANT-ID'
           value: springCloudAzureTenantId
         }
         {
-          name: 'AZURE_KEYVAULT_ENDPOINT'
+          name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
           value: springCloudAzureKeyVaultEndpoint
         }                
       ]
@@ -890,20 +858,12 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'appinscon'
             }
             {
-              name: 'AZURE_TENANT_ID'
-              secretRef: 'AZURE_TENANT_ID'
-            }  
+              name: 'SPRING-CLOUD-AZURE-TENANT-ID'
+              secretRef: 'SPRING-CLOUD-AZURE-TENANT-ID'
+            }   
             {
-              name: 'AZURE_CLIENT_ID'
-              secretRef: 'AZURE_CLIENT_ID'
-            }
-            {
-              name: 'AZURE_CLIENT_SECRET'
-              secretRef: 'AZURE_CLIENT_SECRET'
-            }  
-            {
-              name: 'AZURE_KEYVAULT_ENDPOINT'
-              secretRef: 'AZURE_KEYVAULT_ENDPOINT'
+              name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+              secretRef: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
             }                        
           ]
           image: '${acrName}/${vetsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
@@ -1018,11 +978,11 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           value: appInsightsInstrumentationKey
         }
         {
-          name: 'AZURE_TENANT_ID'
+          name: 'SPRING-CLOUD-AZURE-TENANT-ID'
           value: springCloudAzureTenantId
         } 
         {
-          name: 'AZURE_KEYVAULT_ENDPOINT'
+          name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
           value: springCloudAzureKeyVaultEndpoint
         }                
       ]
@@ -1044,20 +1004,12 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'appinscon'
             }
             {
-              name: 'AZURE_TENANT_ID'
-              secretRef: 'AZURE_TENANT_ID'
-            }  
+              name: 'SPRING-CLOUD-AZURE-TENANT-ID'
+              secretRef: 'SPRING-CLOUD-AZURE-TENANT-ID'
+            }   
             {
-              name: 'AZURE_CLIENT_ID'
-              secretRef: 'AZURE_CLIENT_ID'
-            }
-            {
-              name: 'AZURE_CLIENT_SECRET'
-              secretRef: 'AZURE_CLIENT_SECRET'
-            }  
-            {
-              name: 'AZURE_KEYVAULT_ENDPOINT'
-              secretRef: 'AZURE_KEYVAULT_ENDPOINT'
+              name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+              secretRef: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
             }                        
           ]
           image: '${acrName}/${visitsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
