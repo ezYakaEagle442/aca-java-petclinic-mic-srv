@@ -145,8 +145,6 @@ param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
 @description('The Azure Container App instance name for visits-service')
 param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
 
-
-
 resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' existing = {
   name: azureContainerAppEnvName
 }
@@ -230,7 +228,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           ]
           */
           command: [
-            'ENTRYPOINT ["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            '["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
@@ -423,7 +421,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       containers: [
         {
           command: [
-            'ENTRYPOINT ["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            '["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
@@ -568,7 +566,7 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       containers: [
         {
           command: [
-            'ENTRYPOINT ["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8888", "--spring.profiles.active=docker,mysql"]'
+            '["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8888", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
@@ -726,7 +724,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
       containers: [
         {
           command: [
-            'ENTRYPOINT ["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            '["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
@@ -896,7 +894,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       containers: [
         {
           command: [
-            'ENTRYPOINT ["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            '["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
@@ -1066,7 +1064,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       containers: [
         {
           command: [
-            'ENTRYPOINT ["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            '["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
