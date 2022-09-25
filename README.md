@@ -1,26 +1,126 @@
+---
+page_type: sample
+languages:
+- java
+products:
+- Azure Container Apps
+description: "Deploy Spring Boot apps using Azure Container Apps & MySQL"
+urlFragment: "spring-petclinic-microservices"
+---
+
 # Distributed version of the Spring PetClinic Sample Application deployed to Azure Container Apps
 
 [![Build Status](https://github.com/spring-petclinic/spring-petclinic-microservices/actions/workflows/maven-build.yml/badge.svg)](https://github.com/spring-petclinic/spring-petclinic-microservices/actions/workflows/maven-build.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 This microservices branch was initially derived from [AngularJS version](https://github.com/spring-petclinic/spring-petclinic-angular1) to demonstrate how to split sample Spring application into [microservices](http://www.martinfowler.com/articles/microservices.html).
-To achieve that goal we use IaC with Azure Bicep, MS build of OpenJDK 11, GitHub Actions, Azure Container Registry, Spring Cloud ofr Azure, Azure Key Vault, Azure Database for MySQL
+To achieve that goal we use IaC with Azure Bicep, MS build of OpenJDK 11, GitHub Actions, Azure Container Registry, Azure Container Apps, Azure Key Vault, Azure Database for MySQL
 
-## Deploy Azure Container Apps and the petclinic microservices Apps with IaC
+See the [ACA Micro-services Reference Architecture](https://docs.microsoft.com/en-us/azure/architecture/example-scenario/serverless/microservices-with-container-apps)
+
+# Pre-req
+
+To install Azure Bicep locally, read [https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/install](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/install)
+
+See the [pre-requisites](https://learn.microsoft.com/en-us/azure/container-apps/get-started-existing-container-image?tabs=bash&pivots=container-apps-public-registry#prerequisites) and [the limitations](https://learn.microsoft.com/en-us/azure/container-apps/containers#limitations) in the ACA docs
+
+# CI/CD
+
+## Use GitHub Actions to deploy the Java microservices
+
+About how to build the container image, read :
+- [ACR doc](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-java-quickstart) 
+- [Optimize docker layers with Spring Boot](https://www.baeldung.com/docker-layers-spring-boot)
+
+```sh
+
+```
+
+```sh
+
+```
+
+
+```sh
+
+```
+
+## Pipelines
+
+See GitHub Actions :
+- [Deploy the Azure Infra services workflow](./.github/workflows/deploy-iac.yml)
+- [Build workflow](./.github/workflows/maven-build.yml)
+- [Deploy workflow](./.github/workflows/deploy.yml)
+- [Delete ALL the Azure Infra services workflow, except KeyVault](./.github/workflows/delete-rg.yml)
+
+# Deploy Azure Container Apps and the petclinic microservices Apps with IaC
 
 See the [Bicep section](iac/bicep/README.md)
 
-Be aware that the MySQL DB is NOT deployed to a VNet but network FireWall Rules are Set. So ensure to allow ACA Outbound IP addresses or check the option "Allow public access from any Azure service within Azure to this server" in the Azure Portal / your MySQL DB / Networking / Firewall rules
+<span style="color:red">**Be aware that the MySQL DB is NOT deployed in a VNet but network FireWall Rules are Set. So ensure to allow ACA Outbound IP addresses or check the option "Allow public access from any Azure service within Azure to this server" in the Azure Portal / your MySQL DB / Networking / Firewall rules**</span>
 
-Also Container Apps environments are deployed on a virtual network. This network can be managed or custom (pre-configured by the user beforehand). In either case, the environment has dependencies on services outside of that virtual network. For a list of these dependencies
+
+Also Container Apps environments can be deployed on a virtual network setting the parameter below : 
+```code
+param deployToVNet bool = true
+```
+
+This network can be managed or custom (pre-configured by the user beforehand). In either case, the environment has dependencies on services outside of that virtual network. For a list of these dependencies
 see the [ACA doc](https://docs.microsoft.com/en-us/azure/container-apps/firewall-integration#outbound-fqdn-dependencies)
 
-## Starting services locally without Docker
+## IaC deployment flow
+
+By default :
+```code
+param deployToVNet bool = false
+```
+
+
+## App Container syntax
+
+command	is the container's startup command.	Equivalent to Docker's entrypoint field.
+See the [docs](https://learn.microsoft.com/en-us/azure/container-apps/containers#configuration)
+
+When allocating resources, the total amount of CPUs and memory requested for all the containers in a container app must add up to one of the [following combinations](https://learn.microsoft.com/en-us/azure/container-apps/containers#configuration).
+
+vCPUs (cores)	| Memory
+-------------:|:-------:
+0.25 	| 0.5Gi
+0.5	  | 1.0Gi
+0.75	| 1.5Gi
+1.0	  | 2.0Gi
+1.25	| 2.5Gi
+1.5		| 3.0Gi
+1.75	| 3.5Gi
+2.0		| 4.0Gi
+## Deployment to VNet
+
+: TODO !
+
+### DNS Management
+
+A Private-DNS Zone is created during the [Bicep pre-req deployment](./iac/bicep/aca/pre-req.bicep#L204), see [./iac/bicep/aca/dns.bicep](./iac/bicep/aca/dns.bicep#L40)
+
+/!\ IMPORTANT: Set location to 'global' instead of '${location}'. This is because Azure DNS is a global service. 
+Otherwise you will hit this error:
+```sh
+"MissingRegistrationForLocation. "The subscription is not registered for the resource type 'privateDnsZones' in the location 'westeurope' 
+```
+
+```sh
+resource acaPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  //<env>.<RANDOM>.<REGION>.azurecontainerapps.io. Ex: https://aca-test-vnet.wittyhill-01dfb8c1.westeurope.azurecontainerapps.io
+  name: '${location}.azurecontainerapps.io' // 'private.azurecontainerapps.io'
+  location: 'global'  
+}
+```
+
+# Starting services locally without Docker
 
 Quick local test just to verify that the jar files can be run (the routing will not work out of a K8S cluster, and also the apps will fail to start as soon as management port 8081 will be already in use by config server ...) : 
 
 ```sh
-mvn package -Dmaven.test.skip=true
+mvn package -DskipTests
 java -jar spring-petclinic-config-server\target\spring-petclinic-config-server-2.6.6.jar --server.port=8888
 java -jar spring-petclinic-admin-server\target\spring-petclinic-admin-server-2.6.6.jar --server.port=9090
 java -jar spring-petclinic-visits-service\target\spring-petclinic-visits-service-2.6.6.jar --server.port=8082 # --spring.profiles.active=docker
@@ -32,7 +132,13 @@ java -jar spring-petclinic-api-gateway\target\spring-petclinic-api-gateway-2.6.6
 Note: tip to verify the dependencies
 ```sh
 mvn dependency:tree
+mvn dependency:analyze-duplicate
 ```
+
+To learn more about maven, read :
+- [https://www.baeldung.com/maven](https://www.baeldung.com/maven)
+- [https://www.baeldung.com/maven-duplicate-dependencies](https://www.baeldung.com/maven-duplicate-dependencies)
+- [https://www.baeldung.com/maven-multi-module](https://www.baeldung.com/maven-multi-module)
 
 Every microservice is a Spring Boot application and can be started locally. 
 Please note that supporting services (Config Server) must be started before any other application (Customers, Vets, Visits and API).
@@ -45,7 +151,7 @@ If everything goes well, you can access the following services at given location
 The `main` branch uses an MS openjdk/jdk:11-mariner Docker base.
 
 
-## Understanding the Spring Petclinic application
+# Understanding the Spring Petclinic application
 
 [See the presentation of the Spring Petclinic Framework version](http://fr.slideshare.net/AntoineRey/spring-framework-petclinic-sample-application)
 
@@ -62,11 +168,21 @@ You can then access petclinic here: http://localhost:8080/
 
 The UI code is located at spring-petclinic-api-gateway\src\main\resources\static\scripts.
 
-The Spring Cloud Gateway routing is configuted at spring-petclinic-api-gateway\src\main\resources\application.yml
-
 The Git repo URL used by Spring config is set in spring-petclinic-config-server\src\main\resources\application.yml
 
+The Spring Cloud Gateway routing is configured at spring-petclinic-api-gateway\src\main\resources\application.yml
+
+The Spring Zuul(Netflix Intelligent Routing) config at https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/api-gateway.yml has been deprecated and replaced by the Spring Cloud Gateway.
+
 If you want to know more about the Spring Boot Admin server, you might be interested in [https://github.com/codecentric/spring-boot-admin](https://github.com/codecentric/spring-boot-admin)
+
+## Containerize your Java applications
+
+See the [Azure doc](https://docs.microsoft.com/en-us/azure/developer/java/containers/overview)
+Each micro-service is containerized using a Dockerfile. Example at [./docker/petclinic-customers-service/Dockerfile](./docker/petclinic-customers-service/Dockerfile)
+
+About how to build the container image, read [ACR doc](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-java-quickstart) 
+
 
 ## Database configuration
 
@@ -88,32 +204,44 @@ spring:
     schema: classpath*:db/mysql/schema.sql
     data: classpath*:db/mysql/data.sql
     # url: jdbc:mysql://localhost:3306/petclinic?useSSL=false
-    # url: jdbc:mysql://petcliaca-mysql-server.mysql.database.azure.com:3306/petclinic?useSSL=true
+    # url: jdbc:mysql://petclinic.mysql.database.azure.com:3306/petclinic?useSSL=true
     # https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-using-ssl.html
-    # url: jdbc:mysql://petcliaca-mysql-server.mysql.database.azure.com:3306/petclinic?useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.2&verifyServerCertificate=true
-    url: jdbc:mysql://${MYSQL-SERVER-FULL-NAME}:3306/${MYSQL-DATABASE-NAME}?useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.2&verifyServerCertificate=true    
-    username: ${MYSQL-SERVER-ADMIN-LOGIN-NAME} # ${MYSQL_SERVER_ADMIN_LOGIN_NAME}
-    password: ${MYSQL-SERVER-ADMIN-PASSWORD} # ${MYSQL_SERVER_ADMIN_PASSWORD}
+    # url: jdbc:mysql://petclinic.mysql.database.azure.com:3306/petclinic?useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.2&verifyServerCertificate=true
+    # https://docs.spring.io/spring-boot/docs/2.7.3/reference/html/application-properties.html#appendix.application-properties.data
+    
+    # spring.datasource.url, spring.datasource.username and spring.datasource.password will be automatically injected from KV secrets SPRING-DATASOURCE-URL, SPRING-DATASOURCE-USERNAME and SPRING-DATASOURCE-PASSWORD
+    # url: jdbc:mysql://${SPRING-DATASOURCE-URL}:3306/${MYSQL-DATABASE-NAME}?useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.2&verifyServerCertificate=true    
+    # username: ${SPRING-DATASOURCE-USERNAME}
+    # password: ${SPRING-DATASOURCE-PASSWORD}  
     initialization-mode: NEVER # ALWAYS
     # https://javabydeveloper.com/spring-boot-loading-initial-data/
     platform: mysql
     #driver-class-name: com.mysql.jdbc.Driver
 ```
-In fact the MYSQL-SERVER-FULL-NAME, MYSQL-SERVER-ADMIN-LOGIN-NAME & MYSQL-SERVER-ADMIN-PASSWORD are secrets injected from Key Vault using the config below :
+In fact the spring.datasource.url, spring.datasource.username and spring.datasource.password will be automatically injected from KV secrets SPRING-DATASOURCE-URL, SPRING-DATASOURCE-USERNAME and SPRING-DATASOURCE-PASSWORD using the config below :
 
 ```
 spring:
   cloud:
     azure:
+      profile: # spring.cloud.azure.profile
+        # subscription-id:
+        tenant-id: ${AZURE_TENANT_ID}
+      credential:
+        managed-identity-enabled: true        
       keyvault:
         secret:
+          enabled: true
           property-sources:
-            - credential:
-                client-id: ${AZURE_CLIENT_ID}
-                client-secret: ${AZURE_CLIENT_SECRET}
-              endpoint: ${ENDPOINT}
-              profile:
-                tenant-id: ${AZURE_TENANT_ID}
+            - name: kv-property-source-endpoint
+              endpoint: ${AZURE_KEY_VAULT_ENDPOINT}
+              credential.managed-identity-enabled: true # https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#configuration-17
+              # credential:
+              #  client-id: ${AZURE_CLIENT_ID}
+              #  client-secret: ${AZURE_CLIENT_SECRET}
+              # profile:
+              #  tenant-id: ${AZURE_TENANT_ID}
+---
 ```
 
 You can check the DB connection with this [sample project](https://github.com/Azure-Samples/java-on-azure-examples/tree/main/databases/mysql/get-country).
@@ -126,7 +254,8 @@ with the `mysql` Spring profile. Add the `--spring.profiles.active=mysql` as pro
 
 By default, at startup, database schema will be created and data will be populated.
 You may also manually create the PetClinic database and data by executing the `"db/mysql/{schema,data}.sql"` scripts of each 3 microservices. 
-In the `application.yml` of the [Configuration repository], set the `initialization-mode` to `never`.
+
+In the `application.yml` of the [Configuration repository], set the `initialization-mode` to `ALWAYS`  ( or `never`).
 
 If you are running the microservices with Docker, you have to add the `mysql` profile into the (Dockerfile)[docker/Dockerfile]:
 ```
@@ -135,14 +264,6 @@ ENV SPRING_PROFILES_ACTIVE docker,mysql
 In the `mysql section` of the `application.yml` from the [Configuration repository], you have to change 
 the host and port of your MySQL JDBC connection string. 
 
-
-## CI/CD
-
-### Use GitHub Actions to deploy the Java microservices
-
-See GitHub Actions :
-- [Build workflow](./.github/workflows/maven-build.yml)
-- [Deploy workflow](./.github/workflows/deploy.yml)
 
 ## Observability
 
@@ -153,7 +274,6 @@ az monitor log-analytics query \
   --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == '$appName' | project ContainerAppName_s, Log_s, TimeGenerated | take 3" \
   --out table
 ```
-
 
 Open the Log Analytics that you created - you can find the Log Analytics in the same Resource Group where you created an Azure Container Apps service instance.
 
@@ -219,7 +339,7 @@ Read the Application Insights docs :
 - [https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string](https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string)
 
 The config files are located in each micro-service at src\main\resources\applicationinsights.json
-The Java agent is downloaded in the App container, you can have a look at a Docker file, ex at docker\petclinic-customers-service\Dockerfile 
+The Java agent is downloaded in the App container, you can have a look at a Docker file, example at [./docker/petclinic-customers-service/Dockerfile](./docker/petclinic-customers-service/Dockerfile)
 
 ## Scaling
 
@@ -236,31 +356,14 @@ Azure Key Vault integration is implemented through Spring Cloud for Azure
 
 Read the docs : 
 
-- []()
-- []()
-- []()
-- []()
+- [https://learn.microsoft.com/en-us/azure/developer/java/spring-framework/configure-spring-boot-starter-java-app-with-azure-key-vault](https://learn.microsoft.com/en-us/azure/developer/java/spring-framework/configure-spring-boot-starter-java-app-with-azure-key-vault)
+- [https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#advanced-usage]https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#advanced-usage)
+- [https://github.com/Azure/azure-sdk-for-java/issues/28310](https://github.com/Azure/azure-sdk-for-java/issues/28310)
+- [https://learn.microsoft.com/en-us/azure/container-apps/manage-secrets?tabs=arm-template](https://learn.microsoft.com/en-us/azure/container-apps/manage-secrets?tabs=arm-template)
 - []()
 
 : TODO !
 
-## DNS Management
-
-A Private-DNS Zone is created during the [Bicep pre-req deployment](./iac/bicep/aca/pre-req.bicep), see [./iac/bicep/aca/dns.bicep](./iac/bicep/aca/dns.bicep)
-
-/!\ IMPORTANT: Set location to 'global' instead of '${location}'. This is because Azure DNS is a global service. 
-Otherwise you will hit this error:
-```sh
-"MissingRegistrationForLocation. "The subscription is not registered for the resource type 'privateDnsZones' in the location 'westeurope' 
-```
-
-```sh
-resource acaPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
-  //<env>.<RANDOM>.<REGION>.azurecontainerapps.io. Ex: https://aca-test-vnet.wittyhill-01dfb8c1.westeurope.azurecontainerapps.io
-  name: '${location}.azurecontainerapps.io' // 'private.azurecontainerapps.io'
-  location: 'global'  
-}
-```
 
 ### Custom metrics
 Spring Boot registers a lot number of core metrics: JVM, CPU, Tomcat, Logback... 
