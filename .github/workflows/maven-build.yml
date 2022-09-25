@@ -108,28 +108,28 @@ jobs:
         dockerfile: ../../dockerfiles/Dockerfile
         branch: main
 
-    - name: Build XXX image and push it to ACR
-      uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
-      with:
-        azcliversion: ${{ env.AZ_CLI_VERSION }}
-        inlineScript: |
-
-          # tenantId=$(az account show --query tenantId -o tsv)
-          # echo AZURE_TENANT_ID >> $GITHUB_ENV
-
-          az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
-          # az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
-          az acr build -t ${{ env.REGISTRY_URL }}/${{ env.PROJECT_NAME }}:${{ github.sha }} --file "./docker/petclinic-admin-server/Dockerfile"
-          build_id=$(az acr task list-runs --registry $acr_registry_name -o json --query [0].name )
-
-          build_id=$(echo $build_id | tr -d '"')
-          echo "Successfully pushed image with ID " $build_id
-          az acr task logs --registry $acr_registry_name --run-id  $build_id
-
-          # verify
-          az acr repository list  ${{ env.AZURE_CONTAINER_REGISTRY }} --output table
-          az acr repository show --name ${{ env.AZURE_CONTAINER_REGISTRY }} --repository ${{ env.PROJECT_NAME }}
-
-          mkdir deploy
-          export CONTAINER_REGISTRY=${{ env.AZURE_CONTAINER_REGISTRY }}
-          export IMAGE_TAG=$build_id
+    #- name: Build XXX image and push it to ACR
+    #  uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
+    #  with:
+    #    azcliversion: ${{ env.AZ_CLI_VERSION }}
+    #    inlineScript: |
+    #
+    #      # tenantId=$(az account show --query tenantId -o tsv)
+    #      # echo AZURE_TENANT_ID >> $GITHUB_ENV
+    #
+    #      az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
+    #      # az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
+    #      az acr build -t ${{ env.REGISTRY_URL }}/${{ env.PROJECT_NAME }}:${{ github.sha }} --file "./docker/petclinic-admin-server/Dockerfile"
+    #      build_id=$(az acr task list-runs --registry $acr_registry_name -o json --query [0].name )
+    #
+    #      build_id=$(echo $build_id | tr -d '"')
+    #      echo "Successfully pushed image with ID " $build_id
+    #      az acr task logs --registry $acr_registry_name --run-id  $build_id
+    #
+    #      # verify
+    #      az acr repository list  ${{ env.AZURE_CONTAINER_REGISTRY }} --output table
+    #      az acr repository show --name ${{ env.AZURE_CONTAINER_REGISTRY }} --repository ${{ env.PROJECT_NAME }}
+    #
+    #      mkdir deploy
+    #      export CONTAINER_REGISTRY=${{ env.AZURE_CONTAINER_REGISTRY }}
+    #      export IMAGE_TAG=$build_id
