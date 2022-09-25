@@ -1,8 +1,5 @@
 spring:      
   cloud:
-    # loadbalancer: # https://www.baeldung.com/spring-cloud-load-balancer
-    ribbon:
-      enabled: false
     gateway: # https://docs.spring.io/spring-cloud-gateway/docs/current/reference/html/#the-path-route-predicate-factory
       routes:
         - id: vets-service
@@ -50,7 +47,7 @@ management:
           include: "readinessState"
         liveness:
           include: "livenessState"                      
-    probes:
+      probes:
         enabled: true      
     info:
       enabled: true
