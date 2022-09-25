@@ -9,7 +9,7 @@ env:
   RG_KV: rg-iac-kv # RG where to deploy KV
   RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
   
-  KV_NAME: kv-petcliaca # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
+  KV_NAME: kv-petcliaca442 # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
   SET_KV_ACCESS_POLICIES: false # let it to false
 
   AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
@@ -20,7 +20,7 @@ env:
   GHA_SETTINGS_CFG_REGISTRY_URL: acrpetcliaca.azurecr.io
   GHA_SETTINGS_CFG_REPO_URL: https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv
   GHA_SETTINGS_CFG_CRED_CLIENT_ID:
-  GHA_SETTINGS_CFG_CRED_CLIENT_SECRET:
+  GHA_SETTINGS_CFG_CRED_CLIENT_SECRET: 
   GHA_REVISION_NAME: poc-aca-101
 
   # ==== XXX To be checked ====
@@ -96,6 +96,34 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+    - name: Login with Key Vault SP
+      uses: azure/login@v1 
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # When Public access is disabled on KV, you need to add a network rule in the KV Firewall
+    - name: Authorize local IP to access the Azure Key Vault
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        inlineScript: |
+          az keyvault network-rule add --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
+          sleep 30
+
+    - name: Get service SP from Key Vault
+      uses: Azure/get-keyvault-secrets@v1
+      with:
+        keyvault: ${{ env.KV_NAME }}
+        secrets: "AZURE-CREDENTIALS-FOR-SPRING"
+      id: keyvaultaction
+    
+    - name: Get MySQL Secrets from Key Vault
+      uses: Azure/get-keyvault-secrets@v1
+      with:
+        keyvault: ${{ env.KV_NAME }}
+        secrets: "VM-ADMIN-USER-NAME,VM-ADMIN-PASSWORD,MYSQL-SERVER-NAME,MYSQL-SERVER-FULL-NAME,SPRING-DATASOURCE-URL,SPRING-DATASOURCE-USERNAME,SPRING-DATASOURCE-PASSWORD,SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT,SPRING-CLOUD-AZURE-TENANT-ID"
+      id: mysqlsecrets
+
     - name: Deploy Azure Key Vault and create secrets
       uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
       with:
@@ -135,7 +163,7 @@ jobs:
             -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
   
 
-          # TODO : Allow GH agent to access KV ...
+          # TODO : Allow GH Runner to access KV ...
           # XXX
           # XXX
           # XXX
@@ -176,3 +204,23 @@ jobs:
             -p publicNetworkAccess=enabled \
             -p kvSkuName=standard \
             -p deployToVNet=false
+
+    - name: Disable local IP access to the Key Vault
+      uses: azure/CLI@v1
+      if: ${{ always() }}
+      with:
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        inlineScript: |
+          az keyvault network-rule remove --ip-address $LOCAL_IP --name ${{ env.KEYVAULT }} --only-show-errors
+
+    # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
+    # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#hardening-for-self-hosted-runners
+    # if the runner is self-hosted which is not github provided it is recommended to manually logout at the end of the workflow as shown below.
+    - name: Azure Logout security hardening
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        inlineScript: |
+          az logout
+          az cache purge
+          az account clear
