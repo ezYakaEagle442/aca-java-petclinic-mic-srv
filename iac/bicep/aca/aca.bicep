@@ -87,32 +87,6 @@ param ghaSettingsCfgCredClientId string
 @description('The GitHub Action Settings Configuration / Azure Credentials / Client Secret')
 param ghaSettingsCfgCredClientSecret string
 
-@allowed([
-  json('0.25')
-  json('0.5')
-  json('0.75')
-  json('1.0')  
-  json('1.25')
-  json('1.5')
-  json('1.75')
-  json('2.0')    
-])
-@description('The container Resources CPU')
-param containerResourcesCpu object = json('0.25')
-
-@allowed([
-  json('0.5')
-  json('1.0')  
-  json('1.5')
-  json('2.0')    
-  json('2.5')
-  json('3.0')  
-  json('3.5')
-  json('4.0')    
-])
-@description('The container Resources Memory')
-param containerResourcesMemory object = json('0.5')
-
 @description('The GitHub Action Settings Configuration / Docker file Path for admin-server Azure Container App ')
 param ghaSettingsCfgDockerFilePathAdminServer string = '../../docker/petclinic-admin-server/Dockerfile'
 
