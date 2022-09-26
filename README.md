@@ -32,50 +32,133 @@ About how to build the container image, read :
 - [ACR doc](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-java-quickstart) 
 - [Optimize docker layers with Spring Boot](https://www.baeldung.com/docker-layers-spring-boot)
 
+Read :
+- [https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts](https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts)
+- [https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven](https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven)
+
+
+Add the App secrets used by the Spring Config to your GH repo secrets / Actions secrets / Repository secrets / Add 'SECRET_OBJECT'.
+
+Specifies all [KV secrets](./iac/bicep/kv/parameters-kv.json#L14) {"secretName":"","secretValue":""} that will be then wrapped in a secret object 'SECRET_OBJECT' in the GitHub Action [Azure Infra services deployment workflow](./.github/workflows/deploy-iac.yml#L53).
+
 ```sh
+"secrets": [
+  {
+    "secretName": "MYSQL-SERVER-NAME",
+    "secretValue": "petclinic777"
+  },
+  {
+    "secretName": "MYSQL-SERVER-FULL-NAME",
+    "secretValue": "petclinic777.mysql.database.azure.com"
+  },            
+  {
+    "secretName": "SPRING-DATASOURCE-URL",
+    "secretValue": "jdbc:mysql://petclinic777.mysql.database.azure.com:3306/petclinic?useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.2&verifyServerCertificate=true"
+  },   
+  {
+    "secretName": "SPRING-DATASOURCE-USERNAME",
+    "secretValue": "dolphin_adm"
+  },
+  {
+    "secretName": "SPRING-DATASOURCE-PASSWORD",
+    "secretValue": "PUT YOUR PASSWORD HERE"
+  },   
+  {
+    "secretName": "SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT",
+    "secretValue": "https://kv-petclinic777.vault.azure.net/"
+  },
+  {
+    "secretName": "SPRING-CLOUD-AZURE-TENANT-ID",
+    "secretValue": "PUT YOUR AZURE TENANT ID HERE"
+  },
+  {
+    "secretName": "VM-ADMIN-USER-NAME",
+    "secretValue": "PUT YOUR AZURE Windows client VM JumpOff Admin User Name HERE"
+  },
+  {
+    "secretName": "VM-ADMIN-PASSWORD",
+    "secretValue": "PUT YOUR PASSWORD HERE"
+  }          
+]
+```
+
+```bash
+#  For GitHub Action Runner: https://aka.ms/azadsp-cli
+SPN_APP_NAME="gha_aca_run"
+
+# /!\ In CloudShell, the default subscription is not always the one you thought ...
+subName="set here the name of your subscription"
+subName=$(az account list --query "[?name=='${subName}'].{name:name}" --output tsv)
+echo "subscription Name :" $subName
+
+SUBSCRIPTION_ID=$(az account list --query "[?name=='${subName}'].{id:id}" --output tsv)
+SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+TENANT_ID=$(az account show --query tenantId -o tsv)
+
+# other way to create the SPN :
+SPN_PWD=$(az ad sp create-for-rbac --name $SPN_APP_NAME --role contributor --scopes /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV}/providers/Microsoft.KeyVault/vaults/${KV_NAME} --query password --output tsv)
+#SP_ID=$(az ad sp show --id http://$appName --query objectId -o tsv)
+#SP_ID=$(az ad sp list --all --query "[?appDisplayName=='${appName}'].{appId:appId}" --output tsv)
+SPN_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME}'].{id:appId}" --output tsv)
+TENANT_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME}'].{t:appOwnerTenantId}" --output tsv)
+```
+
+Add SUBSCRIPTION_ID, TENANT_ID, SPN_ID and SPN_PWD as secrets to your GH repo secrets / Actions secrets / Repository secrets
+
+
+Create an SP with Contributor access to the Azure Container Registry, read [ACR Roles doc](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-roles)
+```sh
+az role assignment create --assignee $SPN_ID --scope <resourceID of the ACR> --role "Contributor"
+```
+
+<!-- 
+To generate a key to access the Key Vault, execute command below:
+```bash
+    az ad sp create-for-rbac --role contributor --scopes /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV}/providers/Microsoft.KeyVault/vaults/${KV_NAME} --sdk-auth
+```
+-->
+
+Then, follow the here under step to add access policy for the Service Principal.
+```sh
+az keyvault set-policy -n $KV_NAME --secret-permissions get list --spn <clientId from the Azure SPN JSON>
+```
 
 ```
 
-```sh
+In the end, add this service principal as secret named "AZURE_CREDENTIALS" in your forked GitHub repo see [Use GitHub Actions to connect to Azure documentation](https://docs.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Cwindows) to add the AZURE_CREDENTIALS to your repo.
 
-```
-
-
-```sh
-
-```
+Also add your AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID, AZURE_CLIENT_ID to your GH repo secrets / Actions secrets / Repository secrets
 
 ## Pipelines
 
 See GitHub Actions :
-- [Deploy the Azure Infra services workflow](./.github/workflows/deploy-iac.yml)
-- [Build workflow](./.github/workflows/maven-build.yml)
-- [Deploy workflow](./.github/workflows/deploy.yml)
+- [Deploy the Azure Infra services workflow](./.github/workflows/deploy-iac.yml#L13)
+- [Maven Build workflow](./.github/workflows/maven-build.yml)
+- [Java Apps Deploy workflow](./.github/workflows/deploy-apps.yml)
 - [Delete ALL the Azure Infra services workflow, except KeyVault](./.github/workflows/delete-rg.yml)
 
 # Deploy Azure Container Apps and the petclinic microservices Apps with IaC
 
-Read the [Bicep section](iac/bicep/README.md), but you do not have to run it through CLI, instead you can manually trigger the GitHub Action [deploy-iac.yml](./.github/workflows/deploy-iac.yml), see the Workflow in the next [section](#iac-deployment-flow)
-
-<span style="color:red">**Be aware that the MySQL DB is NOT deployed in a VNet but network FireWall Rules are Set. So ensure to allow ACA Outbound IP addresses or check the option "Allow public access from any Azure service within Azure to this server" in the Azure Portal / your MySQL DB / Networking / Firewall rules**</span>
-
-
-Also Container Apps environments can be deployed on a virtual network setting the parameter below : 
-```code
-param deployToVNet bool = true
-```
+You can read the [Bicep section](iac/bicep/README.md) but you do not have to run it through CLI, instead you can manually trigger the GitHub Action [deploy-iac.yml](./.github/workflows/deploy-iac.yml), see the Workflow in the next [section](#iac-deployment-flow)
 
 This network can be managed or custom (pre-configured by the user beforehand). In either case, the environment has dependencies on services outside of that virtual network. For a list of these dependencies
 see the [ACA doc](https://learn.microsoft.com/en-us/azure/container-apps/firewall-integration#outbound-fqdn-dependencies)
 
 ## IaC deployment flow
 
-By default the Azure Container Apps [Envirponment](./iac/bicep/aca/acaPublicEnv.bicep#L30) is Public, i.e not deployed to a VNet.
+By default the Azure Container Apps Environment is Public, i.e not deployed to a VNet.
+- [Bicep ](./iac/bicep/aca/acaPublicEnv.bicep#L30)
+```code
+param deployToVNet bool = true
+```
+
+- [Azure Infra services deployment workflow](./.github/workflows/deploy-iac.yml#L13)
+```code
+DEPLOY_TO_VNET: false
+```
+
 To Deploy the Apps into your VNet, see [Deployment to VNet section](#deployment-to-vnet)
 
-```code
-param deployToVNet bool = false
-```
 
 ```
 ├── Create RG
@@ -101,17 +184,39 @@ param deployToVNet bool = false
 │   ├── Call [KV Module](./iac/bicep/aca/main.bicep#284) with SET_KV_ACCESS_POLICIES to TRUE
 ```
 
+<span style="color:red">**Be aware that the MySQL DB is NOT deployed in a VNet but network FireWall Rules are Set. So ensure to allow ACA Outbound IP addresses or check the option "Allow public access from any Azure service within Azure to this server" in the Azure Portal / your MySQL DB / Networking / Firewall rules**</span>
+
+## Security
+### secret Management
+Azure Key Vault integration is implemented through Spring Cloud for Azure
+
+Read : 
+
+- [https://learn.microsoft.com/en-us/azure/developer/java/spring-framework/configure-spring-boot-starter-java-app-with-azure-key-vault](https://learn.microsoft.com/en-us/azure/developer/java/spring-framework/configure-spring-boot-starter-java-app-with-azure-key-vault)
+- [https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#advanced-usage]https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#advanced-usage)
+- [https://learn.microsoft.com/en-us/azure/container-apps/manage-secrets?tabs=arm-template](https://learn.microsoft.com/en-us/azure/container-apps/manage-secrets?tabs=arm-template)
+- [https://github.com/Azure/azure-sdk-for-java/issues/28310](https://github.com/Azure/azure-sdk-for-java/issues/28310)
+- [Maven Project parent pom.xml](pom.xml#L168)
+
+The Config-server uses the config declared on the repo at [https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml](https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml) and need a Service Principal to be able to read secrets from KeyVault. This is implemented using Azure Managed Identities (MI) from the [main.bicep](./iac/bicep/aca/main.bicep#L394), calling the [KV Module](./iac/bicep/kv/kv.bicep#L113) with SET_KV_ACCESS_POLICIES to TRUE and providing the Applications MI set in the 
+[accessPoliciesObject](./iac/bicep/aca/main.bicep#L334) once the Container Apps have been created.
+
 ## Deployment to VNet
 
-You can your Apps into your own VNet when creating the Azure Container Apps [Envirponment](./iac/bicep/aca/acaVNetEnv.bicep#L71), setting its [vnetConfiguration](./iac/bicep/aca/acaVNetEnv.bicep#L84)
+You can your Apps into your own VNet when creating the Azure Container Apps Environment, see:
+- [Bicep ](./iac/bicep/aca/acaVNetEnv.bicep#L71), setting its [vnetConfiguration](./iac/bicep/aca/acaVNetEnv.bicep#L84)
 
 ```code
 param deployToVNet bool = true
 ```
+[Azure Infra services deployment workflow](./.github/workflows/deploy-iac.yml#L13)
+```code
+DEPLOY_TO_VNET: true
+```
 
 ### DNS Management
 
-When configuring Azure Container Apps Envirponment to your VNet, a Private-DNS Zone is created during the [Bicep pre-req deployment](./iac/bicep/aca/pre-req.bicep#L204), see [./iac/bicep/aca/dns.bicep](./iac/bicep/aca/dns.bicep#L40)
+When configuring Azure Container Apps Environment to your VNet, a Private-DNS Zone is created during the [Bicep pre-req deployment](./iac/bicep/aca/pre-req.bicep#L204), see [./iac/bicep/aca/dns.bicep](./iac/bicep/aca/dns.bicep#L40)
 
 /!\ IMPORTANT: Set location to 'global' instead of '${location}'. This is because Azure DNS is a global service. 
 Otherwise you will hit this error:
@@ -126,6 +231,9 @@ resource acaPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
   location: 'global'  
 }
 ```
+### Client VM
+When configuring Azure Container Apps Environment to your VNet, a JumpOff client VM is created during the [Bicep pre-req deployment](./iac/bicep/aca/pre-req.bicep#L214), see [./iac/bicep/aca/client-vm.bicep](./iac/bicep/aca/client-vm.bicep#L129)
+
 ## App Container syntax
 
 command	is the container's startup command.	Equivalent to Docker's entrypoint field.
@@ -143,6 +251,7 @@ vCPUs (cores)	| Memory
 1.5		| 3.0Gi
 1.75	| 3.5Gi
 2.0		| 4.0Gi
+
 
 # Starting services locally without Docker
 
@@ -305,6 +414,10 @@ Read the Application Insights docs :
 The config files are located in each micro-service at src\main\resources\applicationinsights.json
 The Java agent is downloaded in the App container, you can have a look at a Docker file, example at [./docker/petclinic-customers-service/Dockerfile](./docker/petclinic-customers-service/Dockerfile)
 
+
+The Application Insights [Connection String](./iac/bicep/aca/main.bicep#L234) [set in the Apps](./iac/bicep/aca/aca.bicep#L736) is retrieved from the [AppInsights Resource](./iac/bicep/aca/pre-req.bicep#L126) created at the pre-req provisionning stage.
+
+
 to get the App logs :
 ```bash
 az monitor log-analytics query \
@@ -313,61 +426,57 @@ az monitor log-analytics query \
   --out table
 ```
 
+
+
 Open the Log Analytics that you created - you can find the Log Analytics in the same Resource Group where you created an Azure Container Apps service instance.
 
 In the Log Analyics page, selects Logs blade and run any of the sample queries supplied below for Azure Container Apps.
-
 Type and run the following Kusto query to see application logs:
-```sh
-    AppPlatformLogsforSpring 
-    | where TimeGenerated > ago(24h) 
-    | limit 500
-    | sort by TimeGenerated
-```
-
-Type and run the following Kusto query to see customers-service application logs:
-```sh
-    AppPlatformLogsforSpring 
-    | where AppName has "customers"
-    | limit 500
-    | sort by TimeGenerated
-```
-
-Type and run the following Kusto query to see errors and exceptions thrown by each app:
 
 ```sh
-    AppPlatformLogsforSpring 
-    | where Log contains "error" or Log contains "exception"
-    | extend FullAppName = strcat(ServiceName, "/", AppName)
-    | summarize count_per_app = count() by FullAppName, ServiceName, AppName, _ResourceId
-    | sort by count_per_app desc 
-    | render piechart
+ContainerAppSystemLogs_CL
+| where ContainerAppName_s == 'customers'
+| project Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s, Message=Log_s
+| take 100
+| limit 500
+| sort by TimeGenerated
 ```
+
+```sh
+ContainerAppSystemLogs_CL
+| where Log contains "error" or Log contains "exception"
+| project Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s, Message=Log_s, ContainerId=ContainerId_s
+| summarize count_per_app = count() by EnvName, AppName,Revision, ContainerId
+| sort by count_per_app desc 
+| render piechart
+```
+
+
 
 Type and run the following Kusto query to see all in the inbound calls into Azure Container Apps:
 
 ```sh
-    AppPlatformIngressLogs
-    | project TimeGenerated, RemoteAddr, Host, Request, Status, BodyBytesSent, RequestTime, ReqId, RequestHeaders
-    | sort by TimeGenerated
+AppPlatformIngressLogsv
+| project TimeGenerated, RemoteAddr, Host, Request, Status, BodyBytesSent, RequestTime, ReqId, RequestHeaders
+| sort by TimeGenerated
 ```
 
 Type and run the following Kusto query to see all the logs from the Spring Cloud Config Server :
 
 ```sh
-    AppPlatformSystemLogs
-    | where LogType contains "ConfigServer"
-    | project TimeGenerated, Level, LogType, ServiceName, Log
-    | sort by TimeGenerated
+ContainerAppSystemLogs_CL
+| where LogType contains "ConfigServer"
+| project TimeGenerated, Level, LogType, ServiceName, Log
+| sort by TimeGenerated
 ```
 
 Type and run the following Kusto query to see all the logs from the managed Azure Container Registry :
 
 ```sh
-    AppPlatformSystemLogs
-    | where LogType contains "Registry"
-    | project TimeGenerated, Level, LogType, ServiceName, Log
-    | sort by TimeGenerated
+  AppPlatformSystemLogs
+  | where LogType contains "Registry"
+  | project TimeGenerated, Level, LogType, ServiceName, Log
+  | sort by TimeGenerated
 ```
 
 
@@ -393,19 +502,22 @@ Circuit breakers
 TODO !
 
 
-## Security
-### secret Management
-Azure Key Vault integration is implemented through Spring Cloud for Azure
+## Troubleshoot
 
-Read the docs : 
+If you face this error :
+```console
+Caused by: java.sql.SQLException: Connections using insecure transport are prohibited while --require_secure_transport=ON.
+```
 
-- [https://learn.microsoft.com/en-us/azure/developer/java/spring-framework/configure-spring-boot-starter-java-app-with-azure-key-vault](https://learn.microsoft.com/en-us/azure/developer/java/spring-framework/configure-spring-boot-starter-java-app-with-azure-key-vault)
-- [https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#advanced-usage]https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#advanced-usage)
-- [https://github.com/Azure/azure-sdk-for-java/issues/28310](https://github.com/Azure/azure-sdk-for-java/issues/28310)
-- [https://learn.microsoft.com/en-us/azure/container-apps/manage-secrets?tabs=arm-template](https://learn.microsoft.com/en-us/azure/container-apps/manage-secrets?tabs=arm-template)
-- []()
+It might be related to the Spring Config configured at [https://github.com/Azure-Samples/spring-petclinic-microservices-config/blob/master/application.yml](https://github.com/Azure-Samples/spring-petclinic-microservices-config/blob/master/application.yml) which on-profile: mysql is set with datasource url :
+jdbc:mysql://${MYSQL_SERVER_FULL_NAME}:3306/${MYSQL_DATABASE_NAME}?**useSSL=false**
 
-: TODO !
+Check the [MySQL connector doc](https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-using-ssl.html)
+Your JBCC URL should look like this for instance:
+url: jdbc:mysql://localhost:3306/petclinic?useSSL=false
+url: jdbc:mysql://${MYSQL_SERVER_FULL_NAME}:3306/${MYSQL_DATABASE_NAME}??useSSL=true
+url: jdbc:mysql://petclinic-mysql-server.mysql.database.azure.com:3306/petclinic?useSSL=true
+url: jdbc:mysql://petclinic-mysql-server.mysql.database.azure.com:3306/petclinic?useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.2&verifyServerCertificate=true    
 
 
 
@@ -434,7 +546,7 @@ For pull requests, editor preferences are available in the [editor config](.edit
 
 
 # Credits
-[https://github.com/ezYakaEagle442/azure-spring-cloud-petclinic-mic-srv](https://github.com/Azure-Samples/spring-petclinic-microservices) has been forked from [https://github.com/Azure-Samples/spring-petclinic-microservices](https://github.com/Azure-Samples/spring-petclinic-microservices), itself already forked from [https://github.com/spring-petclinic/spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices)
+[https://github.com/ezYakaEagle442/azure-spring-apps-petclinic-mic-srv]https://github.com/ezYakaEagle442/azure-spring-apps-petclinic-mic-srv) has been forked from [https://github.com/Azure-Samples/spring-petclinic-microservices](https://github.com/Azure-Samples/spring-petclinic-microservices), itself already forked from [https://github.com/spring-petclinic/spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices)
 
 ## Note regarding GitHub Forks
 It is not possible to [fork twice a repository using the same user account.](https://github.community/t/alternatives-to-forking-into-the-same-account/10200)
