@@ -16,7 +16,7 @@ urlFragment: "spring-petclinic-microservices"
 This microservices branch was initially derived from [AngularJS version](https://github.com/spring-petclinic/spring-petclinic-angular1) to demonstrate how to split sample Spring application into [microservices](http://www.martinfowler.com/articles/microservices.html).
 To achieve that goal we use IaC with Azure Bicep, MS build of OpenJDK 11, GitHub Actions, Azure Container Registry, Azure Container Apps, Azure Key Vault, Azure Database for MySQL
 
-See the [ACA Micro-services Reference Architecture](https://docs.microsoft.com/en-us/azure/architecture/example-scenario/serverless/microservices-with-container-apps)
+See the [ACA Micro-services Reference Architecture](https://learn.microsoft.com/en-us/azure/architecture/example-scenario/serverless/microservices-with-container-apps)
 
 # Pre-req
 
@@ -29,7 +29,7 @@ See the [pre-requisites](https://learn.microsoft.com/en-us/azure/container-apps/
 ## Use GitHub Actions to deploy the Java microservices
 
 About how to build the container image, read :
-- [ACR doc](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-java-quickstart) 
+- [ACR doc](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-java-quickstart) 
 - [Optimize docker layers with Spring Boot](https://www.baeldung.com/docker-layers-spring-boot)
 
 ```sh
@@ -55,7 +55,7 @@ See GitHub Actions :
 
 # Deploy Azure Container Apps and the petclinic microservices Apps with IaC
 
-See the [Bicep section](iac/bicep/README.md)
+Read the [Bicep section](iac/bicep/README.md), but you do not have to run it through CLI, instead you can manually trigger the GitHub Action [deploy-iac.yml](./.github/workflows/deploy-iac.yml), see the Workflow in the next [section](#iac-deployment-flow)
 
 <span style="color:red">**Be aware that the MySQL DB is NOT deployed in a VNet but network FireWall Rules are Set. So ensure to allow ACA Outbound IP addresses or check the option "Allow public access from any Azure service within Azure to this server" in the Azure Portal / your MySQL DB / Networking / Firewall rules**</span>
 
@@ -66,16 +66,66 @@ param deployToVNet bool = true
 ```
 
 This network can be managed or custom (pre-configured by the user beforehand). In either case, the environment has dependencies on services outside of that virtual network. For a list of these dependencies
-see the [ACA doc](https://docs.microsoft.com/en-us/azure/container-apps/firewall-integration#outbound-fqdn-dependencies)
+see the [ACA doc](https://learn.microsoft.com/en-us/azure/container-apps/firewall-integration#outbound-fqdn-dependencies)
 
 ## IaC deployment flow
 
-By default :
+By default the Azure Container Apps [Envirponment](./iac/bicep/aca/acaPublicEnv.bicep#L30) is Public, i.e not deployed to a VNet.
+To Deploy the Apps into your VNet, see [Deployment to VNet section](#deployment-to-vnet)
+
 ```code
 param deployToVNet bool = false
 ```
 
+```
+├── Create RG
+│
+├── Create [KV](./iac/bicep/kv/kv.bicep)
+│   ├── Create [KV](./iac/bicep/kv/kv.bicep#L61)
+│   └── Create [KV Secrets](./iac/bicep/kv/kv.bicep#L99)
+│   └── No KV [Access Policies](./iac/bicep/kv/kv.bicep#L113) will be created at this stage because SET_KV_ACCESS_POLICIES is FALSE
+├── Create [pre-requisites](./iac/bicep/aca/pre-req.bicep)
+│   ├── Create [logAnalyticsWorkspace](./iac/bicep/aca/pre-req.bicep#L93)
+│   ├── Create [appInsights](./iac/bicep/aca/pre-req.bicep#L110)
+│   ├── Call [ACR Module](./iac/bicep/aca/pre-req.bicep#L129)
+│   ├── Call [ACA Module defaultPublicManagedEnvironment](./iac/bicep/aca/pre-req.bicep#L140)
+│   ├── Call [MySQL Module](./iac/bicep/aca/pre-req.bicep#L152)
+│   ├── Call [VNet Module](./iac/bicep/aca/pre-req.bicep#L169)
+└── If deployToVNet=true
+│   ├── Call [ACA Module corpManagedEnvironment](./iac/bicep/aca/pre-req.bicep#L185)
+│   ├── Call [DNS Private-Zone Module](./iac/bicep/aca/pre-req.bicep#L204)
+│   ├── Call [ClientVM Module](./iac/bicep/aca/pre-req.bicep#L214)
+├── Run the [Main](./iac/bicep/aca/main.bicep)
+│   ├── Call [ACA Module](./iac/bicep/aca/main.bicep#225)
+│   ├── Call [roleAssignments Module](./iac/bicep/aca/main.bicep#284)
+│   ├── Call [KV Module](./iac/bicep/aca/main.bicep#284) with SET_KV_ACCESS_POLICIES to TRUE
+```
 
+## Deployment to VNet
+
+You can your Apps into your own VNet when creating the Azure Container Apps [Envirponment](./iac/bicep/aca/acaVNetEnv.bicep#L71), setting its [vnetConfiguration](./iac/bicep/aca/acaVNetEnv.bicep#L84)
+
+```code
+param deployToVNet bool = true
+```
+
+### DNS Management
+
+When configuring Azure Container Apps Envirponment to your VNet, a Private-DNS Zone is created during the [Bicep pre-req deployment](./iac/bicep/aca/pre-req.bicep#L204), see [./iac/bicep/aca/dns.bicep](./iac/bicep/aca/dns.bicep#L40)
+
+/!\ IMPORTANT: Set location to 'global' instead of '${location}'. This is because Azure DNS is a global service. 
+Otherwise you will hit this error:
+```sh
+"MissingRegistrationForLocation. "The subscription is not registered for the resource type 'privateDnsZones' in the location 'westeurope' 
+```
+
+```sh
+resource acaPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  //<env>.<RANDOM>.<REGION>.azurecontainerapps.io. Ex: https://aca-test-vnet.wittyhill-01dfb8c1.westeurope.azurecontainerapps.io
+  name: '${location}.azurecontainerapps.io' // 'private.azurecontainerapps.io'
+  location: 'global'  
+}
+```
 ## App Container syntax
 
 command	is the container's startup command.	Equivalent to Docker's entrypoint field.
@@ -93,27 +143,6 @@ vCPUs (cores)	| Memory
 1.5		| 3.0Gi
 1.75	| 3.5Gi
 2.0		| 4.0Gi
-## Deployment to VNet
-
-: TODO !
-
-### DNS Management
-
-A Private-DNS Zone is created during the [Bicep pre-req deployment](./iac/bicep/aca/pre-req.bicep#L204), see [./iac/bicep/aca/dns.bicep](./iac/bicep/aca/dns.bicep#L40)
-
-/!\ IMPORTANT: Set location to 'global' instead of '${location}'. This is because Azure DNS is a global service. 
-Otherwise you will hit this error:
-```sh
-"MissingRegistrationForLocation. "The subscription is not registered for the resource type 'privateDnsZones' in the location 'westeurope' 
-```
-
-```sh
-resource acaPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
-  //<env>.<RANDOM>.<REGION>.azurecontainerapps.io. Ex: https://aca-test-vnet.wittyhill-01dfb8c1.westeurope.azurecontainerapps.io
-  name: '${location}.azurecontainerapps.io' // 'private.azurecontainerapps.io'
-  location: 'global'  
-}
-```
 
 # Starting services locally without Docker
 
@@ -178,10 +207,10 @@ If you want to know more about the Spring Boot Admin server, you might be intere
 
 ## Containerize your Java applications
 
-See the [Azure doc](https://docs.microsoft.com/en-us/azure/developer/java/containers/overview)
+See the [Azure doc](https://learn.microsoft.com/en-us/azure/developer/java/containers/overview)
 Each micro-service is containerized using a Dockerfile. Example at [./docker/petclinic-customers-service/Dockerfile](./docker/petclinic-customers-service/Dockerfile)
 
-About how to build the container image, read [ACR doc](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-java-quickstart) 
+About how to build the container image, read [ACR doc](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-java-quickstart) 
 
 
 ## Database configuration
@@ -207,7 +236,7 @@ spring:
     # url: jdbc:mysql://petclinic.mysql.database.azure.com:3306/petclinic?useSSL=true
     # https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-using-ssl.html
     # url: jdbc:mysql://petclinic.mysql.database.azure.com:3306/petclinic?useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.2&verifyServerCertificate=true
-    # https://docs.spring.io/spring-boot/docs/2.7.3/reference/html/application-properties.html#appendix.application-properties.data
+    # https://learn.spring.io/spring-boot/docs/2.7.3/reference/html/application-properties.html#appendix.application-properties.data
     
     # spring.datasource.url, spring.datasource.username and spring.datasource.password will be automatically injected from KV secrets SPRING-DATASOURCE-URL, SPRING-DATASOURCE-USERNAME and SPRING-DATASOURCE-PASSWORD
     # url: jdbc:mysql://${SPRING-DATASOURCE-URL}:3306/${MYSQL-DATABASE-NAME}?useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.2&verifyServerCertificate=true    
@@ -266,6 +295,15 @@ the host and port of your MySQL JDBC connection string.
 
 
 ## Observability
+
+Read the Application Insights docs : 
+
+- [https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent](https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent)
+- [https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point](https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point)
+- [https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string](https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string)
+
+The config files are located in each micro-service at src\main\resources\applicationinsights.json
+The Java agent is downloaded in the App container, you can have a look at a Docker file, example at [./docker/petclinic-customers-service/Dockerfile](./docker/petclinic-customers-service/Dockerfile)
 
 to get the App logs :
 ```bash
@@ -332,14 +370,18 @@ Type and run the following Kusto query to see all the logs from the managed Azur
     | sort by TimeGenerated
 ```
 
-Read the Application Insights docs : 
 
-- [https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent](https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent)
-- [https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point](https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point)
-- [https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string](https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string)
+### Custom metrics
+Spring Boot registers a lot number of core metrics: JVM, CPU, Tomcat, Logback... 
+The Spring Boot auto-configuration enables the instrumentation of requests handled by Spring MVC.
+All those three REST controllers `OwnerResource`, `PetResource` and `VisitResource` have been instrumented by the `@Timed` Micrometer annotation at class level.
 
-The config files are located in each micro-service at src\main\resources\applicationinsights.json
-The Java agent is downloaded in the App container, you can have a look at a Docker file, example at [./docker/petclinic-customers-service/Dockerfile](./docker/petclinic-customers-service/Dockerfile)
+* `customers-service` application has the following custom metrics enabled:
+  * @Timed: `petclinic.owner`
+  * @Timed: `petclinic.pet`
+* `visits-service` application has the following custom metrics enabled:
+  * @Timed: `petclinic.visit`
+
 
 ## Scaling
 
@@ -349,6 +391,7 @@ TODO !
 
 Circuit breakers
 TODO !
+
 
 ## Security
 ### secret Management
@@ -364,17 +407,6 @@ Read the docs :
 
 : TODO !
 
-
-### Custom metrics
-Spring Boot registers a lot number of core metrics: JVM, CPU, Tomcat, Logback... 
-The Spring Boot auto-configuration enables the instrumentation of requests handled by Spring MVC.
-All those three REST controllers `OwnerResource`, `PetResource` and `VisitResource` have been instrumented by the `@Timed` Micrometer annotation at class level.
-
-* `customers-service` application has the following custom metrics enabled:
-  * @Timed: `petclinic.owner`
-  * @Timed: `petclinic.pet`
-* `visits-service` application has the following custom metrics enabled:
-  * @Timed: `petclinic.visit`
 
 
 ## Interesting Spring Petclinic forks
@@ -406,6 +438,6 @@ For pull requests, editor preferences are available in the [editor config](.edit
 
 ## Note regarding GitHub Forks
 It is not possible to [fork twice a repository using the same user account.](https://github.community/t/alternatives-to-forking-into-the-same-account/10200)
-However you can [duplicate a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/duplicating-a-repository)
+However you can [duplicate a repository](https://learn.github.com/en/repositories/creating-and-managing-repositories/duplicating-a-repository)
 
 This repo [https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv](https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv) has been duplicated from [https://github.com/spring-petclinic/spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices)
