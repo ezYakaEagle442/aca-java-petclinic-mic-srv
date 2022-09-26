@@ -94,7 +94,6 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
 
 output keyVault object = kv
 
-
 // https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scenarios-secrets
 module kvSecrets '../kv/kv_sec_key.bicep' = {
   name: 'aca-petclinic-kv-sec'
@@ -104,7 +103,6 @@ module kvSecrets '../kv/kv_sec_key.bicep' = {
     secretsObject: secretsObject
     secretExpiryDate: secretExpiryDate
   }
-
 }
 
 // create accessPolicies https://docs.microsoft.com/en-us/azure/templates/microsoft.keyvault/vaults/accesspolicies?tabs=bicep
