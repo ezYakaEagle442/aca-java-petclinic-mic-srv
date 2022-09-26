@@ -1501,7 +1501,7 @@ resource githubActionSettingsVets 'Microsoft.App/containerApps/sourcecontrols@20
   }
 }
 
-resource githubActionSettings 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
+resource githubActionSettingsVisits 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
   name: 'aca-gha-set-visits-svc'
   parent: VisitsServiceContainerApp
   properties: {
