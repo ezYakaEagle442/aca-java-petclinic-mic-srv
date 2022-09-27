@@ -83,6 +83,9 @@ jobs:
     - name: Set Base environment variables
       run: |
         echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV
+
+        spnid=${{ env.credentials }}.clientId
+        echo "clientId="$clientId        
       shell: bash
 
     - name: Login with Key Vault SP
