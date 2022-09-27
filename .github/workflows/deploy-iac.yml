@@ -153,6 +153,7 @@ jobs:
 
   deploy-iac:
     runs-on: ubuntu-latest
+    needs: deploy-kv
     steps:
 
     - name: Set Base environment variables
@@ -191,13 +192,15 @@ jobs:
 
   # https://docs.github.com/en/actions/using-workflows/reusing-workflows#calling-a-reusable-workflow
   # invalid value workflow reference: references to workflows must be prefixed with format 'owner/repository/' or './' for local workflows
-  call-another-reusable:
+  call-maven-build-workflow:
     name: Maven Build
+    needs: deploy-iac
     uses: ./.github/workflows/maven-build.yml # .github/workflows/maven-build.yml@main ==> references to workflows must be prefixed with format 'owner/repository/' or './' for local workflows
     secrets: inherit # pass all secrets
       # envPAT: ${{ secrets.envPAT }} # pass just this secret
 
   deploy-apps:
+    needs: call-maven-build-workflow
     runs-on: ubuntu-latest
     steps:
     - name: Deploy Azure Container Apps
