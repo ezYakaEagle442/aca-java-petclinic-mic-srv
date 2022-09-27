@@ -56,6 +56,34 @@ param springDataSourceUrl string
 param tenantId string = subscription().tenantId
 param subscriptionId string = subscription().id
 
+
+@allowed([
+  '0.25'
+  '0.5'
+  '0.75'
+  '1.0' 
+  '1.25'
+  '1.5'
+  '1.75'
+  '2.0'    
+])
+@description('The container Resources CPU')
+param containerResourcesCpu string = '0.5'
+
+@allowed([
+  '0.5'
+  '1.0'  
+  '1.5'
+  '2.0'    
+  '2.5'
+  '3.0'  
+  '3.5'
+  '4.0'    
+])
+@description('The container Resources Memory')
+param containerResourcesMemory string = '1.0'
+
+
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
 param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.3.0.jar'
 
@@ -312,8 +340,8 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }            
           ]
           resources: {
-            cpu: json('0.25') // 250m
-            memory: json('0.5') // Gi
+            cpu: json(containerResourcesCpu) // 250m
+            memory: json(containerResourcesMemory) // Gi
           }
           /*
           volumeMounts: [
@@ -475,8 +503,8 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }            
           ]
           resources: {
-            cpu: json('0.25') // 250m
-            memory: json('0.5') // Gi
+            cpu: json(containerResourcesCpu) // 250m
+            memory: json(containerResourcesMemory) // Gi
           }
         }
       ]
@@ -620,8 +648,8 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }            
           ]
           resources: {
-            cpu: json('0.25') // 250m
-            memory: json('0.5') // Gi
+            cpu: json(containerResourcesCpu) // 250m
+            memory: json(containerResourcesMemory) // Gi
           }
         }
       ]
@@ -790,8 +818,8 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
             }            
           ]
           resources: {
-            cpu: json('0.25') // 250m
-            memory: json('0.5') // Gi
+            cpu: json(containerResourcesCpu) // 250m
+            memory: json(containerResourcesMemory) // Gi
           }
         }
       ]
@@ -960,8 +988,8 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }            
           ]
           resources: {
-            cpu: json('0.25') // 250m
-            memory: json('0.5') // Gi
+            cpu: json(containerResourcesCpu) // 250m
+            memory: json(containerResourcesMemory) // Gi
           }
         }
       ]
@@ -1130,8 +1158,8 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }            
           ]
           resources: {
-            cpu: json('0.25') // 250m
-            memory: json('0.5') // Gi
+            cpu: json(containerResourcesCpu) // 250m
+            memory: json(containerResourcesMemory) // Gi
           }
         }
       ]
