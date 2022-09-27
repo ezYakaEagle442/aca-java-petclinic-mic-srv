@@ -40,7 +40,7 @@ jobs:
     - name: Azure Login
       uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        creds: ${{ env.credentials }}
 
     - name: Delete Azure Resource Groups
       uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
