@@ -6,6 +6,7 @@ name: Java CI with Maven
 env:
   AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
   REGISTRY_URL: acrpetcliaca.azurecr.io  # set this to the URL of your registry
+  REPOSITORY: petclinic                  # set this to your ACR repository
   PROJECT_NAME: petclinic                # set this to your project's name
   
   # ==== APPS ====
@@ -27,25 +28,20 @@ env:
   # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-secrets
   # ==== Secrets ====
   credentials: ${{ secrets.AZURE_CREDENTIALS }}
-
-  # REGISTRY_USR: ${{ secrets.REGISTRY_USR }}
-  #REGISTRY_PWD: ${{ secrets.REGISTRY_PWD }}
-
-
   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
+  
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
 on:
-  workflow_call:
-    inputs:
-      registryUserName:
-        description: 'ACR User Name'
-        required: true
-        type: string
-      registryUserPassword:
-        description: 'ACR Password'
-        required: true
-        type: string
+#  workflow_call:
+#    inputs:
+#      registryUserName:
+#        description: 'ACR User Name'
+#        required: true
+#        type: string
+#      registryUserPassword:
+#        description: 'ACR Password'
+#        required: true
+#        type: string
 
   push:
     branches:
@@ -53,7 +49,10 @@ on:
   pull_request:
     branches:
       - main
+      
 jobs:
+
+
   build:
     runs-on: ubuntu-latest
 
@@ -93,34 +92,129 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+    # Allow GH Runner to access KV
+    # When Public access is disabled on KV, you need to add a network rule in the KV Firewall
+    - name: Authorize local IP to access the Azure Key Vault
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        inlineScript: |
+          az keyvault network-rule add --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
+          sleep 30
+          
+    - name: Get ACR Credentials Secrets from Key Vault
+      uses: Azure/get-keyvault-secrets@v1
+      with:
+        keyvault: ${{ env.KV_NAME }}
+        secrets: "REGISTRY_USR,REGISTRY_PWD"
+      id: acrsecrets
+
     # https://github.com/marketplace/actions/azure-container-registry-login
     - name: Login to ACR
       uses: azure/docker-login@v1
       with:
         login-server: '${{ env.REGISTRY_URL }}' # default: index.docker.io
-        username: '${{ inputs.registryUserName }}'
-        password: '${{ inputs.registryUserPassword }}'
+        username: '${{ secrets.REGISTRY_USR }}'
+        password: '${{ secrets.REGISTRY_PWD }}'
 
     # https://github.com/marketplace/actions/docker-setup-buildx
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2.0.0
 
     # https://github.com/marketplace/actions/azure-container-registry-build
-    - name: XXX ACR build
-      id: acr
+    - name: admin-server ACR build
+      id: admin-server-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{ secrets.service_principal }} # The Service Principal credentials
-        service_principal_password: ${{ secrets.service_principal_password }} # The Service Principal credentials
+        service_principal: ${{ secrets.REGISTRY_USR }} # The Service Principal credentials : must be stored in KV
+        service_principal_password: ${{ secrets.REGISTRY_PWD }} # The Service Principal credentials: must be stored in KV
         tenant: ${{ env.AZURE_TENANT_ID }} # The ACR tenant
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }} # The ACR name
-        repository: ${{ secrets.repository }} # The repository on the ACR
-        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.ADMIN_SERVER }}:latest # Docker image name. Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+        repository: ${{ env.REPOSITORY }} # The repository on the ACR
+        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.ADMIN_SERVER }} # Docker image name. Default tag: The action will default to use the first 8 characters of the commit SHA if no tag is specified. Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
         # git_access_token: ${{ secrets.git_access_token }} # The Github access token for private repositories
         folder: docker/ # Build context for Docker agent
         dockerfile: ./petclinic-admin-server/Dockerfile # Path to the Dockerfile relative to `folder`
         branch: main # Branch to root the context off of
 
+    - name: config-server ACR build
+      id: config-server-acr-build
+      uses: azure/acr-build@v1
+      with:
+        service_principal: ${{ secrets.REGISTRY_USR }}
+        service_principal_password: ${{ secrets.REGISTRY_PWD }}
+        tenant: ${{ env.AZURE_TENANT_ID }}
+        registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
+        repository: ${{ env.REPOSITORY }}
+        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.CONFIG_SERVER }}
+        folder: docker/
+        dockerfile: ./petclinic-config-server/Dockerfile
+        branch: main
+
+    - name: api-gateway ACR build
+      id: api-gateway-acr-build
+      uses: azure/acr-build@v1
+      with:
+        service_principal: ${{ secrets.REGISTRY_USR }}
+        service_principal_password: ${{ secrets.REGISTRY_PWD }}
+        tenant: ${{ env.AZURE_TENANT_ID }}
+        registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
+        repository: ${{ env.REPOSITORY }}
+        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.API_GATEWAY }}
+        folder: docker/
+        dockerfile: ./petclinic-admin-server/Dockerfile
+        branch: main
+
+    - name: customer-service ACR build
+      id: customer-service-acr-build
+      uses: azure/acr-build@v1
+      with:
+        service_principal: ${{ secrets.REGISTRY_USR }}
+        service_principal_password: ${{ secrets.REGISTRY_PWD }}
+        tenant: ${{ env.AZURE_TENANT_ID }}
+        registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
+        repository: ${{ env.REPOSITORY }}
+        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.CUSTOMERS_SERVICE }}
+        folder: docker/
+        dockerfile: ./petclinic-customers-service/Dockerfile
+        branch: main        
+
+    - name: vets-service ACR build
+      id: vets-service-acr-build
+      uses: azure/acr-build@v1
+      with:
+        service_principal: ${{ secrets.REGISTRY_USR }}
+        service_principal_password: ${{ secrets.REGISTRY_PWD }}
+        tenant: ${{ env.AZURE_TENANT_ID }}
+        registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
+        repository: ${{ env.REPOSITORY }}
+        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.VETS_SERVICE }}
+        folder: docker/
+        dockerfile: ./petclinic-vets-service/Dockerfile
+        branch: main
+
+    - name: visits-service ACR build
+      id: visits-service-acr-build
+      uses: azure/acr-build@v1
+      with:
+        service_principal: ${{ secrets.REGISTRY_USR }}
+        service_principal_password: ${{ secrets.REGISTRY_PWD }}
+        tenant: ${{ env.AZURE_TENANT_ID }}
+        registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
+        repository: ${{ env.REPOSITORY }}
+        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.VISITS_SERVICE }}
+        folder: docker/
+        dockerfile: ./petclinic-admin-server/Dockerfile
+        branch: main
+
+    - name: Disable local IP access to the Key Vault
+      uses: azure/CLI@v1
+      if: ${{ always() }}
+      with:
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        inlineScript: |
+          az keyvault network-rule remove --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
+          
     #- name: Build XXX image and push it to ACR
     #  uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
     #  with:
