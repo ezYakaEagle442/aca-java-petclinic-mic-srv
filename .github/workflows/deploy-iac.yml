@@ -193,7 +193,7 @@ jobs:
   # https://docs.github.com/en/actions/using-workflows/reusing-workflows#calling-a-reusable-workflow
   # invalid value workflow reference: references to workflows must be prefixed with format 'owner/repository/' or './' for local workflows
   call-maven-build-workflow:
-    name: Maven Build
+    name: Trigger Maven
     needs: deploy-iac
     uses: ./.github/workflows/maven-build.yml # .github/workflows/maven-build.yml@main ==> references to workflows must be prefixed with format 'owner/repository/' or './' for local workflows
     secrets: inherit # pass all secrets
