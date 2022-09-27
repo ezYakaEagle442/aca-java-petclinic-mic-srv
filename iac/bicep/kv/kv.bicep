@@ -94,17 +94,6 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
 
 output keyVault object = kv
 
-// https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scenarios-secrets
-module kvSecrets '../kv/kv_sec_key.bicep' = {
-  name: 'aca-petclinic-kv-sec'
-  params: {
-    appName: appName
-    kvName: kvName
-    secretsObject: secretsObject
-    secretExpiryDate: secretExpiryDate
-  }
-}
-
 // create accessPolicies https://docs.microsoft.com/en-us/azure/templates/microsoft.keyvault/vaults/accesspolicies?tabs=bicep
 // /!\ Preview feature: When enableRbacAuthorization is true in KV, the key vault will use RBAC for authorization of data actions, and the access policies specified in vault properties will be ignored
 // https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/loops#loop-with-condition
@@ -119,3 +108,19 @@ resource kvAccessPolicies 'Microsoft.KeyVault/vaults/accessPolicies@2021-06-01-p
       }]
   }
 }
+
+// /!\ In the GHA Workflow, KV must be created firstly, then 'az keyvault network-rule add' must be completed
+// only then ./kv/kv_sec_key.bicep' can be called to create the secrets 
+
+// https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scenarios-secrets
+/*
+module kvSecrets '../kv/kv_sec_key.bicep' = {
+  name: 'aca-petclinic-kv-sec'
+  params: {
+    appName: appName
+    kvName: kvName
+    secretsObject: secretsObject
+    secretExpiryDate: secretExpiryDate
+  }
+}
+*/
