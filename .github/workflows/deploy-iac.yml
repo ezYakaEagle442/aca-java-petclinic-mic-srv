@@ -192,7 +192,7 @@ jobs:
   # https://docs.github.com/en/actions/using-workflows/reusing-workflows#calling-a-reusable-workflow
   call-another-reusable:
     name: Maven Build
-    uses:  ./maven-build.yml@main
+    uses:  .github/workflows/maven-build.yml@main
     secrets: inherit # pass all secrets
       # envPAT: ${{ secrets.envPAT }} # pass just this secret
 
