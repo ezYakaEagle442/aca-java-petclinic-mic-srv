@@ -8,6 +8,7 @@ env:
   REGISTRY_URL: acrpetcliaca.azurecr.io  # set this to the URL of your registry
   REPOSITORY: petclinic                  # set this to your ACR repository
   PROJECT_NAME: petclinic                # set this to your project's name
+  KV_NAME: kv-petcliaca442               # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
   
   # ==== APPS ====
   ADMIN_SERVER: aca-petclinic-admin-server
@@ -108,7 +109,7 @@ jobs:
         keyvault: ${{ env.KV_NAME }}
         secrets: "REGISTRY_USR,REGISTRY_PWD"
       id: acrsecrets
-
+      
     # https://github.com/marketplace/actions/azure-container-registry-login
     - name: Login to ACR
       uses: azure/docker-login@v1
