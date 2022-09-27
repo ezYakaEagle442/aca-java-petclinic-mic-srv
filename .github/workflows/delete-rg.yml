@@ -25,7 +25,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-kv:
+  delete-rg:
     runs-on: ubuntu-latest
 
     steps:
