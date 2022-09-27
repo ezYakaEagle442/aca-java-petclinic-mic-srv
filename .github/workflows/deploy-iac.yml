@@ -82,7 +82,10 @@ jobs:
     # /!\ IMPORTANT: The step that creates or updates the environment variable does not have access to the new value, but all subsequent steps in a job will have access.
     - name: Set Base environment variables
       run: |
-        echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV        
+        echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV
+        spnid=${{ env.credentials }}.appId
+        echo "spnid="$spnid
+
       shell: bash
 
     - name: Login with Key Vault SP
@@ -91,7 +94,7 @@ jobs:
         creds: ${{ env.credentials }}
 
     - name: Deploy Azure Key Vault
-      uses: azure/cli@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
+      uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
       with:
         azcliversion: ${{ env.AZ_CLI_VERSION }}
         inlineScript: |
