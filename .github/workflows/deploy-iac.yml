@@ -17,7 +17,7 @@ env:
 
   AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
   REPOSITORY: petclinic                  # set this to your ACR repository
-  
+
   # GitHub Actions settings
   GHA_SETTINGS_CFG_REGISTRY_URL: acrpetcliaca.azurecr.io
   GHA_SETTINGS_CFG_REPO_URL: https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv
@@ -189,9 +189,10 @@ jobs:
           az cache purge
           az account clear             
 
+  # https://docs.github.com/en/actions/using-workflows/reusing-workflows#calling-a-reusable-workflow
   call-another-reusable:
     name: Maven Build
-    uses:  './maven-build.yml'
+    uses:  ./maven-build.yml@main
     secrets: inherit # pass all secrets
       # envPAT: ${{ secrets.envPAT }} # pass just this secret
 
