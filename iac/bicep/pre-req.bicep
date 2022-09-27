@@ -85,6 +85,11 @@ param tenantId string = subscription().tenantId
 @description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
 param kvName string = 'kv-${appName}'
 
+// https://learn.microsoft.com/en-us/azure/key-vault/secrets/secrets-best-practices#secrets-rotation
+// Because secrets are sensitive to leakage or exposure, it's important to rotate them often, at least every 60 days. 
+@description('Expiry date in seconds since 1970-01-01T00:00:00Z. Ex: 1672444800 ==> 31/12/2022')
+param secretExpiryDate int = 1672444800
+
 resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
   name: kvName
 }
@@ -126,7 +131,7 @@ output appInsightsId string = appInsights.id
 output appInsightsConnectionString string = appInsights.properties.ConnectionString
 output appInsightsInstrumentationKey string = appInsights.properties.InstrumentationKey
 
-module ACR 'acr.bicep' = {
+module ACR './modules/aca/acr.bicep' = {
   name: acrName
   params: {
     appName: appName
@@ -137,7 +142,35 @@ module ACR 'acr.bicep' = {
   }
 }
 
-module defaultPublicManagedEnvironment 'acaPublicEnv.bicep' = if (!deployToVNet) {
+// Once ACR is created, its Credentials must be stored in KV ...
+// /!\ In the GHA Workflow, KV must be created firstly
+// only then ./kv/kv_sec_key.bicep' can be called to create the secrets 
+
+var acrCredentials = {
+    'secrets': [
+      {
+        'secretName': 'REGISTRY_USR'
+        'secretValue': ACR.outputs.acrRegistryUsr
+      }
+      {
+        'secretName': 'REGISTRY_PWD'
+        'secretValue': ACR.outputs.acrRegistryPwd
+      }
+    ]
+  }
+
+// https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scenarios-secrets
+module kvSecrets './modules/kv/kv_sec_key.bicep' = {
+  name: 'aca-petclinic-kv-sec'
+  params: {
+    appName: appName
+    kvName: kvName
+    secretsObject: acrCredentials
+    secretExpiryDate: secretExpiryDate
+  }
+}
+
+module defaultPublicManagedEnvironment './modules/aca/acaPublicEnv.bicep' = if (!deployToVNet) {
   name: 'aca-pub-env'
   params: {
     appName: appName
@@ -149,7 +182,7 @@ module defaultPublicManagedEnvironment 'acaPublicEnv.bicep' = if (!deployToVNet)
   }
 }
 
-module mysql '../mysql/mysql.bicep' = {
+module mysql './modules/mysql/mysql.bicep' = {
   name: 'mysqldb'
   params: {
     appName: appName
@@ -166,7 +199,7 @@ module mysql '../mysql/mysql.bicep' = {
 }
 
 // https://docs.microsoft.com/en-us/azure/spring-cloud/how-to-deploy-in-azure-virtual-network?tabs=azure-portal#virtual-network-requirements
-module vnetModule 'vnet.bicep' = if (deployToVNet) {
+module vnetModule './modules/aca/vnet.bicep' = if (deployToVNet) {
   name: 'vnet-aca'
   // scope: resourceGroup(rg.name)
   params: {
@@ -182,7 +215,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = if (depl
   name: vnetName
 }
 
-module corpManagedEnvironment 'acaVNetEnv.bicep' = if (deployToVNet) {
+module corpManagedEnvironment './modules/aca/acaVNetEnv.bicep' = if (deployToVNet) {
   name: 'aca-corp-env'
   params: {
     appName: appName
@@ -201,7 +234,7 @@ module corpManagedEnvironment 'acaVNetEnv.bicep' = if (deployToVNet) {
     dockerBridgeCidr: dockerBridgeCidr
   }
 }
-module dnsprivatezone 'dns.bicep' = if (deployToVNet) {
+module dnsprivatezone './modules/aca/dns.bicep' = if (deployToVNet) {
   name: 'dns-private-zone'
   params: {
     appName: appName
@@ -211,7 +244,7 @@ module dnsprivatezone 'dns.bicep' = if (deployToVNet) {
   }
 }
 
-module clientVM 'client-vm.bicep' = if (deployToVNet) {
+module clientVM './modules/aca/client-vm.bicep' = if (deployToVNet) {
   name: 'vm-client'
   params: {
      location: location

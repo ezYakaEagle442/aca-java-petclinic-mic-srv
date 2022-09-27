@@ -23,21 +23,20 @@ Otherwise you will hit this error:
 az group create --name rg-iac-kv --location westeurope
 az group create --name rg-iac-aca-petclinic-mic-srv --location westeurope
 
-az deployment group create --name iac-101-kv -f ./kv/kv.bicep -g rg-iac-kv \
-    --parameters @./kv/parameters-kv.json
+az deployment group create --name iac-101-kv -f ./modules/kv/kv.bicep -g rg-iac-kv \
+    --parameters @./modules/aca/kv/parameters-kv.json
 
 # /!\ pre-req:
 # You need to build the Apps and to push the images to ACR, so ACR must be provisionned before ACA Apps
 # You also need to deploy AppInsights to get the Instrument Key and to then provide it as param of the ACA Deployment
-az deployment group create --name iac-101-pre-req -f ./aca/pre-req.bicep -g rg-iac-aca-petclinic-mic-srv \
-    --parameters @./aca/parameters-pre-req.json # --debug # --what-if to test like a dry-run
+az deployment group create --name iac-101-pre-req -f ./pre-req.bicep -g rg-iac-aca-petclinic-mic-srv \
+    --parameters @./parameters-pre-req.json # --debug # --what-if to test like a dry-run
 
 # Then Launch the GitHub workflow to build the project : ./.github/workflows/maven-build.yml 
 
 # Finally Deploy ACA Apps ==> check all the parameter files
-az deployment group create --name iac-101-aca -f ./aca/main.bicep -g rg-iac-aca-petclinic-mic-srv \
-    --parameters @./aca/parameters.json --debug # --what-if to test like a dry-run
-    
+az deployment group create --name iac-101-aca -f ./petclinic-apps.bicep -g rg-iac-aca-petclinic-mic-srv \
+    --parameters @./parameters.json --debug # --what-if to test like a dry-run
 ```
 
 Note: you can Run a Bicep script to debug and output the results to Azure Storage, see the [doc](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/deployment-script-bicep#sample-bicep-files)

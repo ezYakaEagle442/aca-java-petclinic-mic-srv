@@ -222,7 +222,7 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
 // Use - instead of . in secret name. . isn’t supported in secret name. If your application have property name which contains ., 
 // like spring.datasource.url, just replace . to - when save secret in Azure Key Vault. 
 // For example: Save spring-datasource-url in Azure Key Vault. In your application, you can still use spring.datasource.url to retrieve property value.
-module azurecontainerapp 'aca.bicep' = {
+module azurecontainerapp './modules/aca/aca.bicep' = {
   name: 'azurecontainerapp'
   // scope: resourceGroup(rg.name)
   params: {
@@ -281,7 +281,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' exis
 }
 
 // https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scope-extension-resources
-module roleAssignments 'roleAssignments.bicep' = {
+module roleAssignments './modules/aca/roleAssignments.bicep' = {
   name: 'role-assignments'
   params: {
     acrName: acrName
@@ -380,7 +380,7 @@ var vNetRules = [
 
 // allow to Azure Container App subnetID and azureContainerAppIdentity
 // /!\ TO BE FIXED: should apply only when deployToVNet=true
-module KeyVault '../kv/kv.bicep'= {
+module KeyVault './modules/kv/kv.bicep'= {
   name: 'KeyVault'
   scope: resourceGroup(kvRGName)
   params: {
