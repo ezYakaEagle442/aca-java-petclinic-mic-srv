@@ -193,7 +193,7 @@ jobs:
   # invalid value workflow reference: references to workflows must be prefixed with format 'owner/repository/' or './' for local workflows
   call-another-reusable:
     name: Maven Build
-    uses: ./maven-build.yml@main # .github/workflows/maven-build.yml@main ==> references to workflows must be prefixed with format 'owner/repository/' or './' for local workflows
+    uses: ./.github/workflows/maven-build.yml@main # .github/workflows/maven-build.yml@main ==> references to workflows must be prefixed with format 'owner/repository/' or './' for local workflows
     secrets: inherit # pass all secrets
       # envPAT: ${{ secrets.envPAT }} # pass just this secret
 

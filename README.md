@@ -82,8 +82,13 @@ Specifies all [KV secrets](./iac/bicep/kv/parameters-kv.json#L14) {"secretName":
 ]
 ```
 
-```bash
-#  For GitHub Action Runner: https://aka.ms/azadsp-cli
+```bash  
+az group create --name ${{ env.RG_KV }} --location ${{ env.LOCATION }}
+az group create --name ${{ env.RG_APP }} --location ${{ env.LOCATION }}
+```
+
+A Service Principal is required for GitHub Action Runner, read [https://aka.ms/azadsp-cli](https://aka.ms/azadsp-cli)
+```bash  
 SPN_APP_NAME="gha_aca_run"
 
 # /!\ In CloudShell, the default subscription is not always the one you thought ...
@@ -94,9 +99,48 @@ echo "subscription Name :" $subName
 SUBSCRIPTION_ID=$(az account list --query "[?name=='${subName}'].{id:id}" --output tsv)
 SUBSCRIPTION_ID=$(az account show --query id -o tsv)
 TENANT_ID=$(az account show --query tenantId -o tsv)
+```
 
+Add your AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID to your GH repo secrets / Actions secrets / Repository secrets
+
+Read [https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Cwindows#create-a-service-principal-and-add-it-as-a-github-secret)
+
+
+```sh
 # other way to create the SPN :
-SPN_PWD=$(az ad sp create-for-rbac --name $SPN_APP_NAME --role contributor --scopes /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV}/providers/Microsoft.KeyVault/vaults/${KV_NAME} --query password --output tsv)
+# SPN_PWD=$(az ad sp create-for-rbac --name $SPN_APP_NAME --skip-assignment --query password --output tsv)
+az ad sp create-for-rbac --name $SPN_APP_NAME
+
+
+az role assignment create --assignee $SPN_APP_NAME --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV}
+```
+
+```console
+{
+  "clientId": "<GUID>",
+  "clientSecret": "<GUID>",
+  "subscriptionId": "<GUID>",
+  "tenantId": "<GUID>",
+  "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+  "resourceManagerEndpointUrl": "https://management.azure.com/",
+  "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+  "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+  "galleryEndpointUrl": "https://gallery.azure.com/",
+  "managementEndpointUrl": "https://management.core.windows.net/"
+}
+```
+Read :
+- [Use GitHub Actions to connect to Azure documentation](https://docs.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Cwindows).
+- [https://github.com/Azure/login#configure-a-service-principal-with-a-secret](https://github.com/Azure/login#configure-a-service-principal-with-a-secret)
+
+Paste in your JSON object for your service principal with the name AZURE_CREDENTIALS as secrets to your GH repo secrets / Actions secrets / Repository secrets.
+
+
+
+In the GitHub Action Runner, to allow the Service Principal used to access the Key Vault, execute the command below:
+```sh
+az role assignment create --assignee --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV}/providers/Microsoft.KeyVault/vaults/${KV_NAME} --role contributor 
+
 #SP_ID=$(az ad sp show --id http://$appName --query objectId -o tsv)
 #SP_ID=$(az ad sp list --all --query "[?appDisplayName=='${appName}'].{appId:appId}" --output tsv)
 SPN_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME}'].{id:appId}" --output tsv)
@@ -106,28 +150,19 @@ TENANT_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME
 Add SUBSCRIPTION_ID, TENANT_ID, SPN_ID and SPN_PWD as secrets to your GH repo secrets / Actions secrets / Repository secrets
 
 
-Create an SP with Contributor access to the Azure Container Registry, read [ACR Roles doc](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-roles)
+In the GitHub Action Runner, to allow the Service Principal used to access to the Azure Container Registry, build & push images: Create an SP with Contributorrole , read [ACR Roles doc](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-roles)
 ```sh
+az ad sp create-for-rbac -n "aca-acr-build-task"
 az role assignment create --assignee $SPN_ID --scope <resourceID of the ACR> --role "Contributor"
 ```
-
-<!-- 
-To generate a key to access the Key Vault, execute command below:
-```bash
-    az ad sp create-for-rbac --role contributor --scopes /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV}/providers/Microsoft.KeyVault/vaults/${KV_NAME} --sdk-auth
-```
--->
 
 Then, follow the here under step to add access policy for the Service Principal.
 ```sh
 az keyvault set-policy -n $KV_NAME --secret-permissions get list --spn <clientId from the Azure SPN JSON>
 ```
 
-```
+Finally Create a GH [PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) to [publish ACA Revisions with GHA](https://learn.microsoft.com/en-us/azure/container-apps/github-actions-cli?tabs=bash#authentication)
 
-In the end, add this service principal as secret named "AZURE_CREDENTIALS" in your forked GitHub repo see [Use GitHub Actions to connect to Azure documentation](https://docs.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Cwindows) to add the AZURE_CREDENTIALS to your repo.
-
-Also add your AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID, AZURE_CLIENT_ID to your GH repo secrets / Actions secrets / Repository secrets
 
 ## Pipelines
 
@@ -146,7 +181,9 @@ see the [ACA doc](https://learn.microsoft.com/en-us/azure/container-apps/firewal
 
 ## IaC deployment flow
 
-By default the Azure Container Apps Environment is Public, i.e not deployed to a VNet.
+By default the Azure Container Apps [Environment](https://learn.microsoft.com/en-us/azure/container-apps/networking) is deployed as external resources and are available for public requests, i.e not deployed to a VNet. 
+(External environments are deployed with a virtual IP on an external, public facing IP address.)
+
 - [Bicep ](./iac/bicep/aca/acaPublicEnv.bicep#L30)
 ```code
 param deployToVNet bool = true
