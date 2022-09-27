@@ -4,7 +4,7 @@
 name: Java CI with Maven
 
 env:
-  AZURE_CONTAINER_REGISTRY: acrpetcliaca # set this to the name of your container registry
+  AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
   REGISTRY_URL: acrpetcliaca.azurecr.io  # set this to the URL of your registry
   PROJECT_NAME: petclinic                # set this to your project's name
   
@@ -28,13 +28,25 @@ env:
   # ==== Secrets ====
   credentials: ${{ secrets.AZURE_CREDENTIALS }}
 
-  # ==== Versions ====
-  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-  ENDPOINT: ${{ secrets.AZURE_KEY_VAULT_ENDPOINT }}
+  # REGISTRY_USR: ${{ secrets.REGISTRY_USR }}
+  #REGISTRY_PWD: ${{ secrets.REGISTRY_PWD }}
+
+
   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
 on:
+  workflow_call:
+    inputs:
+      registryUserName:
+        description: 'ACR User Name'
+        required: true
+        type: string
+      registryUserPassword:
+        description: 'ACR Password'
+        required: true
+        type: string
+
   push:
     branches:
       - main
@@ -43,7 +55,6 @@ on:
       - main
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -64,18 +75,11 @@ jobs:
         cache: maven
     
     - name: Build with Maven
-      run: mvn -B clean package --file pom.xml -DskipTests -Denv=cloud
-
-    - name: Azure Login
-      uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: maven build, clean
       run: |
-        mvn clean
+        mvn -B clean package --file pom.xml -DskipTests -Denv=cloud
         echo "github.workspace = ${{ github.workspace }}"
         pwd
+
         ls -al
         ls -al spring-petclinic-admin-server/target/*.jar
         ls -al spring-petclinic-api-gateway/target/*.jar
@@ -84,29 +88,38 @@ jobs:
         ls -al spring-petclinic-vets-service/target/*.jar
         ls -al spring-petclinic-visits-service/target/*.jar
 
+    - name: Azure Login
+      uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
     # https://github.com/marketplace/actions/azure-container-registry-login
-    - name: xxx
+    - name: Login to ACR
       uses: azure/docker-login@v1
       with:
-        login-server: '<login server>' # default: index.docker.io
-        username: '<username>'
-        password: '<password>'
+        login-server: '${{ env.REGISTRY_URL }}' # default: index.docker.io
+        username: '${{ inputs.registryUserName }}'
+        password: '${{ inputs.registryUserPassword }}'
+
+    # https://github.com/marketplace/actions/docker-setup-buildx
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2.0.0
 
     # https://github.com/marketplace/actions/azure-container-registry-build
-    - name: ACR build
+    - name: XXX ACR build
       id: acr
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{ secrets.service_principal }}
-        service_principal_password: ${{ secrets.service_principal_password }}
-        tenant: ${{ secrets.tenant }}
-        registry: ${{ secrets.registry }}
-        repository: ${{ secrets.repository }}
-        image: image
-        git_access_token: ${{ secrets.git_access_token }}
-        folder: src/docker
-        dockerfile: ../../dockerfiles/Dockerfile
-        branch: main
+        service_principal: ${{ secrets.service_principal }} # The Service Principal credentials
+        service_principal_password: ${{ secrets.service_principal_password }} # The Service Principal credentials
+        tenant: ${{ env.AZURE_TENANT_ID }} # The ACR tenant
+        registry: ${{ env.AZURE_CONTAINER_REGISTRY }} # The ACR name
+        repository: ${{ secrets.repository }} # The repository on the ACR
+        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.ADMIN_SERVER }}:latest # Docker image name. Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+        # git_access_token: ${{ secrets.git_access_token }} # The Github access token for private repositories
+        folder: docker/ # Build context for Docker agent
+        dockerfile: ./petclinic-admin-server/Dockerfile # Path to the Dockerfile relative to `folder`
+        branch: main # Branch to root the context off of
 
     #- name: Build XXX image and push it to ACR
     #  uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
