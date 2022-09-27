@@ -1,31 +1,32 @@
 # This workflow will deploy all the Azure services, including ACA, ACA Env., ACR, KV & secrets, MYSQL (eventually with a Firewall rule to allow your workstation IP)
-# eventually if deployToVNet=true : also VNet, ACA Env. deployed to VNet, private DNS-Zone, client VM deployed to the VNet
+# eventually if DEPLOY_TO_VNET is set to true : also VNet, ACA Env. deployed to VNet, private DNS-Zone, client VM deployed to the VNet
 
 name: Deploy IaC with Azure Bicep
 
 env:
   APP_NAME: petcliaca
   LOCATION: westeurope
-  RG_KV: rg-iac-kv # RG where to deploy KV
+  RG_KV: rg-iac-kv777 # RG where to deploy KV
   RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
   
+  ACA_ENV_NAME: aca-env-pub # ACA Environment name. Ex 'aca-env-pub' or 'aca-env-corp' when deployed to your VNet
+  DEPLOY_TO_VNET: false
+
   KV_NAME: kv-petcliaca442 # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
   SET_KV_ACCESS_POLICIES: false # let it to false
 
   AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
   
-  ACA_ENV_NAME: aca-env-corp # ACA Environment name
-
   # GitHub Actions settings
   GHA_SETTINGS_CFG_REGISTRY_URL: acrpetcliaca.azurecr.io
   GHA_SETTINGS_CFG_REPO_URL: https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv
-  GHA_SETTINGS_CFG_CRED_CLIENT_ID:
-  GHA_SETTINGS_CFG_CRED_CLIENT_SECRET: 
+  GHA_SETTINGS_CFG_CRD_CLIENT_ID: ${{ secrets.GHA_SETTINGS_CFG_CRD_CLIENT_ID }}
+  GHA_SETTINGS_CFG_CRD_CLIENT_SECRET: ${{ secrets.GHA_SETTINGS_CFG_CRD_CLIENT_SECRET }}
   GHA_REVISION_NAME: poc-aca-101
 
   # ==== XXX To be checked ====
  
-  PROJECT_NAME: petclinic                # set this to your project's name
+  PROJECT_NAME: petclinic # set this to your Maven project's name
   
   # ==== APPS ====
   ADMIN_SERVER: aca-petclinic-admin-server
@@ -57,18 +58,12 @@ env:
   SECRET_EXPIRY_DATE: 1672444800
 
   credentials: ${{ secrets.AZURE_CREDENTIALS }}
-
-  # ==== Azure Key VAULT  ====
   
-  #SPRING-CLOUD-AZURE-CLIENT-ID: ${{ secrets.SPRING-CLOUD-AZURE-CLIENT-ID }}
-  #SPRING-CLOUD-AZURE-CLIENT-SECRET: ${{ secrets.SPRING-CLOUD-AZURE-CLIENT-SECRET }}
-  #SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT: ${{ secrets.SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT }}
-  #SPRING-CLOUD-AZURE-TENANT-ID: ${{ secrets.SPRING-CLOUD-AZURE-TENANT-ID }}
+  # AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  # AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
 
-  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-  ENDPOINT: ${{ secrets.AZURE_KEY_VAULT_ENDPOINT }}
   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
   # ==== Versions ====
   DEPLOYMENT_VERSION: 2.6.6
@@ -81,7 +76,6 @@ on:
 jobs:
   deploy-kv:
     runs-on: ubuntu-latest
-
     steps:
 
     # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
@@ -91,53 +85,22 @@ jobs:
         echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV        
       shell: bash
 
-    - name: Azure Login
+    - name: Login with Key Vault SP
       uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Login with Key Vault SP
-      uses: azure/login@v1 
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    # When Public access is disabled on KV, you need to add a network rule in the KV Firewall
-    - name: Authorize local IP to access the Azure Key Vault
-      uses: azure/CLI@v1
-      with:
-        azcliversion: ${{ env.AZ_CLI_VERSION }}
-        inlineScript: |
-          az keyvault network-rule add --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
-          sleep 30
-
-    - name: Get service SP from Key Vault
-      uses: Azure/get-keyvault-secrets@v1
-      with:
-        keyvault: ${{ env.KV_NAME }}
-        secrets: "AZURE-CREDENTIALS-FOR-SPRING"
-      id: keyvaultaction
-    
-    - name: Get MySQL Secrets from Key Vault
-      uses: Azure/get-keyvault-secrets@v1
-      with:
-        keyvault: ${{ env.KV_NAME }}
-        secrets: "VM-ADMIN-USER-NAME,VM-ADMIN-PASSWORD,MYSQL-SERVER-NAME,MYSQL-SERVER-FULL-NAME,SPRING-DATASOURCE-URL,SPRING-DATASOURCE-USERNAME,SPRING-DATASOURCE-PASSWORD,SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT,SPRING-CLOUD-AZURE-TENANT-ID"
-      id: mysqlsecrets
-
-    - name: Deploy Azure Key Vault and create secrets
+    - name: Deploy Azure Key Vault
       uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
       with:
         azcliversion: ${{ env.AZ_CLI_VERSION }}
         inlineScript: |
 
-          # tenantId=$(az account show --query tenantId -o tsv)
-          # echo AZURE_TENANT_ID >> $GITHUB_ENV
-          mkdir deploy
-
           # Check, choose a Region with AZ : https://docs.microsoft.com/en-us/azure/availability-zones/az-overview#azure-regions-with-availability-zones
           az group create --name ${{ env.RG_KV }} --location ${{ env.LOCATION }}
           az group create --name ${{ env.RG_APP }} --location ${{ env.LOCATION }}
 
+          # leave this fake dummy accessPoliciesObject as anyway SET_KV_ACCESS_POLICIES is set to FALSE at this stage
           var accessPoliciesObject = {
             accessPolicies: [
               {
@@ -157,20 +120,69 @@ jobs:
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p location=${{ env.LOCATION }} \
-            -p setKVAccessPolicies=false \
+            -p setKVAccessPolicies=${{ env.SET_KV_ACCESS_POLICIES }} \
             -p accessPoliciesObject=$accessPoliciesObject \
-            -p secretsObject=${{ secrets.XXX }} \
+            -p secretsObject=${{ secrets.SECRET_OBJECT }} \
             -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
-  
 
-          # TODO : Allow GH Runner to access KV ...
-          # XXX
-          # XXX
-          # XXX
+    # Allow GH Runner to access KV
+    # When Public access is disabled on KV, you need to add a network rule in the KV Firewall
+    - name: Authorize local IP to access the Azure Key Vault
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        inlineScript: |
+          az keyvault network-rule add --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
+          sleep 30
+    
+    # Perform role assigment
+    - name: Azure Key Vault Role assigment
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        inlineScript: |
+          spnid=${{ env.credentials }}.appId
+          echo "spnid="$spnid
+          az role assignment create --assignee $spnid --scope /subscriptions/${{ env.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RG_KV }/providers/Microsoft.KeyVault/vaults/${{ env.KV_NAME } --role "Contributor"
 
-          # /!\ pre-req:
-          # You need to build the Apps and to push the images to ACR, so ACR must be provisionned before ACA Apps
-          # You also need to deploy AppInsights to get the Instrument Key and to then provide it as param of the ACA Deployment
+    # Now that GH Runner is Allowed to access KV, create the secrets
+    - name: Create Azure Key Vault secrets
+      uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
+      with:
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        inlineScript: |
+          az deployment group create --name aca-petclinic-kv -f ../../kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretsObject=${{ secrets.SECRET_OBJECT }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+
+    - name: Get MySQL Secrets from Key Vault
+      uses: Azure/get-keyvault-secrets@v1
+      with:
+        keyvault: ${{ env.KV_NAME }}
+        #secrets: "MYSQL-SERVER-NAME,MYSQL-SERVER-FULL-NAME,SPRING-DATASOURCE-URL,SPRING-DATASOURCE-USERNAME,SPRING-DATASOURCE-PASSWORD,SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT,SPRING-CLOUD-AZURE-TENANT-ID"
+        secrets: "SECRET_OBJECT" 
+      id: mysqlsecrets
+
+    - name: Get Client VM Secrets from Key Vault
+      uses: Azure/get-keyvault-secrets@v1
+      if: ${{ env.DEPLOY_TO_VNET }}
+      with:
+        keyvault: ${{ env.KV_NAME }}
+        secrets: "VM-ADMIN-USER-NAME,VM-ADMIN-PASSWORD"
+      id: vmsecrets
+
+  deploy-iac:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Deploy the pre-req
+      uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
+      with:
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        inlineScript: |
+
           # --debug # --what-if to test like a dry-run
           az deployment group create --name aca-petclinic-pre-req -f ../../iac/bicep/aca/pre-req.bicep -g ${{ env.RG_APP }} \
             -p appName=${{ env.APP_NAME }} \
@@ -178,15 +190,48 @@ jobs:
             -p acrName=${{ env.AZURE_CONTAINER_REGISTRY }} \
             -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
             -p setFwRuleClient=false \
-            -p deployToVNet=false
+            -p deployToVNet=${{ env.DEPLOY_TO_VNET }}
 
             az deployment group show \
               -g ${{ env.RG_APP }} \
               -n aca-petclinic-pre-req \
-              --query properties.outputs.appInsightsInstrumentationKey.value
+              --query properties.outputs.appInsightsConnectionString.value    
+              
+    # Perform role assigment
+    - name: ACR Role assigment
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        inlineScript: |
+          spnid=${{ env.credentials }}.appId
+          az role assignment create --assignee $spnid --scope /subscriptions/${{ env.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RG_APP }/providers/Microsoft.ContainerRegistry/registries/${{ env.AZURE_CONTAINER_REGISTRY } --role "Contributor"
 
-          # Finally Deploy ACA Apps ==> check all the parameter files
-          # --what-if to test like a dry-run   
+    # You need to build the Apps and to push the images to ACR, this is why ACR has been provisionned before ACA Apps in the pre-req.bicep
+    - name: Maven Build
+      uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action        
+      env:
+        GITHUB_TOKEN: ${{ secrets.MY_TOKEN }}
+      run: |
+        acrUsr=$(az deployment group show \
+              -g ${{ env.RG_APP }} \
+              -n aca-petclinic-pre-req \
+              --query properties.outputs.acrRegistryUsr.value)
+
+        acrPwd=$(az deployment group show \
+              -g ${{ env.RG_APP }} \
+              -n aca-petclinic-pre-req \
+              --query properties.outputs.acrRegistryPwd.value)
+
+        gh workflow run maven-build.yml -f registryUserName=$acrUsr -f registryUserPassword=$acrPwd
+
+    - name: Deploy Azure Container Apps
+      uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
+      with:
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        inlineScript: |
+
+          echo "About to call ACA, roleAssignments and KV Module ./iac/bicep/aca/main.bicep#284 with SET_KV_ACCESS_POLICIES to TRUE" 
+          
           az deployment group create --name aca-petclinic-apps -f ../../iac/bicep/aca/main.bicep -g ${{ env.RG_APP }} \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
@@ -194,16 +239,16 @@ jobs:
             -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p kvRGName=${{ env.RG_KV }} \
-            -p secretsObject=${{ secrets.XXX }} \
+            -p secretsObject=${{ secrets.SECRET_OBJECT }} \
             -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }} \
             -p ghaSettingsCfgRegistryUrl=${{ env.GHA_SETTINGS_CFG_REGISTRY_URL }} \
             -p ghaSettingsCfgRepoUrl=${{ env.GHA_SETTINGS_CFG_REPO_URL }} \
-            -p ghaSettingsCfgCredClientId=${{ env.XXX }} \
-            -p ghaSettingsCfgCredClientSecret=${{ env.XXX }} \     
+            -p ghaSettingsCfgCredClientId=${{ env.GHA_SETTINGS_CFG_CRD_CLIENT_ID }} \
+            -p ghaSettingsCfgCredClientSecret=${{ env.${{ env.GHA_SETTINGS_CFG_CRD_CLIENT_SECRET }} }} \     
             -p revisionName=${{ env.GHA_REVISION_NAME }} \
             -p publicNetworkAccess=enabled \
             -p kvSkuName=standard \
-            -p deployToVNet=false
+            -p deployToVNet=${{ env.DEPLOY_TO_VNET }}
 
     - name: Disable local IP access to the Key Vault
       uses: azure/CLI@v1
@@ -211,7 +256,7 @@ jobs:
       with:
         azcliversion: ${{ env.AZ_CLI_VERSION }}
         inlineScript: |
-          az keyvault network-rule remove --ip-address $LOCAL_IP --name ${{ env.KEYVAULT }} --only-show-errors
+          az keyvault network-rule remove --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
 
     # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
     # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#hardening-for-self-hosted-runners
