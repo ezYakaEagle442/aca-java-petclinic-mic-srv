@@ -52,8 +52,8 @@ jobs:
           # echo AZURE_TENANT_ID >> $GITHUB_ENV
 
           # Check, choose a Region with AZ : https://docs.microsoft.com/en-us/azure/availability-zones/az-overview#azure-regions-with-availability-zones
-          # az group delete --name ${{ env.RG_KV }} --location ${{ env.LOCATION }}
-          az group delete --name ${{ env.RG_APP }} --location ${{ env.LOCATION }}
+          # az group delete --name ${{ env.RG_KV }} --yes
+          az group delete --name ${{ env.RG_APP }} --location ${{ env.LOCATION }} --yes
 
     # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
     # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#hardening-for-self-hosted-runners
