@@ -210,8 +210,7 @@ jobs:
           az role assignment create --assignee $spnid --scope /subscriptions/${{ env.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RG_APP }/providers/Microsoft.ContainerRegistry/registries/${{ env.AZURE_CONTAINER_REGISTRY } --role "Contributor"
 
     # You need to build the Apps and to push the images to ACR, this is why ACR has been provisionned before ACA Apps in the pre-req.bicep
-    - name: Maven Build
-      uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action        
+    - name: Maven Build       
       env:
         GITHUB_TOKEN: ${{ secrets.MY_TOKEN }}
       run: |
