@@ -85,6 +85,7 @@ jobs:
         echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV
         spnid=${{ env.credentials }}.appId
         echo "spnid="$spnid
+        az version
 
       shell: bash
 
