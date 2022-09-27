@@ -221,7 +221,7 @@ jobs:
             -p ghaSettingsCfgRegistryUrl=${{ env.GHA_SETTINGS_CFG_REGISTRY_URL }} \
             -p ghaSettingsCfgRepoUrl=${{ env.GHA_SETTINGS_CFG_REPO_URL }} \
             -p ghaSettingsCfgCredClientId=${{ env.GHA_SETTINGS_CFG_CRD_CLIENT_ID }} \
-            -p ghaSettingsCfgCredClientSecret=${{ env.${{ env.GHA_SETTINGS_CFG_CRD_CLIENT_SECRET }} }} \     
+            -p ghaSettingsCfgCredClientSecret=${{ env.GHA_SETTINGS_CFG_CRD_CLIENT_SECRET }} }} \     
             -p revisionName=${{ env.GHA_REVISION_NAME }} \
             -p publicNetworkAccess=enabled \
             -p kvSkuName=standard \
