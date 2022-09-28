@@ -85,13 +85,26 @@ jobs:
       run: |
           echo  +++ START Step - Deploy Azure Key Vault
           # leave this fake dummy accessPoliciesObject empty as anyway SET_KV_ACCESS_POLICIES is set to FALSE at this stage
-          apo="{}"
+          apo="{ \n
+            \"accessPolicies\": [\n
+              {\n
+                \"objectId\": \"fakeDummyAppIdentityId\",\n
+                \"tenantId\": \"fakeDummyTenantId\",\n
+                \"permissions\": {\n
+                  \"secrets\": [\n
+                    \"get\",\n
+                    \"list\"\n
+                  ]\n
+                }\n
+              }\n
+            ]\n
+          }"
 
           pwd
           ls -al
           # /home/runner/work/aca-java-petclinic-mic-srv/aca-java-petclinic-mic-srv/.
           
-          az deployment group create --name aca-petclinic-kv -f iac/bicep/modules/kv/kv.bicep -g ${{ env.RG_KV }} \
+          az deployment group create --name aca-petclinic-kv -f iac/bicep/modules/kv/kv.bicep -g ${{ env.RG_KV }} --debug \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p location=${{ env.LOCATION }} \
