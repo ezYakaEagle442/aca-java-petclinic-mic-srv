@@ -215,7 +215,26 @@ jobs:
         azcliversion: ${{ env.AZ_CLI_VERSION }}
         inlineScript: |
           az keyvault network-rule remove --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
-          
+
+    # https://docs.github.com/en/packages/learn-github-packages/introduction-to-github-packages
+    # To authenticate to a GitHub Packages registry within a GitHub Actions workflow, you can use
+    # GITHUB_TOKEN to publish packages associated with the workflow repository.
+
+    # https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry
+    # https://docs.github.com/en/actions/publishing-packages/publishing-java-packages-with-maven#publishing-packages-to-github-packages
+    # Publish the package
+    # https://stackoverflow.com/questions/57711558/deploy-to-github-package-registry-from-github-action
+    # https://github.com/marketplace/actions/generate-settings-xml-for-maven-builds
+    # https://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html#altDeploymentRepository
+    - name:  Publish the Maven package
+      run: |
+        mkdir -p ~/.m2
+        echo "<settings><servers><server><id>github-aca</id><username>$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')</username><password>\${env.GITHUB_TOKEN}</password></server></servers></settings>" > ~/.m2/settings.xml
+        REPO="github-aca::default::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
+        mvn deploy -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" --batch-mode -DskipTests -Dmaven.install.skip=true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     #- name: Build XXX image and push it to ACR
     #  uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
     #  with:
