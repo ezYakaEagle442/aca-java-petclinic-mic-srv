@@ -77,7 +77,7 @@ jobs:
     - name: Deploy Azure Key Vault
       uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
       with:
-        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        # azcliversion: ${{ env.AZ_CLI_VERSION }}
         inlineScript: |
 
           # leave this fake dummy accessPoliciesObject as anyway SET_KV_ACCESS_POLICIES is set to FALSE at this stage
