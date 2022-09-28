@@ -75,11 +75,11 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }} # ${{ env.credentials }}
 
     - name: Deploy Azure Key Vault
-      uses: azure/CLI@v1 # https://github.com/marketplace/actions/azure-cli-action
+      uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
       with:
-        azcliversion: 2.30.0 # ${{ env.AZ_CLI_VERSION }}
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
         inlineScript: |
-
+          echo  +++ START Step - Deploy Azure Key Vault
           # leave this fake dummy accessPoliciesObject empty as anyway SET_KV_ACCESS_POLICIES is set to FALSE at this stage
           apo="{}"
 
