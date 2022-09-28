@@ -100,6 +100,10 @@ jobs:
             ]\n
           }"
 
+          echo **************************************************
+          echo apo = $apo
+          echo **************************************************
+          
           pwd
           ls -al
           # /home/runner/work/aca-java-petclinic-mic-srv/aca-java-petclinic-mic-srv/.
