@@ -81,20 +81,7 @@ jobs:
         inlineScript: |
 
           # leave this fake dummy accessPoliciesObject as anyway SET_KV_ACCESS_POLICIES is set to FALSE at this stage
-          var accessPoliciesObject = {
-            accessPolicies: [
-              {
-                objectId: fakeDummyAppIdentityId
-                tenantId: fakeDummyTenantId
-                permissions: {
-                  secrets: [
-                    'get'
-                    'list'
-                  ]
-                }
-              }
-            ]
-          }
+          accessPoliciesObject='{}'
 
           az deployment group create --name aca-petclinic-kv -f ../../iac/bicep/modules/kv/kv.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
