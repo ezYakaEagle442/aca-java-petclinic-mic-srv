@@ -70,14 +70,14 @@ jobs:
       shell: bash
 
     - name: Login with GHA Runner SP
-      uses: azure/login@v@v1.4.6 # fails https://github.com/marketplace/actions/azure-login
+      uses: azure/login@v1.4.6 # fails https://github.com/marketplace/actions/azure-login
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }} # ${{ env.credentials }}
 
     - name: Deploy Azure Key Vault
       uses: azure/CLI@v1 # https://github.com/marketplace/actions/azure-cli-action
       with:
-        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        azcliversion: 2.30.0 # ${{ env.AZ_CLI_VERSION }}
         inlineScript: |
 
           # leave this fake dummy accessPoliciesObject empty as anyway SET_KV_ACCESS_POLICIES is set to FALSE at this stage
