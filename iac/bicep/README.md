@@ -39,4 +39,6 @@ az deployment group create --name iac-101-aca -f ./petclinic-apps.bicep -g rg-ia
     --parameters @./parameters.json --debug # --what-if to test like a dry-run
 ```
 
-Note: you can Run a Bicep script to debug and output the results to Azure Storage, see the [doc](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/deployment-script-bicep#sample-bicep-files)
+Note: you can Run a Bicep script to debug and output the results to Azure Storage, see :
+-  [doc](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/deployment-script-bicep#sample-bicep-files)
+- [https://learn.microsoft.com/en-us/azure/templates/microsoft.resources/deploymentscripts?pivots=deployment-language-bicep](https://learn.microsoft.com/en-us/azure/templates/microsoft.resources/deploymentscripts?pivots=deployment-language-bicep)
