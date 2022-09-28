@@ -74,11 +74,12 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }} # ${{ env.credentials }}
 
-    - name: Deploy Azure Key Vault
-      uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
-      with:
-        azcliversion: ${{ env.AZ_CLI_VERSION }}
-        inlineScript: |
+    - name: Deploy Azure Key Vault      
+      # uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
+      # with:
+        #azcliversion: ${{ env.AZ_CLI_VERSION }}
+        # inlineScript: |
+      run: |
           echo  +++ START Step - Deploy Azure Key Vault
           # leave this fake dummy accessPoliciesObject empty as anyway SET_KV_ACCESS_POLICIES is set to FALSE at this stage
           apo="{}"
@@ -91,28 +92,27 @@ jobs:
             -p accessPoliciesObject=$apo \
             -p secretsObject=${{ secrets.SECRET_OBJECT }} \
             -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+      shell: bash
 
     # Allow GH Runner to access KV
     # When Public access is disabled on KV, you need to add a network rule in the KV Firewall
     - name: Authorize local IP to access the Azure Key Vault
-      uses: azure/CLI@v1
-      with:
-        azcliversion: ${{ env.AZ_CLI_VERSION }}
-        inlineScript: |
+      run: |
           az keyvault network-rule add --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
           sleep 30
-    
+      shell: bash
+
+
     # Now that GH Runner is Allowed to access KV, create the secrets
     - name: Create Azure Key Vault secrets
-      uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
-      with:
-        azcliversion: ${{ env.AZ_CLI_VERSION }}
-        inlineScript: |
+      run: |
           az deployment group create --name aca-petclinic-kv -f ../../iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p secretsObject=${{ secrets.SECRET_OBJECT }} \
             -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+
+      shell: bash
 
     - name: Get MySQL Secrets from Key Vault
       uses: Azure/get-keyvault-secrets@v1
@@ -131,13 +131,11 @@ jobs:
       id: vmsecrets
 
     - name: Disable local IP access to the Key Vault
-      uses: azure/CLI@v1
       if: ${{ always() }}
-      with:
-        azcliversion: ${{ env.AZ_CLI_VERSION }}
-        inlineScript: |
+      run: |
           az keyvault network-rule remove --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
-
+      shell: bash
+      
   deploy-iac:
     runs-on: ubuntu-latest
     needs: deploy-kv
