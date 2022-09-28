@@ -66,7 +66,9 @@ jobs:
         echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV        
       shell: bash
 
-    - uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
+      
     - name: Set up JDK
       uses: actions/setup-java@v3 
       with:
