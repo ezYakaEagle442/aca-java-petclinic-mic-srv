@@ -101,6 +101,23 @@ jobs:
             ]
           }"
 
+          apo=`cat <<-____HERE
+          {
+            "accessPolicies": [
+              {
+                "objectId": "fakeDummyAppIdentityId",
+                "tenantId": "fakeDummyTenantId",
+                "permissions": {
+                  "secrets": [
+                    "get",
+                    "list"
+                  ]
+                }
+              }
+            ]
+          }
+          ____HERE`
+
           echo **************************************************
           echo apo = "$apo"
           echo **************************************************
