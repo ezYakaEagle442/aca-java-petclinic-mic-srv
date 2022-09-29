@@ -105,8 +105,9 @@ jobs:
           ____HERE`
 
           echo **************************************************
+          # https://github.com/twpayne/chezmoi/discussions/1706
           apo="{\"accessPolicies\" : \"foo\"}"
-          echo accessPoliciesObject = "${apo}"
+          echo accessPoliciesObject = "${{apo}}"
           echo **************************************************
           
           pwd
