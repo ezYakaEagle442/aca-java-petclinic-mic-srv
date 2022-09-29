@@ -211,6 +211,11 @@ module vnetModule './modules/aca/vnet.bicep' = if (deployToVNet) {
   }   
 }
 
+// 
+// /!\ TO BE FIXED: allow to Azure Container App subnetID and azureContainerAppIdentity
+// should apply only when deployToVNet=true
+//
+
 resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = if (deployToVNet) {
   name: vnetName
 }
