@@ -104,9 +104,9 @@ jobs:
           }
           ____HERE`
 
-          accessPoliciesObject="{"accessPolicies"}"
           echo **************************************************
-          echo apo = "$accessPoliciesObject"
+          apo="{\"accessPolicies\" : \"foo\"}"
+          echo accessPoliciesObject = "${apo}"
           echo **************************************************
           
           pwd
@@ -118,7 +118,7 @@ jobs:
             -p kvName=${{ env.KV_NAME }} \
             -p location=${{ env.LOCATION }} \
             -p setKVAccessPolicies=${{ env.SET_KV_ACCESS_POLICIES }} \
-            -p accessPoliciesObject="$apo" \  
+            -p accessPoliciesObject="$accessPoliciesObject" \  
 
       shell: bash
 
