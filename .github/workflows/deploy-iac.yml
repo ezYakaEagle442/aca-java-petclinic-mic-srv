@@ -107,8 +107,8 @@ jobs:
           echo **************************************************
           # https://github.com/twpayne/chezmoi/discussions/1706
           apo="{\"accessPolicies\" : \"foo\"}"
-          #echo accessPoliciesObject = "${apo}"  ::add-mask:
-          echo accessPoliciesObject="{{  ${apo} }}"
+          echo accessPoliciesObject = "${apo}"
+          #echo accessPoliciesObject="{{  ${apo} }}"
           echo **************************************************
           
           pwd
@@ -120,7 +120,7 @@ jobs:
             -p kvName=${{ env.KV_NAME }} \
             -p location=${{ env.LOCATION }} \
             -p setKVAccessPolicies=${{ env.SET_KV_ACCESS_POLICIES }} \
-            -p accessPoliciesObject="$accessPoliciesObject" \  
+            -p accessPoliciesObject=$accessPoliciesObject \  
 
       shell: bash
 
