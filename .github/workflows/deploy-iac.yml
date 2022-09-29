@@ -91,8 +91,8 @@ jobs:
           {
             "accessPolicies": [
               {
-                "objectId": "fakeDummyAppIdentityId",
-                "tenantId": "fakeDummyTenantId",
+                "objectId":"fakeDummyAppIdentityId",
+                "tenantId":"fakeDummyTenantId",
                 "permissions": {
                   "secrets": [
                     "get",
@@ -106,7 +106,7 @@ jobs:
 
           echo **************************************************
           # https://github.com/twpayne/chezmoi/discussions/1706
-          apo="{\"accessPolicies\" : \"foo\"}"
+          apo="{\"accessPolicies\":\"foo\"}"
           accessPoliciesObject="${apo}"
           echo accessPoliciesObject = "${accessPoliciesObject}"
           echo **************************************************
