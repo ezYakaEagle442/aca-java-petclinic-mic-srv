@@ -147,20 +147,20 @@ module ACR './modules/aca/acr.bicep' = {
 // only then ./kv/kv_sec_key.bicep' can be called to create the secrets 
 
 var acrCredentials = {
-    'secrets': [
+    '"secrets"': [
       {
-        'secretName': 'REGISTRY_USR'
-        'secretValue': ACR.outputs.acrRegistryUsr
+        '"secretName"': '"REGISTRY_USR"'
+        '"secretValue"': ACR.outputs.acrRegistryUsr
       }
       {
-        'secretName': 'REGISTRY_PWD'
-        'secretValue': ACR.outputs.acrRegistryPwd
+        '"secretName"': '"REGISTRY_PWD"'
+        '"secretValue"': ACR.outputs.acrRegistryPwd
       }
     ]
   }
 
 // https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scenarios-secrets
-module kvSecrets './modules/kv/kv_sec_key.bicep' = {
+module kvAcrSecrets './modules/kv/kv_sec_key.bicep' = {
   name: 'aca-petclinic-kv-sec'
   params: {
     appName: appName
