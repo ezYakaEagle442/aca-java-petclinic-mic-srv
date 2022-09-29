@@ -30,15 +30,6 @@ param location string = 'westeurope'
 @description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
 param kvName string // = 'kv-${appName}'
 
-@description('Specifies all KV secrets {"secretName":"","secretValue":""} wrapped in a secure object.')
-@secure()
-param secretsObject object
-
-// https://learn.microsoft.com/en-us/azure/key-vault/secrets/secrets-best-practices#secrets-rotation
-// Because secrets are sensitive to leakage or exposure, it's important to rotate them often, at least every 60 days. 
-@description('Expiry date in seconds since 1970-01-01T00:00:00Z. Ex: 1672444800 ==> 31/12/2022')
-param secretExpiryDate int = 1672444800
-
 @description('The name of the KV RG')
 param kvRGName string
 
@@ -380,20 +371,13 @@ var vNetRules = [
 
 // allow to Azure Container App subnetID and azureContainerAppIdentity
 // /!\ TO BE FIXED: should apply only when deployToVNet=true
-module KeyVault './modules/kv/kv.bicep'= {
-  name: 'KeyVault'
+module KeyVaultAccessPolicies './modules/kv/kv_policies.bicep'= {
+  name: 'KeyVaultAccessPolicies'
   scope: resourceGroup(kvRGName)
   params: {
-    location: location
     appName: appName
     kvName: kvName
-    skuName: kvSkuName
     tenantId: tenantId
-    publicNetworkAccess: publicNetworkAccess
-    vNetRules: vNetRules // /!\ TO BE FIXED: should apply only when deployToVNet=true
-    setKVAccessPolicies: setKVAccessPolicies
     accessPoliciesObject: accessPoliciesObject
-    //secretsObject: secretsObject
-    //secretExpiryDate: secretExpiryDate
   } 
 }
