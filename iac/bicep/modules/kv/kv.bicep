@@ -14,6 +14,7 @@ param appName string = 'iacdemo${uniqueString(resourceGroup().id)}'
 @description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
 param kvName string = 'kv-${appName}'
 
+/*
 @description('Specifies all KV secrets {"secretName":"","secretValue":""} wrapped in a secure object.')
 @secure()
 param secretsObject object
@@ -22,6 +23,7 @@ param secretsObject object
 // Because secrets are sensitive to leakage or exposure, it's important to rotate them often, at least every 60 days. 
 @description('Expiry date in seconds since 1970-01-01T00:00:00Z. Ex: 1672444800 ==> 31/12/2022')
 param secretExpiryDate int = 1672444800
+*/
 
 param setKVAccessPolicies bool = false
 
