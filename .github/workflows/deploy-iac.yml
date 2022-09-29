@@ -120,7 +120,7 @@ jobs:
             -p kvName=${{ env.KV_NAME }} \
             -p location=${{ env.LOCATION }} \
             -p setKVAccessPolicies=${{ env.SET_KV_ACCESS_POLICIES }} \
-            -p accessPoliciesObject=$accessPoliciesObject \  
+            # -p accessPoliciesObject=$accessPoliciesObject \  
 
       shell: bash
 
