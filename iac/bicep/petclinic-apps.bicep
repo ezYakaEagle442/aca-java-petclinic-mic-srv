@@ -393,7 +393,7 @@ module KeyVault './modules/kv/kv.bicep'= {
     vNetRules: vNetRules // /!\ TO BE FIXED: should apply only when deployToVNet=true
     setKVAccessPolicies: setKVAccessPolicies
     accessPoliciesObject: accessPoliciesObject
-    secretsObject: secretsObject
-    secretExpiryDate: secretExpiryDate
+    //secretsObject: secretsObject
+    //secretExpiryDate: secretExpiryDate
   } 
 }
