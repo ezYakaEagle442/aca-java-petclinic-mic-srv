@@ -157,16 +157,16 @@ jobs:
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="MYSQL-SERVER-FULL-NAME" \
             -p secretValue=${{ secrets.MYSQL_SERVER_FULL_NAME }} \
-            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}  
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
 
     - name: Create SPRING-DATASOURCE-URL secret in Azure Key Vault
       run: |
-          az deployment group create --name aca-petclinic-kv-sec3 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+          az deployment group create --name aca-petclinic-kv-sec3 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} --debug \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="SPRING-DATASOURCE-URL" \
             -p secretValue=${{ secrets.SPRING_DATASOURCE_URL }} \
-            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}  
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
 
     - name: Create SPRING-DATASOURCE-USERNAME secret in Azure Key Vault
       run: |
@@ -175,7 +175,7 @@ jobs:
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="SPRING-DATASOURCE-USERNAME" \
             -p secretValue=${{ secrets.SPRING_DATASOURCE_USERNAME }} \
-            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}          
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}    
 
     - name: Create SPRING-DATASOURCE-PASSWORD secret in Azure Key Vault
       run: |
@@ -184,7 +184,7 @@ jobs:
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="SPRING-DATASOURCE-PASSWORD" \
             -p secretValue=${{ secrets.SPRING_DATASOURCE_PASSWORD }} \
-            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}  
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
 
     - name: Create SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT secret in Azure Key Vault
       run: |
@@ -193,7 +193,7 @@ jobs:
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT" \
             -p secretValue=${{ secrets.SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT }} \
-            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}  
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
 
     - name: Create SPRING-CLOUD-AZURE-TENANT-ID secret in Azure Key Vault
       run: |
@@ -202,7 +202,7 @@ jobs:
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="SPRING-CLOUD-AZURE-TENANT-ID" \
             -p secretValue=${{ secrets.SPRING_CLOUD_AZURE_TENANT_ID }} \
-            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}          
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }} 
 
     - name: Create VM-ADMIN-USER-NAME secret in Azure Key Vault
       run: |
@@ -211,7 +211,7 @@ jobs:
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="VM-ADMIN-USER-NAME" \
             -p secretValue=${{ secrets.VM_ADMIN_USER_NAME }} \
-            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}  
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
 
     - name: Create VM-ADMIN-PASSWORD secret in Azure Key Vault
       run: |
@@ -220,7 +220,7 @@ jobs:
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="VM-ADMIN-PASSWORD" \
             -p secretValue=${{ secrets.VM_ADMIN_PASSWORD }} \
-            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}  
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
 
       shell: bash
 
