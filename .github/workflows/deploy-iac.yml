@@ -188,7 +188,7 @@ jobs:
 
     - name: Create SPRING-CLOUD-AZURE-TENANT-ID secret in Azure Key Vault
       run: |
-          az deployment group create --name aca-petclinic-kv-sec7-f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+          az deployment group create --name aca-petclinic-kv-sec7 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="SPRING-CLOUD-AZURE-TENANT-ID" \
