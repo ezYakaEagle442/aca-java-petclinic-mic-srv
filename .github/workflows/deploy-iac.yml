@@ -38,7 +38,16 @@ env:
   # as this significantly reduces the probability the secrets will be properly redacted. Instead, create individual secrets for each sensitive value.
 
   # Specifies all KV secrets {"secretName":"","secretValue":""} wrapped in a secure object.
-  SECRET_OBJECT: ${{ secrets.SECRET_OBJECT }}
+  # SECRET_OBJECT: ${{ secrets.SECRET_OBJECT }}
+
+  MYSQL_SERVER_FULL_NAME: ${{ secrets.MYSQL_SERVER_FULL_NAME }}
+  SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+  SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+  SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+  SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT: ${{ secrets.SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT }}
+  SPRING_CLOUD_AZURE_TENANT_ID: ${{ secrets.SPRING_CLOUD_AZURE_TENANT_ID }}
+  VM_ADMIN_USER_NAME: ${{ secrets.VM_ADMIN_USER_NAME }}
+  VM_ADMIN_PASSWORD: ${{ secrets.VM_ADMIN_PASSWORD }}
 
   # https://learn.microsoft.com/en-us/azure/key-vault/secrets/secrets-best-practices#secrets-rotation
   # Because secrets are sensitive to leakage or exposure, it's important to rotate them often, at least every 60 days. 
@@ -132,13 +141,86 @@ jobs:
 
 
     # Now that GH Runner is Allowed to access KV, create the secrets
-    - name: Create Azure Key Vault secrets
+    - name: Create MYSQL-SERVER-NAME secret in Azure Key Vault
       run: |
-          az deployment group create --name aca-petclinic-kv -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+          az deployment group create --name aca-petclinic-kv-sec1 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
-            -p secretsObject=${{ secrets.SECRET_OBJECT }} \
+            -p secretName="MYSQL-SERVER-NAME" \
+            -p secretValue=${{ secrets.MYSQL_SERVER_NAME }} \
             -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}          
+
+    - name: Create MYSQL-SERVER-FULL-NAME secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-sec2 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="MYSQL-SERVER-FULL-NAME" \
+            -p secretValue=${{ secrets.MYSQL_SERVER_FULL_NAME }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}  
+
+    - name: Create SPRING-DATASOURCE-URL secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-sec3 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="SPRING-DATASOURCE-URL" \
+            -p secretValue=${{ secrets.SPRING_DATASOURCE_URL }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}  
+
+    - name: Create SPRING-DATASOURCE-USERNAME secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-sec4 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="SPRING-DATASOURCE-USERNAME" \
+            -p secretValue=${{ secrets.SPRING_DATASOURCE_USERNAME }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}          
+
+    - name: Create SPRING-DATASOURCE-PASSWORD secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-sec5 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="SPRING-DATASOURCE-PASSWORD" \
+            -p secretValue=${{ secrets.SPRING_DATASOURCE_PASSWORD }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}  
+
+    - name: Create SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-sec6 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT" \
+            -p secretValue=${{ secrets.SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}  
+
+    - name: Create SPRING-CLOUD-AZURE-TENANT-ID secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-sec7-f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="SPRING-CLOUD-AZURE-TENANT-ID" \
+            -p secretValue=${{ secrets.SPRING_CLOUD_AZURE_TENANT_ID }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}          
+
+    - name: Create VM-ADMIN-USER-NAME secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-sec8 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="VM-ADMIN-USER-NAME" \
+            -p secretValue=${{ secrets.VM_ADMIN_USER_NAME }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}  
+
+    - name: Create VM-ADMIN-PASSWORD secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-sec9 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="VM-ADMIN-PASSWORD" \
+            -p secretValue=${{ secrets.VM_ADMIN_PASSWORD }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}  
 
       shell: bash
 
@@ -146,8 +228,7 @@ jobs:
       uses: Azure/get-keyvault-secrets@v1
       with:
         keyvault: ${{ env.KV_NAME }}
-        #secrets: "MYSQL-SERVER-NAME,MYSQL-SERVER-FULL-NAME,SPRING-DATASOURCE-URL,SPRING-DATASOURCE-USERNAME,SPRING-DATASOURCE-PASSWORD,SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT,SPRING-CLOUD-AZURE-TENANT-ID"
-        secrets: "SECRET_OBJECT" 
+        secrets: "MYSQL-SERVER-NAME,MYSQL-SERVER-FULL-NAME,SPRING-DATASOURCE-URL,SPRING-DATASOURCE-USERNAME,SPRING-DATASOURCE-PASSWORD,SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT,SPRING-CLOUD-AZURE-TENANT-ID"
       id: mysqlsecrets
 
     - name: Get Client VM Secrets from Key Vault
