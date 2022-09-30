@@ -159,15 +159,6 @@ jobs:
             -p secretValue=${{ secrets.MYSQL_SERVER_FULL_NAME }} \
             -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
 
-    - name: Create SPRING-DATASOURCE-URL secret in Azure Key Vault
-      run: |
-          az deployment group create --name aca-petclinic-kv-sec3 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} --debug \
-            -p appName=${{ env.APP_NAME }} \
-            -p kvName=${{ env.KV_NAME }} \
-            -p secretName="SPRING-DATASOURCE-URL" \
-            -p secretValue=${{ secrets.SPRING_DATASOURCE_URL }} \
-            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
-
     - name: Create SPRING-DATASOURCE-USERNAME secret in Azure Key Vault
       run: |
           az deployment group create --name aca-petclinic-kv-sec4 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
@@ -175,7 +166,7 @@ jobs:
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="SPRING-DATASOURCE-USERNAME" \
             -p secretValue=${{ secrets.SPRING_DATASOURCE_USERNAME }} \
-            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}    
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
 
     - name: Create SPRING-DATASOURCE-PASSWORD secret in Azure Key Vault
       run: |
@@ -220,6 +211,15 @@ jobs:
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="VM-ADMIN-PASSWORD" \
             -p secretValue=${{ secrets.VM_ADMIN_PASSWORD }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+
+    - name: Create SPRING-DATASOURCE-URL secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-sec3 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} --debug \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="SPRING-DATASOURCE-URL" \
+            -p secretValue=${{ secrets.SPRING_DATASOURCE_URL }} \
             -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
 
       shell: bash
