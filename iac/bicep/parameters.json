@@ -22,49 +22,7 @@
       }, 
       "kvSkuName": {
         "value": "standard"
-      },
-      "secretsObject": {
-        "value": {
-          "secrets": [
-            {
-              "secretName": "MYSQL-SERVER-NAME",
-              "secretValue": "petcliaca"
-            },
-            {
-              "secretName": "MYSQL-SERVER-FULL-NAME",
-              "secretValue": "petcliaca.mysql.database.azure.com"
-            },            
-            {
-              "secretName": "SPRING-DATASOURCE-URL",
-              "secretValue": ""
-            },
-            {
-              "secretName": "SPRING-DATASOURCE-USERNAME",
-              "secretValue": "mys_adm"
-            },
-            {
-              "secretName": "SPRING-DATASOURCE-PASSWORD",
-              "secretValue": ""
-            }, 
-            {
-              "secretName": "SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT",
-              "secretValue": ""
-            },
-            {
-              "secretName": "SPRING-CLOUD-AZURE-TENANT-ID",
-              "secretValue": ""
-            },
-            {
-              "secretName": "VM-ADMIN-USER-NAME",
-              "secretValue": ""
-            },
-            {
-              "secretName": "VM-ADMIN-PASSWORD",
-              "secretValue": ""
-            }                   
-          ]
-        }
-      },                   
+      },                 
       "revisionName": {
         "value": "poc-aca-101"
       }, 
