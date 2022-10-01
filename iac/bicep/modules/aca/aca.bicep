@@ -112,9 +112,11 @@ param revisionName string = 'poc-aca-101'
 @description('The GitHub branch name')
 param ghaGitBranchName string = 'main'
 
+@secure()
 @description('The GitHub Action Settings Configuration / Azure Credentials / Client Id')
 param ghaSettingsCfgCredClientId string
 
+@secure()
 @description('The GitHub Action Settings Configuration / Azure Credentials / Client Secret')
 param ghaSettingsCfgCredClientSecret string
 
