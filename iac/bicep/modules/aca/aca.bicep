@@ -97,11 +97,12 @@ param appInsightsInstrumentationKey string
 @description('The GitHub Action Settings / Repo URL')
 param ghaSettingsCfgRepoUrl string = 'https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv'
 
+@secure()
 @description('The GitHub Action Settings Configuration / Registry User Name')
 param ghaSettingsCfgRegistryUserName string
 
-@description('The GitHub Action Settings Configuration / Registry Password')
 @secure()
+@description('The GitHub Action Settings Configuration / Registry Password')
 param ghaSettingsCfgRegistryPassword string
 
 @description('The GitHub Action Settings Configuration / Registry URL')
