@@ -58,7 +58,7 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
     enabledForTemplateDeployment: true
     enablePurgeProtection: true
     enableSoftDelete: true
-    enableRbacAuthorization: false // /!\ Preview feature: When true, the key vault will use RBAC for authorization of data actions, and the access policies specified in vault properties will be ignored
+    enableRbacAuthorization: true // /!\ When true, the key vault will use RBAC for authorization of data actions, and the access policies specified in vault properties will be ignored
     // When enabledForDeployment is true, networkAcls.bypass must include \"AzureServices\"
     networkAcls: {
       bypass: 'AzureServices'
@@ -73,7 +73,7 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
       virtualNetworkRules: vNetRules
     }
     softDeleteRetentionInDays: 7 // 30 must be greater or equal than '7' but less or equal than '90'.
-    accessPolicies: []
+    //accessPolicies: []
   }
 }
 
