@@ -85,11 +85,6 @@ param tenantId string = subscription().tenantId
 @description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
 param kvName string = 'kv-${appName}'
 
-// https://learn.microsoft.com/en-us/azure/key-vault/secrets/secrets-best-practices#secrets-rotation
-// Because secrets are sensitive to leakage or exposure, it's important to rotate them often, at least every 60 days. 
-@description('Expiry date in seconds since 1970-01-01T00:00:00Z. Ex: 1672444800 ==> 31/12/2022')
-param secretExpiryDate int = 1672444800
-
 resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
   name: kvName
 }
@@ -139,34 +134,6 @@ module ACR './modules/aca/acr.bicep' = {
     location: location
     tenantId: tenantId
     networkRuleSetCidr: infrastructureSubnetCidr
-  }
-}
-
-// Once ACR is created, its Credentials must be stored in KV ...
-// /!\ In the GHA Workflow, KV must be created firstly
-// only then ./kv/kv_sec_key.bicep' can be called to create the secrets 
-
-var acrCredentials = {
-    '"secrets"': [
-      {
-        '"secretName"': '"REGISTRY_USR"'
-        '"secretValue"': ACR.outputs.acrRegistryUsr
-      }
-      {
-        '"secretName"': '"REGISTRY_PWD"'
-        '"secretValue"': ACR.outputs.acrRegistryPwd
-      }
-    ]
-  }
-
-// https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scenarios-secrets
-module kvAcrSecrets './modules/kv/kv_sec_key.bicep' = {
-  name: 'aca-petclinic-kv-sec'
-  params: {
-    appName: appName
-    kvName: kvName
-    secretsObject: acrCredentials
-    secretExpiryDate: secretExpiryDate
   }
 }
 
