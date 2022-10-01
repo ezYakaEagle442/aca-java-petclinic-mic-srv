@@ -9,8 +9,8 @@ env:
   RG_KV: rg-iac-kv777 # RG where to deploy KV
   RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
   
-  ACA_ENV_NAME: aca-env-pub # ACA Environment name. Ex 'aca-env-pub' or 'aca-env-corp' when deployed to your VNet
-  DEPLOY_TO_VNET: false
+  ACA_ENV_NAME: aca-env-corp # ACA Environment name. Ex 'aca-env-pub' or 'aca-env-corp' when deployed to your VNet
+  DEPLOY_TO_VNET: true
 
   KV_NAME: kv-petcliaca442 # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
   SET_KV_ACCESS_POLICIES: false # let it to false
@@ -121,12 +121,13 @@ jobs:
           ls -al
           # /home/runner/work/aca-java-petclinic-mic-srv/aca-java-petclinic-mic-srv/.
           
+          vNetRules=[]
+
           az deployment group create --name aca-petclinic-kv -f iac/bicep/modules/kv/kv.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p location=${{ env.LOCATION }} \
-
-      shell: bash
+            -p vNetRules=${vNetRules}
 
     # Allow GH Runner to access KV
     # When Public access is disabled on KV, you need to add a network rule in the KV Firewall
@@ -269,7 +270,24 @@ jobs:
             az deployment group show \
               -g ${{ env.RG_APP }} \
               -n aca-petclinic-pre-req \
-              --query properties.outputs.appInsightsConnectionString.value    
+              --query properties.outputs.appInsightsConnectionString.value
+
+          # TODO : once the VNet is created after pre-req, vNetRules must be configured in KV if DEPLOY_TO_VNET=true 
+          vNetRules=[]
+          if (${{ env.DEPLOY_TO_VNET }}) {
+            net1=$(az deployment group show -g ${{ env.RG_APP }} -n aca-petclinic-pre-req --query properties.outputs.acrRegistryUsr.value)
+         
+            var vNetRules = [
+              {
+                'id': vnet.properties.subnets[0].id
+                'ignoreMissingVnetServiceEndpoint': false
+              }
+              {
+                'id': vnet.properties.subnets[1].id
+                'ignoreMissingVnetServiceEndpoint': false
+              }  
+            ]
+          }              
       shell: bash
 
     - name: Authorize local IP to access the Azure Key Vault
