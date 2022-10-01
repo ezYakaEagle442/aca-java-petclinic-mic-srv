@@ -57,9 +57,3 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' = {
 output vnetId string = vnet.id
 output infrastructureSubnetId string = vnet.properties.subnets[0].id
 output infrastructureSubnetAddressPrefix string = vnet.properties.subnets[0].properties.addressPrefix
-
-resource subnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing =  {
-  name: infrastructureSubnetName
-}
-
-// output subnetIpCfgId string = subnet.properties.ipConfigurations[0].id
