@@ -33,7 +33,7 @@ env:
   
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
 on:
-#  workflow_call:
+  workflow_call:
 #    secrets:
 #      registryUserName:
 #        description: 'ACR User Name'
