@@ -209,7 +209,6 @@ module corpManagedEnvironment './modules/aca/acaVNetEnv.bicep' = if (deployToVNe
 module dnsprivatezone './modules/aca/dns.bicep' = if (deployToVNet) {
   name: 'dns-private-zone'
   params: {
-    appName: appName
     location: location
     vnetName: vnetName
     corpManagedEnvironmentStaticIp: corpManagedEnvironment.outputs.corpManagedEnvironmentStaticIp
