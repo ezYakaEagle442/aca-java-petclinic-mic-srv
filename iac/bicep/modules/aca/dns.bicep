@@ -1,14 +1,3 @@
-/*
-Test with
-az deployment group create --name iac-101-aca-dns -f ./aca/dns.bicep -g rg-iac-aca-petclinic-mic-srv \
-    -p appName=petcliaca --debug 
- --what-if to test like a dry-run
-*/
-
-@description('A UNIQUE name')
-@maxLength(20)
-param appName string = '101-${uniqueString(deployment().name)}'
-
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
 
@@ -18,6 +7,11 @@ param vnetName string = 'vnet-aca'
 param corpManagedEnvironmentStaticIp string
 
 /*
+
+@description('A UNIQUE name')
+@maxLength(20)
+param appName string = '101-${uniqueString(deployment().name)}'
+
 @description('The Azure Container App instance name for admin-server')
 param adminServerContainerAppName string = 'aca-${appName}-admin-server'
 
