@@ -233,8 +233,8 @@ module azurecontainerapp './modules/aca/aca.bicep' = {
     springDataSourcePwd: kv.getSecret('SPRING-DATASOURCE-PASSWORD')
     tenantId: tenantId
     subscriptionId: subscriptionId
-    ghaSettingsCfgCredClientId: ghaSettingsCfgCredClientId
-    ghaSettingsCfgCredClientSecret: ghaSettingsCfgCredClientSecret
+    ghaSettingsCfgCredClientId: kv.getSecret('SPN-ID') // ghaSettingsCfgCredClientId
+    ghaSettingsCfgCredClientSecret: kv.getSecret('SPN-PWD') // ghaSettingsCfgCredClientSecret
     ghaSettingsCfgRegistryUserName: ACR.listCredentials().username
     ghaSettingsCfgRegistryPassword: ACR.listCredentials().passwords[0].value
     ghaSettingsCfgRegistryUrl: ACR.properties.loginServer
