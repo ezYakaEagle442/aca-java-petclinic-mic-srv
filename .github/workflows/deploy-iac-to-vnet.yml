@@ -259,14 +259,12 @@ jobs:
             -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
             -p setFwRuleClient=false \
             -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
-            # the here unde rparams would be used ONLY when DEPLOY_TO_VNET=true 
-            -p autoShutdownNotificationEmail "toto@groland.grd" \
-            -p clientIPAddress "10.0.0.42" \
-            -p startIpAddress "10.42.0.0" \
-            -p endIpAddress "10.42.0.255" \
-            -p nsgRuleSourceAddressPrefix "10.0.0.0/16"
+            -p autoShutdownNotificationEmail="toto@groland.grd" \
+            -p clientIPAddress=$LOCAL_IP \
+            -p startIpAddress="10.42.2.0" \
+            -p endIpAddress="10.42.3.255" \
+            -p nsgRuleSourceAddressPrefix="10.0.0.0/16"
             
-
             az deployment group show \
               -g ${{ env.RG_APP }} \
               -n aca-petclinic-pre-req \
