@@ -33,16 +33,15 @@ env:
   
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
 on:
-  workflow_call:
-#    inputs:
+#  workflow_call:
+#    secrets:
 #      registryUserName:
 #        description: 'ACR User Name'
 #        required: true
-#        type: string
 #      registryUserPassword:
 #        description: 'ACR Password'
 #        required: true
-#        type: string
+#    inputs:
 
   push:
     branches:
@@ -109,7 +108,7 @@ jobs:
       uses: Azure/get-keyvault-secrets@v1
       with:
         keyvault: ${{ env.KV_NAME }}
-        secrets: "REGISTRY_USR,REGISTRY_PWD"
+        secrets: "REGISTRY-USR,REGISTRY-PWD"
       id: acrsecrets
       
     # https://github.com/marketplace/actions/azure-container-registry-login
@@ -117,8 +116,8 @@ jobs:
       uses: azure/docker-login@v1
       with:
         login-server: '${{ env.REGISTRY_URL }}' # default: index.docker.io
-        username: '${{ secrets.REGISTRY_USR }}'
-        password: '${{ secrets.REGISTRY_PWD }}'
+        username: '${{ secrets.REGISTRY-USR }}'
+        password: '${{ secrets.REGISTRY-PWD }}'
 
     # https://github.com/marketplace/actions/docker-setup-buildx
     - name: Set up Docker Buildx
@@ -129,8 +128,8 @@ jobs:
       id: admin-server-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{ secrets.REGISTRY_USR }} # The Service Principal credentials : must be stored in KV
-        service_principal_password: ${{ secrets.REGISTRY_PWD }} # The Service Principal credentials: must be stored in KV
+        service_principal: ${{ secrets.REGISTRY-USR }} # The Service Principal credentials : must be stored in KV
+        service_principal_password: ${{ secrets.REGISTRY-PWD }} # The Service Principal credentials: must be stored in KV
         tenant: ${{ env.AZURE_TENANT_ID }} # The ACR tenant
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }} # The ACR name
         repository: ${{ env.REPOSITORY }} # The repository on the ACR
@@ -144,8 +143,8 @@ jobs:
       id: config-server-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{ secrets.REGISTRY_USR }}
-        service_principal_password: ${{ secrets.REGISTRY_PWD }}
+        service_principal: ${{ secrets.REGISTRY-USR }}
+        service_principal_password: ${{ secrets.REGISTRY-PWD }}
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
@@ -158,8 +157,8 @@ jobs:
       id: api-gateway-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{ secrets.REGISTRY_USR }}
-        service_principal_password: ${{ secrets.REGISTRY_PWD }}
+        service_principal: ${{ secrets.REGISTRY-USR }}
+        service_principal_password: ${{ secrets.REGISTRY-PWD }}
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
@@ -172,8 +171,8 @@ jobs:
       id: customer-service-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{ secrets.REGISTRY_USR }}
-        service_principal_password: ${{ secrets.REGISTRY_PWD }}
+        service_principal: ${{ secrets.REGISTRY-USR }}
+        service_principal_password: ${{ secrets.REGISTRY-PWD }}
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
@@ -186,8 +185,8 @@ jobs:
       id: vets-service-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{ secrets.REGISTRY_USR }}
-        service_principal_password: ${{ secrets.REGISTRY_PWD }}
+        service_principal: ${{ secrets.REGISTRY-USR }}
+        service_principal_password: ${{ secrets.REGISTRY-PWD }}
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
@@ -200,8 +199,8 @@ jobs:
       id: visits-service-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{ secrets.REGISTRY_USR }}
-        service_principal_password: ${{ secrets.REGISTRY_PWD }}
+        service_principal: ${{ secrets.REGISTRY-USR }}
+        service_principal_password: ${{ secrets.REGISTRY-PWD }}
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
