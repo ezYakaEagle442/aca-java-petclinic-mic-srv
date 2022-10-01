@@ -1,0 +1,69 @@
+# This workflow will Update all the ACA Apps
+name: Update Apps
+
+env:
+  LOCATION: westeurope
+  RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to update the ACA Apps
+
+  AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
+  REGISTRY_URL: acrpetcliaca.azurecr.io  # set this to the URL of your registry
+  REPOSITORY: petclinic                  # set this to your ACR repository
+
+  ADMIN_SERVER: aca-petclinic-admin-server
+  CONFIG_SERVER: aca-petclinic-config-server
+  DISCOVERY_SERVER: aca-petclinic-discovery-server
+
+  API_GATEWAY: aca-petclinic-api-gateway
+  CUSTOMERS_SERVICE: aca-petclinic-customers-service
+  VETS_SERVICE: aca-petclinic-vets-service
+  VISITS_SERVICE: aca-petclinic-visits-service
+
+  # https://github.com/Azure/actions-workflow-samples/blob/master/assets/create-secrets-for-GitHub-workflows.md#consume-secrets-in-your-workflow
+  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-secrets
+
+  # ==== Secrets ====
+  credentials: ${{ secrets.AZURE_CREDENTIALS }}
+
+  # ==== Versions ====
+  AZ_CLI_VERSION: 2.40.0
+
+on:
+  workflow_dispatch:
+
+jobs:
+  delete-rg:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Azure Login
+      uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
+      with:
+        creds: ${{ env.credentials }}
+
+    - name: Delete Apps
+      uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
+      with:
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        inlineScript: |
+          az config set extension.use_dynamic_install=yes_without_prompt
+          az containerapp update -n azconapps -g rg-azconapps-northeurope --image ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }}:${{ github.sha }}
+          az containerapp update --name aca-${{ env.ADMIN_SERVER }}-customers-service -g ${{ env.RG_APP }} --yes
+          az containerapp update --name aca-${{ env.VISITS_SERVICE }}-customers-service -g ${{ env.RG_APP }} --yes
+          az containerapp update --name aca-${{ env.VETS_SERVICE }}-customers-service -g ${{ env.RG_APP }} --yes
+          az containerapp update --name aca-${{ env.CUSTOMERS_SERVICE }}-customers-service -g ${{ env.RG_APP }} --yes
+          az containerapp update --name aca-${{ env.API_GATEWAY }}-customers-service -g ${{ env.RG_APP }} --yes
+          az containerapp update --name aca-${{ env.CONFIG_SERVER }}-customers-service -g ${{ env.RG_APP }} --yes
+          az containerapp update --name aca-${{ env.DISCOVERY_SERVER }}-customers-service -g ${{ env.RG_APP }} --yes
+
+    # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
+    # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#hardening-for-self-hosted-runners
+    # if the runner is self-hosted which is not github provided it is recommended to manually logout at the end of the workflow as shown below.
+    - name: Azure Logout security hardening
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        inlineScript: |
+          az logout
+          az cache purge
+          az account clear
