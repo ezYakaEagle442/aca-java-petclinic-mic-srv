@@ -245,6 +245,9 @@ jobs:
         echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV     
       shell: bash
 
+    - name: Checkout
+      uses: actions/checkout@v3.0.2 # https://github.com/actions/checkout
+      
     - name: Deploy the pre-req
       run: |
           # --debug # --what-if to test like a dry-run
