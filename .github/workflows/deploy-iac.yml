@@ -88,6 +88,7 @@ jobs:
       # with:
         #azcliversion: ${{ env.AZ_CLI_VERSION }}
         # inlineScript: |
+      shell: bash
       run: |
           echo  +++ START Step - Deploy Azure Key Vault
           # leave this fake dummy accessPoliciesObject empty as anyway SET_KV_ACCESS_POLICIES is set to FALSE at this stage
@@ -124,9 +125,7 @@ jobs:
           az deployment group create --name aca-petclinic-kv -f iac/bicep/modules/kv/kv.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
-            -p location=${{ env.LOCATION }} \
-
-      shell: bash
+            -p location=${{ env.LOCATION }}
 
     # Allow GH Runner to access KV
     # When Public access is disabled on KV, you need to add a network rule in the KV Firewall
@@ -258,7 +257,7 @@ jobs:
             -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
             -p setFwRuleClient=false \
             -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
-            # the here unde rparams would be used ONLY when DEPLOY_TO_VNET=true 
+            # the here under params would be used ONLY when DEPLOY_TO_VNET=true 
             -p autoShutdownNotificationEmail "toto@groland.grd" \
             -p clientIPAddress "10.0.0.42" \
             -p startIpAddress "10.42.0.0" \
@@ -269,7 +268,8 @@ jobs:
             az deployment group show \
               -g ${{ env.RG_APP }} \
               -n aca-petclinic-pre-req \
-              --query properties.outputs.appInsightsConnectionString.value    
+              --query properties.outputs.appInsightsConnectionString.value
+              
       shell: bash
 
     - name: Authorize local IP to access the Azure Key Vault
