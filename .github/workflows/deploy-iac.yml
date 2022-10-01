@@ -229,33 +229,6 @@ jobs:
     #        -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
     #  shell: bash
 
-    # Perform role assigment
-    - name: Azure Key Vault Role assigment
-      uses: azure/CLI@v1
-      with:
-        azcliversion: ${{ env.AZ_CLI_VERSION }}
-        inlineScript: |
-          spnid=${{ env.credentials }}.appId
-          echo "spnid="$spnid
-          az role assignment create --assignee $spnid --scope /subscriptions/${{ env.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RG_KV }}/providers/Microsoft.KeyVault/vaults/${{ env.KV_NAME }} --role "Contributor"
-          # set Access Policies
-          az keyvault set-policy --name ${{ env.KV_NAME }} --spn "spn AppId" -g  ${{ env.RG_KV }} --secret-permissions list get set # --application-id xxx 
-
-    - name: Get MySQL Secrets from Key Vault
-      uses: Azure/get-keyvault-secrets@v1
-      with:
-        keyvault: ${{ env.KV_NAME }}
-        secrets: "MYSQL-SERVER-NAME,MYSQL-SERVER-FULL-NAME,SPRING-DATASOURCE-URL,SPRING-DATASOURCE-USERNAME,SPRING-DATASOURCE-PASSWORD,SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT,SPRING-CLOUD-AZURE-TENANT-ID"
-      id: mysqlsecrets
-
-    - name: Get Client VM Secrets from Key Vault
-      uses: Azure/get-keyvault-secrets@v1
-      if: ${{ env.DEPLOY_TO_VNET }}
-      with:
-        keyvault: ${{ env.KV_NAME }}
-        secrets: "VM-ADMIN-USER-NAME,VM-ADMIN-PASSWORD"
-      id: vmsecrets
-
     - name: Disable local IP access to the Key Vault
       if: ${{ always() }}
       run: |
