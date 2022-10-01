@@ -103,7 +103,7 @@ param ghaSettingsCfgRepoUrl string = 'https://github.com/ezYakaEagle442/aca-java
 
 @description('The GitHub branch name')
 param ghaGitBranchName string = 'main'
-
+/*
 @secure()
 @description('The GitHub Action Settings Configuration / Azure Credentials / Client Id')
 param ghaSettingsCfgCredClientId string
@@ -111,6 +111,7 @@ param ghaSettingsCfgCredClientId string
 @secure()
 @description('The GitHub Action Settings Configuration / Azure Credentials / Client Secret')
 param ghaSettingsCfgCredClientSecret string
+*/
 
 @description('The GitHub Action Settings Configuration / Docker file Path for admin-server Azure Container App ')
 param ghaSettingsCfgDockerFilePathAdminServer string = './docker/petclinic-admin-server/Dockerfile'
@@ -357,20 +358,6 @@ var accessPoliciesObject = {
   ]
 }
 
-// /!\ TO BE FIXED: should apply only when deployToVNet=true
-var vNetRules = [
-  {
-    'id': vnet.properties.subnets[0].id
-    'ignoreMissingVnetServiceEndpoint': false
-  }
-  {
-    'id': vnet.properties.subnets[1].id
-    'ignoreMissingVnetServiceEndpoint': false
-  }  
-]
-
-// allow to Azure Container App subnetID and azureContainerAppIdentity
-// /!\ TO BE FIXED: should apply only when deployToVNet=true
 module KeyVaultAccessPolicies './modules/kv/kv_policies.bicep'= {
   name: 'KeyVaultAccessPolicies'
   scope: resourceGroup(kvRGName)
