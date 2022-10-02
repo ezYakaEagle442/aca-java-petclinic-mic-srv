@@ -12,6 +12,9 @@ param acaVetsServicePrincipalId string
 param acaVisitsServicePrincipalId string
 
 /*
+param vnetName string
+param subnetName string
+
 @allowed([
   'Owner'
   'Contributor'
@@ -20,6 +23,7 @@ param acaVisitsServicePrincipalId string
 ])
 @description('VNet Built-in role to assign')
 param networkRoleType string
+*/
 
 @allowed([
   'KeyVaultAdministrator'
@@ -27,16 +31,14 @@ param networkRoleType string
   'KeyVaultSecretsUser'  
 ])
 @description('KV Built-in role to assign')
-param kvRoleType string
+param kvRoleType string = 'KeyVaultSecretsUser'
 
-param vnetName string
-param subnetName string
 param kvName string
 
 @description('The name of the KV RG')
 param kvRGName string
 
-*/
+
 
 
 // https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
@@ -98,24 +100,40 @@ resource appSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-02-01' existi
   name: '${vnetName}/${subnetName}'
 }
 
+*/
+
 resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
   name: kvName
   scope: resourceGroup(kvRGName)
 }
 
-*/
-
 // You need Key Vault Administrator permission to be able to see the Keys/Secrets/Certificates in the Azure Portal
-/*
-resource KVAdminRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+resource kvSecretsUserRoleAssignmentCustomersService 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
   name: guid(kv.id, kvRoleType , subscription().subscriptionId)
   properties: {
     roleDefinitionId: role[kvRoleType]
-    principalId: acaPrincipalId
+    principalId: acaCustomersServicePrincipalId
     principalType: 'ServicePrincipal'
   }
 }
-*/
+
+resource kvSecretsUserRoleAssignmentVetsService 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(kv.id, kvRoleType , subscription().subscriptionId)
+  properties: {
+    roleDefinitionId: role[kvRoleType]
+    principalId: acaVetsServicePrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource kvSecretsUserRoleAssignmentVisitsService 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(kv.id, kvRoleType , subscription().subscriptionId)
+  properties: {
+    roleDefinitionId: role[kvRoleType]
+    principalId: acaVisitsServicePrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
 
 // https://github.com/Azure/azure-quickstart-templates/blob/master/modules/Microsoft.ManagedIdentity/user-assigned-identity-role-assignment/1.0/main.bicep
 // https://github.com/Azure/bicep/discussions/5276
