@@ -283,7 +283,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
             }                                 
           ]
-          image: '${acrName}/${adminServerContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: '${acrName}/${acrRepository}/${adminServerContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: adminServerContainerAppName
           probes: [
             {
@@ -476,7 +476,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
             }                    
           ]
-          image: '${acrName}/${apiGatewayContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: '${acrName}/${acrRepository}/${apiGatewayContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: apiGatewayContainerAppName
           probes: [
             {
@@ -621,7 +621,7 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
             }
           ]
-          image: '${acrName}/${configServerContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: '${acrName}/${acrRepository}/${configServerContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: configServerContainerAppName
           probes: [
             {
@@ -791,7 +791,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               secretRef: springDataSourceUrl
             }                          
           ]
-          image: '${acrName}/${customersServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: '${acrName}/${acrRepository}/${customersServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: customersServiceContainerAppName
           probes: [
             {
@@ -961,7 +961,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: springDataSourceUrl
             }                      
           ]
-          image: '${acrName}/${vetsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: '${acrName}/${acrRepository}/${vetsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: vetsServiceContainerAppName
           probes: [
             {
@@ -1131,7 +1131,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: springDataSourceUrl
             }                           
           ]
-          image: '${acrName}/${visitsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: '${acrName}/${acrRepository}/${visitsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: visitsServiceContainerAppName
           probes: [
             {
