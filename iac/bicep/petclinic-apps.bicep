@@ -281,13 +281,13 @@ module roleAssignments './modules/aca/roleAssignments.bicep' = {
     acaCustomersServicePrincipalId: CustomersServiceContainerApp.identity.principalId
     acaVetsServicePrincipalId: VetsServiceContainerApp.identity.principalId
     acaVisitsServicePrincipalId: VisitsServiceContainerApp.identity.principalId
+    kvName: kvName
+    kvRGName: kvRGName
+    kvRoleType: 'KeyVaultSecretsUser'
     /*
     vnetName: vnetName
     subnetName: infrastructureSubnetName
-    kvName: kvName
-    kvRGName: kvRGName
     networkRoleType: 'Owner'
-    kvRoleType: 'KeyVaultReader'
     */
   }
   dependsOn: [
