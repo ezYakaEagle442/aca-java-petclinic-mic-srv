@@ -126,7 +126,7 @@ jobs:
         azcliversion: ${{ env.AZ_CLI_VERSION }}
         inlineScript: |
           az keyvault network-rule add --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
-          sleep 30
+          sleep 10
           
     # https://github.com/Azure/get-keyvault-secrets Action is deprecated "REGISTRY-USR,REGISTRY-PWD" ${{ env.KV_NAME }}
     - name: Get ACR Credentials Secrets from Key Vault

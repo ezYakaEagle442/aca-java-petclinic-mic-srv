@@ -105,7 +105,7 @@ jobs:
     - name: Authorize local IP to access the Azure Key Vault
       run: |
           az keyvault network-rule add --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
-          sleep 30
+          sleep 10
       shell: bash
 
     # Now that GH Runner is Allowed to access KV, create the secrets
@@ -264,7 +264,7 @@ jobs:
     - name: Authorize local IP to access the Azure Key Vault
       run: |
           az keyvault network-rule add --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
-          sleep 30
+          sleep 10
       shell: bash
 
     - name: Create REGISTRY-USR secret in Azure Key Vault
