@@ -269,7 +269,7 @@ jobs:
 
     - name: Create REGISTRY-USR secret in Azure Key Vault
       run: |
-          acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n aca-petclinic-pre-req --query properties.outputs.acrRegistryUsr.value)
+          acr_usr=$(az acr credential show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }}  --query username)
           az deployment group create --name aca-petclinic-kv-sec-acr-usr -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
@@ -280,7 +280,7 @@ jobs:
 
     - name: Create REGISTRY-PWD secret in Azure Key Vault
       run: |
-          acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n aca-petclinic-pre-req --query properties.outputs.acrRegistryPwd.value)
+          acr_pwd=$(az acr credential show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }}  --query passwords[0].value)
           az deployment group create --name aca-petclinic-kv-sec-acr-pwd -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
