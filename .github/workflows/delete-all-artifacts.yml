@@ -1,4 +1,5 @@
-name: Delete All the jar Arfifacts
+name: Delete All the jar Arfifacts from GitHub Packages
+# https://github.com/${{ GITHUB_REPOSITORY }}/packages/"
 # You need at least delete:packages and read:packages scopes to delete a package
 on:
   workflow_dispatch:
@@ -14,7 +15,6 @@ env:
   VETS_SERVICE: vets-service
   VISITS_SERVICE: visits-service
 
-  # useless as config & discovery server are managed by Azure Spring Apps
   CONFIG_SERVER: config-server
   DISCOVERY_SERVER: discovery-server
 
@@ -109,9 +109,10 @@ jobs:
         curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" ${{ env.VETS_SERVICE_API_URL }}
         curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" ${{ env.VISITS_SERVICE_API_URL }}
 
-        curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" ${{ env.GH_API }}/org.springframework.samples.${{ env.PRJ_PREFIX }}-spring-petclinic-microservices
+        curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" https://${{ env.GH_API }}/org.springframework.samples.${{ env.PRJ_PREFIX }}-spring-petclinic-microservices
         # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
-        echo "All artifacts have been deleted, check at https://github.com/${{ GITHUB_REPOSITORY }}/packages/"
+        # https://learn.microsoft.com/en-us/azure/developer/github/github-variable-substitution
+        echo "All artifacts have been deleted, check at https://github.com/${{github.repository}}/packages/"
       shell: bash
       env:
         GHA_PAT: ${{ secrets.PKG_PAT }}
