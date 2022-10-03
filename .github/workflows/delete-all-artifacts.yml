@@ -100,6 +100,7 @@ jobs:
     # You can  download all artifacts in a workflow run by not specifying a name.
     - name: Delete ALL Jar artifacts
       run: |
+        echo "About to delete all jars files ..."
         curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" ${{ env.ADMIN_SERVER_API_URL }}
         curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" ${{ env.API_GATEWAY_API_URL }}
         curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" ${{ env.CONFIG_SERVER_API_URL }}
@@ -108,7 +109,8 @@ jobs:
         curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" ${{ env.VETS_SERVICE_API_URL }}
         curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" ${{ env.VISITS_SERVICE_API_URL }}
 
-        curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" ${{ env.GH_API }}/org.springframework.samples.${{ env.PRJ_PREFIX }}-spring-petclinic-microservices/spring-petclinic-microservices
+        curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" ${{ env.GH_API }}/org.springframework.samples.${{ env.PRJ_PREFIX }}-spring-petclinic-microservices
+        echo "All artifacts have been deleted, check at https://github.com/${{ github.event.repository.owner.name }}/aca-java-petclinic-mic-srv/packages/"
       shell: bash
       env:
         GHA_PAT: ${{ secrets.PKG_PAT }}
