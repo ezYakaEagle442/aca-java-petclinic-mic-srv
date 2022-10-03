@@ -17,12 +17,12 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>aca-spring-petclinic-config-server</module>
-        <module>aca-spring-petclinic-admin-server</module>
-        <module>aca-spring-petclinic-customers-service</module>
-        <module>aca-spring-petclinic-vets-service</module>
-        <module>aca-spring-petclinic-visits-service</module>
-        <module>aca-spring-petclinic-api-gateway</module>
+        <module>spring-petclinic-config-server</module>
+        <module>spring-petclinic-admin-server</module>
+        <module>spring-petclinic-customers-service</module>
+        <module>spring-petclinic-vets-service</module>
+        <module>spring-petclinic-visits-service</module>
+        <module>spring-petclinic-api-gateway</module>
     </modules>
 
     <properties>
