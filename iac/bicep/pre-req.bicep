@@ -154,8 +154,8 @@ module defaultPublicManagedEnvironment './modules/aca/acaPublicEnv.bicep' = if (
 }
 
 
-module mysql './modules/mysql/mysql.bicep' = {
-  name: 'mysqldb'
+module mysqlPub './modules/mysql/mysql.bicep' = {
+  name: 'mysqldbpub'
   params: {
     appName: appName
     location: location
@@ -166,7 +166,7 @@ module mysql './modules/mysql/mysql.bicep' = {
     serverName: kv.getSecret('MYSQL-SERVER-NAME')
     administratorLogin: kv.getSecret('SPRING-DATASOURCE-USERNAME')
     administratorLoginPassword: kv.getSecret('SPRING-DATASOURCE-PASSWORD')
-    azureContainerAppsOutboundPubIP: corpManagedEnvironment.outputs.corpManagedEnvironmentStaticIp // CustomersServiceContainerApp.properties.outboundIPAddresses[0]
+    azureContainerAppsOutboundPubIP: defaultPublicManagedEnvironment.outputs.corpManagedEnvironmentStaticIp
   }
 }
 
@@ -215,6 +215,22 @@ module corpManagedEnvironment './modules/aca/acaVNetEnv.bicep' = if (deployToVNe
     appInsights
     vnetModule
   ]
+}
+
+module mysqlWithCorpEnv './modules/mysql/mysql.bicep' = if (deployToVNet) {
+  name: 'mysqldbcorpenv'
+  params: {
+    appName: appName
+    location: location
+    setFwRuleClient: setFwRuleClient
+    clientIPAddress: clientIPAddress
+    startIpAddress: startIpAddress
+    endIpAddress: endIpAddress
+    serverName: kv.getSecret('MYSQL-SERVER-NAME')
+    administratorLogin: kv.getSecret('SPRING-DATASOURCE-USERNAME')
+    administratorLoginPassword: kv.getSecret('SPRING-DATASOURCE-PASSWORD')
+    azureContainerAppsOutboundPubIP: corpManagedEnvironment.outputs.corpManagedEnvironmentStaticIp
+  }
 }
 
 module dnsprivatezone './modules/aca/dns.bicep' = if (deployToVNet) {
