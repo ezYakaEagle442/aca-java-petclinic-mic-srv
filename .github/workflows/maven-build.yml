@@ -133,7 +133,7 @@ jobs:
         tenant: ${{ env.AZURE_TENANT_ID }} # The ACR tenant
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }} # The ACR name
         repository: ${{ env.REPOSITORY }} # The repository on the ACR
-        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.ADMIN_SERVER }} # Docker image name. Default tag: The action will default to use the first 8 characters of the commit SHA if no tag is specified. Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+        image: ${{ env.ADMIN_SERVER }}:${{ github.sha }} # Docker image name. Default tag: The action will default to use the first 8 characters of the commit SHA if no tag is specified. Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
         # git_access_token: ${{ secrets.git_access_token }} # The Github access token for private repositories
         folder: docker/ # Build context for Docker agent
         dockerfile: ./petclinic-admin-server/Dockerfile # Path to the Dockerfile relative to `folder`
@@ -148,7 +148,7 @@ jobs:
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
-        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.CONFIG_SERVER }}
+        image: ${{ env.CONFIG_SERVER }}:${{ github.sha }}
         folder: docker/
         dockerfile: ./petclinic-config-server/Dockerfile
         branch: main
@@ -162,9 +162,9 @@ jobs:
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
-        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.API_GATEWAY }}
+        image: ${{ env.API_GATEWAY }}:${{ github.sha }}
         folder: docker/
-        dockerfile: ./petclinic-admin-server/Dockerfile
+        dockerfile: ./petclinic-api-gateway/Dockerfile
         branch: main
 
     - name: customer-service ACR build
@@ -176,7 +176,7 @@ jobs:
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
-        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.CUSTOMERS_SERVICE }}
+        image: ${{ env.CUSTOMERS_SERVICE }}:${{ github.sha }}
         folder: docker/
         dockerfile: ./petclinic-customers-service/Dockerfile
         branch: main        
@@ -190,7 +190,7 @@ jobs:
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
-        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.VETS_SERVICE }}
+        image: ${{ env.VETS_SERVICE }}:${{ github.sha }}
         folder: docker/
         dockerfile: ./petclinic-vets-service/Dockerfile
         branch: main
@@ -204,9 +204,9 @@ jobs:
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
-        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.VISITS_SERVICE }}
+        image: ${{ env.VISITS_SERVICE }}:${{ github.sha }}
         folder: docker/
-        dockerfile: ./petclinic-admin-server/Dockerfile
+        dockerfile: ./petclinic-visits-service/Dockerfile
         branch: main
 
     - name: Disable local IP access to the Key Vault
