@@ -43,13 +43,13 @@ jobs:
         azcliversion: ${{ env.AZ_CLI_VERSION }}
         inlineScript: |
           az config set extension.use_dynamic_install=yes_without_prompt
-          az containerapp delete --name aca-${{ env.ADMIN_SERVER }}-customers-service -g ${{ env.RG_APP }} --yes
-          az containerapp delete --name aca-${{ env.VISITS_SERVICE }}-customers-service -g ${{ env.RG_APP }} --yes
-          az containerapp delete --name aca-${{ env.VETS_SERVICE }}-customers-service -g ${{ env.RG_APP }} --yes
-          az containerapp delete --name aca-${{ env.CUSTOMERS_SERVICE }}-customers-service -g ${{ env.RG_APP }} --yes
-          az containerapp delete --name aca-${{ env.API_GATEWAY }}-customers-service -g ${{ env.RG_APP }} --yes
-          az containerapp delete --name aca-${{ env.CONFIG_SERVER }}-customers-service -g ${{ env.RG_APP }} --yes
-          az containerapp delete --name aca-${{ env.DISCOVERY_SERVER }}-customers-service -g ${{ env.RG_APP }} --yes
+          az containerapp delete --name ${{ env.ADMIN_SERVER }} -g ${{ env.RG_APP }} --yes
+          az containerapp delete --name ${{ env.VISITS_SERVICE }} -g ${{ env.RG_APP }} --yes
+          az containerapp delete --name ${{ env.VETS_SERVICE }} -g ${{ env.RG_APP }} --yes
+          az containerapp delete --name ${{ env.CUSTOMERS_SERVICE }} -g ${{ env.RG_APP }} --yes
+          az containerapp delete --name ${{ env.API_GATEWAY }} -g ${{ env.RG_APP }} --yes
+          az containerapp delete --name ${{ env.CONFIG_SERVER }} -g ${{ env.RG_APP }} --yes
+          az containerapp delete --name ${{ env.DISCOVERY_SERVER }} -g ${{ env.RG_APP }} --yes
 
     # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
     # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#hardening-for-self-hosted-runners

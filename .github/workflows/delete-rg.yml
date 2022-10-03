@@ -47,11 +47,7 @@ jobs:
       with:
         azcliversion: ${{ env.AZ_CLI_VERSION }}
         inlineScript: |
-
-          # tenantId=$(az account show --query tenantId -o tsv)
-          # echo AZURE_TENANT_ID >> $GITHUB_ENV
-
-          # Check, choose a Region with AZ : https://docs.microsoft.com/en-us/azure/availability-zones/az-overview#azure-regions-with-availability-zones
+          az config set extension.use_dynamic_install=yes_without_prompt
           # az group delete --name ${{ env.RG_KV }} --yes
           az group delete --name ${{ env.RG_APP }} --yes
 
