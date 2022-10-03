@@ -78,7 +78,9 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
 }
 
 output keyVault object = kv
-
+output keyVaultId string = kv.id
+output keyVaultPublicNetworkAccess string = kv.properties.publicNetworkAccess
+output keyVaultURI string = kv.properties.vaultUri
 
 // /!\ In the GHA Workflow, KV must be created firstly, then 'az keyvault network-rule add' must be completed
 // only then ./kv/kv_sec_key.bicep' can be called to create the secrets 
