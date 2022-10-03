@@ -139,17 +139,11 @@ jobs:
       with:
         azcliversion: ${{ env.AZ_CLI_VERSION }}
         inlineScript: |
-          acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryUsr.value)
-          acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryPwd.value)
-          
-          echo usr : $acr_usr
-          echo pwd : $acr_pwd
+          #acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryUsr.value)
+          #acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryPwd.value)
           
           acr_usr=$(az keyvault secret show -n REGISTRY-USR --vault-name ${{ env.KV_NAME }} --query value)
           acr_pwd=$(az keyvault secret show -n REGISTRY-PWD --vault-name ${{ env.KV_NAME }} --query value)
-
-          echo acr_usr : $acr_usr
-          echo pwd : $acr_pwd
 
           echo "::set-output name=acr_usr::$acr_usr"
           echo "::set-output name=acr_pwd::$acr_pwd"
