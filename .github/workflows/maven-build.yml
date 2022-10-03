@@ -74,10 +74,11 @@ jobs:
     
     - name: Build with Maven
       run: |
+        pwd
+        ls -al
         mvn -B clean package --file pom.xml -DskipTests -Denv=cloud
         echo "github.workspace = ${{ github.workspace }}"
-        pwd
-
+        
         ls -al
         ls -al spring-petclinic-admin-server/target/*.jar
         ls -al spring-petclinic-api-gateway/target/*.jar
@@ -156,7 +157,7 @@ jobs:
         azcliversion: ${{ env.AZ_CLI_VERSION }}
         inlineScript: |
           az keyvault network-rule remove --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
-          
+
     # https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs
     outputs:
       acr_usr: ${{ steps.acr_creds.outputs.acr_usr }}
