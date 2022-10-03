@@ -224,6 +224,9 @@ module dnsprivatezone './modules/aca/dns.bicep' = if (deployToVNet) {
     vnetName: vnetName
     corpManagedEnvironmentStaticIp: corpManagedEnvironment.outputs.corpManagedEnvironmentStaticIp
   }
+  dependsOn: [
+    vnetModule 
+  ]   
 }
 
 module clientVM './modules/aca/client-vm.bicep' = if (deployToVNet) {
