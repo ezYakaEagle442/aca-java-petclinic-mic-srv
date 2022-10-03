@@ -147,7 +147,12 @@ module defaultPublicManagedEnvironment './modules/aca/acaPublicEnv.bicep' = if (
     logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
     logDestination: logDestination
   }
+  dependsOn: [
+    logAnalyticsWorkspace
+    appInsights
+  ]
 }
+
 
 module mysql './modules/mysql/mysql.bicep' = {
   name: 'mysqldb'
@@ -205,7 +210,13 @@ module corpManagedEnvironment './modules/aca/acaVNetEnv.bicep' = if (deployToVNe
     platformReservedDnsIP: platformReservedDnsIP
     dockerBridgeCidr: dockerBridgeCidr
   }
+  dependsOn: [
+    logAnalyticsWorkspace
+    appInsights
+    vnetModule
+  ]
 }
+
 module dnsprivatezone './modules/aca/dns.bicep' = if (deployToVNet) {
   name: 'dns-private-zone'
   params: {
@@ -230,5 +241,9 @@ module clientVM './modules/aca/client-vm.bicep' = if (deployToVNet) {
      nicName: nicName
      nsgName: nsgName
      nsgRuleName: nsgRuleName
-  }   
+  }
+  dependsOn: [
+    vnetModule
+    dnsprivatezone    
+  ]  
 }
