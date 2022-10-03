@@ -146,6 +146,8 @@ az keyvault set-policy -n $KV_NAME --secret-permissions get list --spn $SPN_ID
 
 Finally Create a GH [PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) to [publish ACA Revisions with GHA](https://learn.microsoft.com/en-us/azure/container-apps/github-actions-cli?tabs=bash#authentication)
 
+<span style="color:red">**Your GitHub personal access token needs to have the workflow scope selected.**
+
 
 ## Pipelines
 
