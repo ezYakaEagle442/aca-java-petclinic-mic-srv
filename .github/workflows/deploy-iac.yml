@@ -218,15 +218,15 @@ jobs:
             -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
       shell: bash
 
-    #- name: Create SPRING-DATASOURCE-URL secret in Azure Key Vault
-    #  run: |
-    #      az deployment group create --name aca-petclinic-kv-sec3 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} --debug \
-    #        -p appName=${{ env.APP_NAME }} \
-    #        -p kvName=${{ env.KV_NAME }} \
-    #        -p secretName="SPRING-DATASOURCE-URL" \
-    #        -p secretValue=${{ secrets.SPRING_DATASOURCE_URL }} \
-    #        -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
-    #  shell: bash
+    - name: Create SPRING-DATASOURCE-URL secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-sec3 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} --debug \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="SPRING-DATASOURCE-URL" \
+            -p secretValue=${{ secrets.SPRING_DATASOURCE_URL }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+      shell: bash
 
     - name: Disable local IP access to the Key Vault
       if: ${{ always() }}
