@@ -62,13 +62,6 @@ jobs:
       packages: write    
     steps:
 
-    # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
-    # /!\ IMPORTANT:  The step that creates or updates the environment variable does not have access to the new value, but all subsequent steps in a job will have access.
-    - name: Set Base environment variables
-      run: |
-        echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV        
-      shell: bash
-
     - name: Checkout
       uses: actions/checkout@v3
       
@@ -117,6 +110,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    
+    # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
+    # /!\ IMPORTANT:  The step that creates or updates the environment variable does not have access to the new value, but all subsequent steps in a job will have access.
+    - name: Set Base environment variables
+      run: |
+        echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV        
+      shell: bash
+
     - name: Azure Login
       uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
       with:
@@ -148,6 +149,14 @@ jobs:
           echo "::set-output name=acr_usr::$acr_usr"
           echo "::set-output name=acr_pwd::$acr_pwd"
 
+    - name: Disable local IP access to the Key Vault
+      uses: azure/CLI@v1
+      if: ${{ always() }}
+      with:
+        azcliversion: ${{ env.AZ_CLI_VERSION }}
+        inlineScript: |
+          az keyvault network-rule remove --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
+          
     # https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs
     outputs:
       acr_usr: ${{ steps.acr_creds.outputs.acr_usr }}
@@ -254,16 +263,6 @@ jobs:
         folder: docker/
         dockerfile: ./petclinic-visits-service/Dockerfile
         branch: main
-
-    - name: Disable local IP access to the Key Vault
-      uses: azure/CLI@v1
-      if: ${{ always() }}
-      with:
-        azcliversion: ${{ env.AZ_CLI_VERSION }}
-        inlineScript: |
-          az keyvault network-rule remove --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
-
-
 
     #- name: Build XXX image and push it to ACR
     #  uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
