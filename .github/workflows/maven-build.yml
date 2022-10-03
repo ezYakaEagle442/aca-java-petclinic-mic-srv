@@ -57,6 +57,9 @@ jobs:
 
   maven-build:
     runs-on: ubuntu-latest
+    permissions: 
+      contents: read
+      packages: write    
     steps:
 
     # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
@@ -91,6 +94,7 @@ jobs:
         ls -al spring-petclinic-visits-service/target/*.jar
 
     # https://docs.github.com/en/packages/learn-github-packages/introduction-to-github-packages
+    # https://docs.github.com/en/actions/security-guides/automatic-token-authentication
     # To authenticate to a GitHub Packages registry within a GitHub Actions workflow, you can use
     # GITHUB_TOKEN to publish packages associated with the workflow repository.
 
@@ -107,7 +111,7 @@ jobs:
         REPO="github-aca::default::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
         mvn deploy -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" --batch-mode -DskipTests -Dmaven.install.skip=true
       env:
-        GITHUB_TOKEN: ${{ secrets.PKG_PAT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   get-acr-creds:
     runs-on: ubuntu-latest
