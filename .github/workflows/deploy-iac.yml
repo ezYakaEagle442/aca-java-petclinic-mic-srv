@@ -288,7 +288,7 @@ jobs:
           # az acr show  -n acrpetcliaca -g ${{ env.RG_APP }} --query loginServer
           # acr_usr=$(az acr credential show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }}  --query username)
           # acr_usr value returned contains quotes "acrpetcliaca" ==> sed -i 's/\"//g' foo.txt
-          acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryUsr.value) | tr -d '"'
+          acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryUsr.value) # | tr -d '"'
           
           az deployment group create --name aca-petclinic-kv-sec-acr-usr -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
@@ -301,7 +301,7 @@ jobs:
     - name: Create REGISTRY-PWD secret in Azure Key Vault
       run: |
           # acr_pwd=$(az acr credential show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }}  --query passwords[0].value)
-          acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryPwd.value) | tr -d '"'
+          acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryPwd.value) # | tr -d '"'
           
           az deployment group create --name aca-petclinic-kv-sec-acr-pwd -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
