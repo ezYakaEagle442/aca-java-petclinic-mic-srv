@@ -10,7 +10,7 @@ urlFragment: "spring-petclinic-microservices"
 
 # Distributed version of the Spring PetClinic Sample Application deployed to Azure Container Apps
 
-[![Build Status](https://github.com/spring-petclinic/spring-petclinic-microservices/actions/workflows/maven-build.yml/badge.svg)](https://github.com/spring-petclinic/spring-petclinic-microservices/actions/workflows/maven-build.yml)
+[![Build Status](https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv/actions/workflows/maven-build.yml/badge.svg)](https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv/actions/workflows/maven-build.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 This microservices branch was initially derived from [AngularJS version](https://github.com/spring-petclinic/spring-petclinic-angular1) to demonstrate how to split sample Spring application into [microservices](http://www.martinfowler.com/articles/microservices.html).
@@ -37,54 +37,41 @@ Read :
 - [https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven](https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven)
 
 
-Add the App secrets used by the Spring Config to your GH repo secrets / Actions secrets / Repository secrets / Add 'SECRET_OBJECT'.
+You have to specify all [KV secrets](./iac/bicep/modules/kv/kv_sec_key.bicep#L25) that will be then created in the GitHub Action [Azure Infra services deployment workflow](./.github/workflows/deploy-iac.yml#L140) :
+- MYSQL-SERVER-NAME
+- MYSQL-SERVER-FULL-NAME
+- SPRING-DATASOURCE-URL
+- SPRING-DATASOURCE-USERNAME
+- SPRING-DATASOURCE-PASSWORD
+- SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT
+- SPRING-CLOUD-AZURE-TENANT-ID
+- VM-ADMIN-USER-NAME
+- VM-ADMIN-PASSWORD
 
-Specifies all [KV secrets](./iac/bicep/kv/parameters-kv.json#L14) {"secretName":"","secretValue":""} that will be then wrapped in a secret object 'SECRET_OBJECT' in the GitHub Action [Azure Infra services deployment workflow](./.github/workflows/deploy-iac.yml#L53).
+dash '-' are not supported in GH secrets, so the secrets must be named in GH with underscore '_'.
+Also the '&' character in the SPRING_DATASOURCE_URL must be escaped with '\&'
 
-```sh
-"secrets": [
-  {
-    "secretName": "MYSQL-SERVER-NAME",
-    "secretValue": "petclinic777"
-  },
-  {
-    "secretName": "MYSQL-SERVER-FULL-NAME",
-    "secretValue": "petclinic777.mysql.database.azure.com"
-  },            
-  {
-    "secretName": "SPRING-DATASOURCE-URL",
-    "secretValue": "jdbc:mysql://petclinic777.mysql.database.azure.com:3306/petclinic?useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.2&verifyServerCertificate=true"
-  },   
-  {
-    "secretName": "SPRING-DATASOURCE-USERNAME",
-    "secretValue": "dolphin_adm"
-  },
-  {
-    "secretName": "SPRING-DATASOURCE-PASSWORD",
-    "secretValue": "PUT YOUR PASSWORD HERE"
-  },   
-  {
-    "secretName": "SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT",
-    "secretValue": "https://kv-petclinic777.vault.azure.net/"
-  },
-  {
-    "secretName": "SPRING-CLOUD-AZURE-TENANT-ID",
-    "secretValue": "PUT YOUR AZURE TENANT ID HERE"
-  },
-  {
-    "secretName": "VM-ADMIN-USER-NAME",
-    "secretValue": "PUT YOUR AZURE Windows client VM JumpOff Admin User Name HERE"
-  },
-  {
-    "secretName": "VM-ADMIN-PASSWORD",
-    "secretValue": "PUT YOUR PASSWORD HERE"
-  }          
-]
-```
+Add the App secrets used by the Spring Config to your GH repo secrets / Actions secrets / Repository secrets / Add :
 
-```bash  
-az group create --name ${{ env.RG_KV }} --location ${{ env.LOCATION }}
-az group create --name ${{ env.RG_APP }} --location ${{ env.LOCATION }}
+Secret Name	| Secret Value example
+-------------:|:-------:
+MYSQL_SERVER_NAME | petclinic777
+MYSQL_SERVER_FULL_NAME | petclinic777.mysql.database.azure.com
+SPRING_DATASOURCE_URL | jdbc:mysql://petcliaca.mysql.database.azure.com:3306/petclinic?useSSL=true\&requireSSL=true\&enabledTLSProtocols=TLSv1.2\&verifyServerCertificate=true
+SPRING_DATASOURCE_USERNAME | dolphin_adm
+SPRING_DATASOURCE_PASSWORD | PUT YOUR PASSWORD HERE
+SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT | https://kv-petclinic777.vault.azure.net/
+SPRING_CLOUD_AZURE_TENANT_ID | PUT YOUR AZURE TENANT ID HERE
+VM_ADMIN_USER_NAME | PUT YOUR AZURE Windows client VM JumpOff Admin User Name HERE
+VM_ADMIN_PASSWORD | PUT YOUR PASSWORD HERE
+
+```bash
+LOCATION="westeurope"
+RG_KV="rg-iac-kv777"
+RG_APP="rg-iac-aca-petclinic-mic-srv"
+
+az group create --name $RG_KV --location $LOCATION
+az group create --name $RG_APP --location $LOCATION
 ```
 
 A Service Principal is required for GitHub Action Runner, read [https://aka.ms/azadsp-cli](https://aka.ms/azadsp-cli)
@@ -106,13 +93,10 @@ Add your AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID to your GH repo secrets / Action
 Read [https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Cwindows#create-a-service-principal-and-add-it-as-a-github-secret)
 
 
+In the GitHub Action Runner, to allow the Service Principal used to access the Key Vault, execute the command below:
 ```sh
-# other way to create the SPN :
 # SPN_PWD=$(az ad sp create-for-rbac --name $SPN_APP_NAME --skip-assignment --query password --output tsv)
 az ad sp create-for-rbac --name $SPN_APP_NAME
-
-
-az role assignment create --assignee $SPN_APP_NAME --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV}
 ```
 
 ```console
@@ -129,36 +113,35 @@ az role assignment create --assignee $SPN_APP_NAME --scope /subscriptions/${SUBS
   "managementEndpointUrl": "https://management.core.windows.net/"
 }
 ```
+
+```sh
+#SPN_ID=$(az ad sp list --all --query "[?appDisplayName=='${SPN_APP_NAME}'].{appId:appId}" --output tsv)
+SPN_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME}'].{id:appId}" --output tsv)
+TENANT_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME}'].{t:appOwnerOrganizationId}" --output tsv)
+
+# the assignee is an appId
+az role assignment create --assignee $SPN_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV} --role contributor
+az role assignment create --assignee $SPN_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_APP} --role contributor
+```
+
 Read :
 - [Use GitHub Actions to connect to Azure documentation](https://docs.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Cwindows).
 - [https://github.com/Azure/login#configure-a-service-principal-with-a-secret](https://github.com/Azure/login#configure-a-service-principal-with-a-secret)
 
-Paste in your JSON object for your service principal with the name AZURE_CREDENTIALS as secrets to your GH repo secrets / Actions secrets / Repository secrets.
+Paste in your JSON object for your service principal with the name **AZURE_CREDENTIALS** as secrets to your GH repo secrets / Actions secrets / Repository secrets.
 
-
-
-In the GitHub Action Runner, to allow the Service Principal used to access the Key Vault, execute the command below:
+You can test your connection with CLI :
 ```sh
-az role assignment create --assignee --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV}/providers/Microsoft.KeyVault/vaults/${KV_NAME} --role contributor 
-
-#SP_ID=$(az ad sp show --id http://$appName --query objectId -o tsv)
-#SP_ID=$(az ad sp list --all --query "[?appDisplayName=='${appName}'].{appId:appId}" --output tsv)
-SPN_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME}'].{id:appId}" --output tsv)
-TENANT_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME}'].{t:appOwnerTenantId}" --output tsv)
+az login --service-principal -u $SPN_ID -p SPN_PWD --tenant $TENANT_ID
 ```
 
 Add SUBSCRIPTION_ID, TENANT_ID, SPN_ID and SPN_PWD as secrets to your GH repo secrets / Actions secrets / Repository secrets
 
-
-In the GitHub Action Runner, to allow the Service Principal used to access to the Azure Container Registry, build & push images: Create an SP with Contributorrole , read [ACR Roles doc](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-roles)
-```sh
-az ad sp create-for-rbac -n "aca-acr-build-task"
-az role assignment create --assignee $SPN_ID --scope <resourceID of the ACR> --role "Contributor"
-```
-
+<span style="color:red">**Be aware that at this stage KV is not created yet, it must exist first to set-policy**</span>
 Then, follow the here under step to add access policy for the Service Principal.
 ```sh
-az keyvault set-policy -n $KV_NAME --secret-permissions get list --spn <clientId from the Azure SPN JSON>
+KV_NAME="kv-petcliaca442"
+az keyvault set-policy -n $KV_NAME --secret-permissions get list --spn $SPN_ID
 ```
 
 Finally Create a GH [PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) to [publish ACA Revisions with GHA](https://learn.microsoft.com/en-us/azure/container-apps/github-actions-cli?tabs=bash#authentication)
@@ -172,6 +155,8 @@ See GitHub Actions :
 - [Java Apps Deploy workflow](./.github/workflows/deploy-apps.yml)
 - [Delete ALL the Azure Infra services workflow, except KeyVault](./.github/workflows/delete-rg.yml)
 
+Note: the GH Hosted Runner / [Ubuntu latest image has already Azure CLI installed](https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md#cli-tools)
+
 # Deploy Azure Container Apps and the petclinic microservices Apps with IaC
 
 You can read the [Bicep section](iac/bicep/README.md) but you do not have to run it through CLI, instead you can manually trigger the GitHub Action [deploy-iac.yml](./.github/workflows/deploy-iac.yml), see the Workflow in the next [section](#iac-deployment-flow)
@@ -184,9 +169,9 @@ see the [ACA doc](https://learn.microsoft.com/en-us/azure/container-apps/firewal
 By default the Azure Container Apps [Environment](https://learn.microsoft.com/en-us/azure/container-apps/networking) is deployed as external resources and are available for public requests, i.e not deployed to a VNet. 
 (External environments are deployed with a virtual IP on an external, public facing IP address.)
 
-- [Bicep ](./iac/bicep/aca/acaPublicEnv.bicep#L30)
+- [Bicep ](./iac/bicep/modules/aca/acaPublicEnv.bicep#L30)
 ```code
-param deployToVNet bool = true
+param deployToVNet bool = false
 ```
 
 - [Azure Infra services deployment workflow](./.github/workflows/deploy-iac.yml#L13)
@@ -200,25 +185,23 @@ To Deploy the Apps into your VNet, see [Deployment to VNet section](#deployment-
 ```
 ├── Create RG
 │
-├── Create [KV](./iac/bicep/kv/kv.bicep)
-│   ├── Create [KV](./iac/bicep/kv/kv.bicep#L61)
-│   └── Create [KV Secrets](./iac/bicep/kv/kv.bicep#L99)
-│   └── No KV [Access Policies](./iac/bicep/kv/kv.bicep#L113) will be created at this stage because SET_KV_ACCESS_POLICIES is FALSE
-├── Create [pre-requisites](./iac/bicep/aca/pre-req.bicep)
-│   ├── Create [logAnalyticsWorkspace](./iac/bicep/aca/pre-req.bicep#L93)
-│   ├── Create [appInsights](./iac/bicep/aca/pre-req.bicep#L110)
-│   ├── Call [ACR Module](./iac/bicep/aca/pre-req.bicep#L129)
-│   ├── Call [ACA Module defaultPublicManagedEnvironment](./iac/bicep/aca/pre-req.bicep#L140)
-│   ├── Call [MySQL Module](./iac/bicep/aca/pre-req.bicep#L152)
-│   ├── Call [VNet Module](./iac/bicep/aca/pre-req.bicep#L169)
+├── Create [KV](./iac/bicep/modules/kv/kv.bicep)
+│   ├── Create [KV](./iac/bicep/modules/kv/kv.bicep#L46)
+├── Create [pre-requisites](./iac/bicep/pre-req.bicep)
+│   ├── Create [logAnalyticsWorkspace](./iac/bicep/pre-req.bicep#L93)
+│   ├── Create [appInsights](./iac/bicep/pre-req.bicep#L110)
+│   ├── Call [ACR Module](./iac/bicep/pre-req.bicep#L129)
+│   ├── Call [ACA Module defaultPublicManagedEnvironment](./iac/bicep/pre-req.bicep#L140)
+│   ├── Call [MySQL Module](./iac/bicep/pre-req.bicep#L152)
+│   ├── Call [VNet Module](./iac/bicep/pre-req.bicep#L169)
 └── If deployToVNet=true
-│   ├── Call [ACA Module corpManagedEnvironment](./iac/bicep/aca/pre-req.bicep#L185)
-│   ├── Call [DNS Private-Zone Module](./iac/bicep/aca/pre-req.bicep#L204)
-│   ├── Call [ClientVM Module](./iac/bicep/aca/pre-req.bicep#L214)
-├── Run the [Main](./iac/bicep/aca/main.bicep)
-│   ├── Call [ACA Module](./iac/bicep/aca/main.bicep#225)
-│   ├── Call [roleAssignments Module](./iac/bicep/aca/main.bicep#284)
-│   ├── Call [KV Module](./iac/bicep/aca/main.bicep#284) with SET_KV_ACCESS_POLICIES to TRUE
+│   ├── Call [ACA Module corpManagedEnvironment](./iac/bicep/modules/aca/pre-req.bicep#L185)
+│   ├── Call [DNS Private-Zone Module](./iac/bicep/modules/aca/pre-req.bicep#L209)
+│   ├── Call [ClientVM Module](./iac/bicep/modules/aca/pre-req.bicep#L214)
+├── Run the [Main](./iac/bicep/petclinic-apps.bicep)
+│   ├── Call [ACA Module](./iac/bicep/modules/aca/aca.bicep#185)
+│   ├── Call [roleAssignments Module](./iac/bicep/petclinic-apps.bicep#275)
+│   └── Call [KV Access Policies](./iac/bicep/petclinic-apps.bicep#361)
 ```
 
 <span style="color:red">**Be aware that the MySQL DB is NOT deployed in a VNet but network FireWall Rules are Set. So ensure to allow ACA Outbound IP addresses or check the option "Allow public access from any Azure service within Azure to this server" in the Azure Portal / your MySQL DB / Networking / Firewall rules**</span>
@@ -241,19 +224,19 @@ The Config-server uses the config declared on the repo at [https://github.com/ez
 ## Deployment to VNet
 
 You can your Apps into your own VNet when creating the Azure Container Apps Environment, see:
-- [Bicep ](./iac/bicep/aca/acaVNetEnv.bicep#L71), setting its [vnetConfiguration](./iac/bicep/aca/acaVNetEnv.bicep#L84)
+- [Bicep ](./iac/bicep/modules/aca/acaVNetEnv.bicep#L71), setting its [vnetConfiguration](./iac/bicep/modules/aca/acaVNetEnv.bicep#L84)
 
 ```code
 param deployToVNet bool = true
 ```
-[Azure Infra services deployment workflow](./.github/workflows/deploy-iac.yml#L13)
+[Azure Infra services deployment workflow](./.github/workflows/deploy-iac-to-vnet.yml#L13)
 ```code
 DEPLOY_TO_VNET: true
 ```
 
 ### DNS Management
 
-When configuring Azure Container Apps Environment to your VNet, a Private-DNS Zone is created during the [Bicep pre-req deployment](./iac/bicep/aca/pre-req.bicep#L204), see [./iac/bicep/aca/dns.bicep](./iac/bicep/aca/dns.bicep#L40)
+When configuring Azure Container Apps Environment to your VNet, a Private-DNS Zone is created during the [Bicep pre-req deployment](./iac/bicep/pre-req.bicep#L190), see [./iac/bicep/modules/aca/dns.bicep](./iac/bicep/modules/aca/dns.bicep#L34)
 
 /!\ IMPORTANT: Set location to 'global' instead of '${location}'. This is because Azure DNS is a global service. 
 Otherwise you will hit this error:
@@ -269,7 +252,7 @@ resource acaPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
 }
 ```
 ### Client VM
-When configuring Azure Container Apps Environment to your VNet, a JumpOff client VM is created during the [Bicep pre-req deployment](./iac/bicep/aca/pre-req.bicep#L214), see [./iac/bicep/aca/client-vm.bicep](./iac/bicep/aca/client-vm.bicep#L129)
+When configuring Azure Container Apps Environment to your VNet, a JumpOff client VM is created during the [Bicep pre-req deployment](./iac/bicep/pre-req.bicep#L219), see [./iac/bicep/aca/client-vm.bicep](./iac/bicep/modules/aca/client-vm.bicep#L129)
 
 ## App Container syntax
 

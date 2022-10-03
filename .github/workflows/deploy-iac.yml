@@ -258,6 +258,7 @@ jobs:
           az deployment group create --name aca-petclinic-pre-req -f iac/bicep/pre-req.bicep -g ${{ env.RG_APP }} \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
+            -p kvName=${{ env.KV_NAME }} \
             -p acrName=${{ env.AZURE_CONTAINER_REGISTRY }} \
             -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
             -p setFwRuleClient=false \
