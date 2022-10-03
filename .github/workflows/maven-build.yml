@@ -234,7 +234,7 @@ jobs:
         REPO="github-aca::default::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
         mvn deploy -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" --batch-mode -DskipTests -Dmaven.install.skip=true
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.PKG_PAT }}
 
     #- name: Build XXX image and push it to ACR
     #  uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
