@@ -170,7 +170,7 @@ jobs:
     needs: [get-acr-creds, maven-build] # https://docs.github.com/en/actions/using-jobs/using-jobs-in-a-workflow#defining-prerequisite-jobs
     steps:
     
-    # https://github.com/marketplace/actions/azure-container-registry-login
+    # https://github.com/marketplace/actions/azure-container-registry-login : Use this GitHub Action to log in to a private container registry such as Azure Container registry.
     #- name: Login to ACR
     #  uses: azure/docker-login@v1
     #  with:
@@ -192,7 +192,7 @@ jobs:
         tenant: ${{ env.AZURE_TENANT_ID }} # The ACR tenant
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }} # The ACR name
         repository: ${{ env.REPOSITORY }} # The repository on the ACR
-        image: ${{ env.ADMIN_SERVER }}:${{ github.sha }} # Docker image name. Default tag: The action will default to use the first 8 characters of the commit SHA if no tag is specified. Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+        image: ${{ env.ADMIN_SERVER }} # Docker image name. Default tag: The action will default to use the first 8 characters of the commit SHA if no tag is specified. Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
         # git_access_token: ${{ secrets.git_access_token }} # The Github access token for private repositories
         folder: docker/ # Build context for Docker agent
         dockerfile: ./petclinic-admin-server/Dockerfile # Path to the Dockerfile relative to `folder`
@@ -207,7 +207,7 @@ jobs:
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
-        image: ${{ env.CONFIG_SERVER }}:${{ github.sha }}
+        image: ${{ env.CONFIG_SERVER }}
         folder: docker/
         dockerfile: ./petclinic-config-server/Dockerfile
         branch: main
@@ -221,7 +221,7 @@ jobs:
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
-        image: ${{ env.API_GATEWAY }}:${{ github.sha }}
+        image: ${{ env.API_GATEWAY }}
         folder: docker/
         dockerfile: ./petclinic-api-gateway/Dockerfile
         branch: main
@@ -235,7 +235,7 @@ jobs:
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
-        image: ${{ env.CUSTOMERS_SERVICE }}:${{ github.sha }}
+        image: ${{ env.CUSTOMERS_SERVICE }}
         folder: docker/
         dockerfile: ./petclinic-customers-service/Dockerfile
         branch: main        
@@ -249,7 +249,7 @@ jobs:
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
-        image: ${{ env.VETS_SERVICE }}:${{ github.sha }}
+        image: ${{ env.VETS_SERVICE }}
         folder: docker/
         dockerfile: ./petclinic-vets-service/Dockerfile
         branch: main
@@ -263,7 +263,7 @@ jobs:
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
-        image: ${{ env.VISITS_SERVICE }}:${{ github.sha }}
+        image: ${{ env.VISITS_SERVICE }}
         folder: docker/
         dockerfile: ./petclinic-visits-service/Dockerfile
         branch: main
@@ -279,7 +279,7 @@ jobs:
     #
     #      az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
     #      # az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
-    #      az acr build -t ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.PROJECT_NAME }}:${{ github.sha }} --file "./docker/petclinic-admin-server/Dockerfile"
+    #      az acr build -t ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.PROJECT_NAME }} --file "./docker/petclinic-admin-server/Dockerfile"
     #      build_id=$(az acr task list-runs --registry $acr_registry_name -o json --query [0].name )
     #
     #      build_id=$(echo $build_id | tr -d '"')
