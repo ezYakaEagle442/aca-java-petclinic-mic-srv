@@ -124,7 +124,7 @@ jobs:
         mkdir -p ~/.m2
         echo "<settings><servers><server><id>github-aca</id><username>$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')</username><password>\${env.GITHUB_TOKEN}</password></server></servers></settings>" > ~/.m2/settings.xml
         REPO="github-aca::default::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
-        mvn deploy -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" --batch-mode -DskipTests -Dmaven.install.skip=true
+        #mvn deploy -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" --batch-mode -DskipTests -Dmaven.install.skip=true
 
         # local copy would not be shared between Jobs
         # mvn org.apache.maven.plugins:maven-dependency-plugin:3.3.0:copy \
@@ -264,7 +264,7 @@ jobs:
         ls -al ${{ env.VETS_SERVICE }}/spring-petclinic-${{ env.VETS_SERVICE }}/target/*.jar
         ls -al ${{ env.VISITS_SERVICE }}/spring-petclinic-${{ env.VISITS_SERVICE }}/target/*.jar
         ls -al ${{ env.CONFIG_SERVER }}/spring-petclinic-${{ env.CONFIG_SERVER }}/target/*.jar
-        ls -al ${{ env.DISCOVERY_SERVER }}/spring-petclinic-${{ env.DISCOVERY_SERVER }}/target/*.jar
+        # ls -al ${{ env.DISCOVERY_SERVER }}/spring-petclinic-${{ env.DISCOVERY_SERVER }}/target/*.jar
 
         # github.workspace = /home/runner/work/aca-java-petclinic-mic-srv/aca-java-petclinic-mic-srv
         echo "github.workspace = ${{ github.workspace }}" 
@@ -275,7 +275,7 @@ jobs:
         cp ${{ env.VETS_SERVICE }}/spring-petclinic-${{ env.VETS_SERVICE }}/target/*.jar  ${{ github.workspace }}" 
         cp ${{ env.VISITS_SERVICE }}/spring-petclinic-${{ env.VISITS_SERVICE }}/target/*.jar  ${{ github.workspace }}" 
         cp ${{ env.CONFIG_SERVER }}/spring-petclinic-${{ env.CONFIG_SERVER }}/target/*.jar  ${{ github.workspace }}" 
-        cp ${{ env.DISCOVERY_SERVER }}/spring-petclinic-${{ env.DISCOVERY_SERVER }}/target/*.jar  ${{ github.workspace }}" 
+        # cp ${{ env.DISCOVERY_SERVER }}/spring-petclinic-${{ env.DISCOVERY_SERVER }}/target/*.jar  ${{ github.workspace }}" 
         ls -al
 
         ls -al spring-petclinic-${{ env.ADMIN_SERVER }}/target/*.jar
@@ -284,8 +284,8 @@ jobs:
         ls -al spring-petclinic-${{ env.VETS_SERVICE }}/target/*.jar
         ls -al spring-petclinic-${{ env.VISITS_SERVICE }}/target/*.jar
         ls -al spring-petclinic-${{ env.CONFIG_SERVER }}/target/*.jar
-        ls -al spring-petclinic-${{ env.DISCOVERY_SERVER }}/target/*.jar
-        
+        # ls -al spring-petclinic-${{ env.DISCOVERY_SERVER }}/target/*.jar
+
 
     # https://github.com/marketplace/actions/azure-container-registry-login : Use this GitHub Action to log in to a private container registry such as Azure Container registry.
     #- name: Login to ACR
