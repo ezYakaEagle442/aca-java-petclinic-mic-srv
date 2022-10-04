@@ -100,12 +100,13 @@ jobs:
         echo "github.workspace = ${{ github.workspace }}"
         
         ls -al
-        ls -al spring-petclinic-admin-server/target/*.jar
-        ls -al spring-petclinic-api-gateway/target/*.jar
-        ls -al spring-petclinic-config-server/target/*.jar
-        ls -al spring-petclinic-customers-service/target/*.jar
-        ls -al spring-petclinic-vets-service/target/*.jar
-        ls -al spring-petclinic-visits-service/target/*.jar
+        ls -al spring-petclinic-${{ env.ADMIN_SERVER }}/target/*.jar
+        ls -al spring-petclinic-${{ env.API_GATEWAY }}/target/*.jar
+        ls -al spring-petclinic-${{ env.CUSTOMERS_SERVICE }}/target/*.jar
+        ls -al spring-petclinic-${{ env.VETS_SERVICE }}/target/*.jar
+        ls -al spring-petclinic-${{ env.VISITS_SERVICE }}/target/*.jar
+        ls -al spring-petclinic-${{ env.CONFIG_SERVER }}/target/*.jar
+        ls -al spring-petclinic-${{ env.DISCOVERY_SERVER }}/target/*.jar
 
     # https://docs.github.com/en/packages/learn-github-packages/introduction-to-github-packages
     # https://docs.github.com/en/actions/security-guides/automatic-token-authentication
@@ -253,7 +254,38 @@ jobs:
       uses: actions/download-artifact@v3.0.0
 
     - name: Display ALL Jar artifacts
-      run: ls -R
+      run: |
+        pwd
+        ls -al
+        echo "Listing downloaded artifacts : "
+        ls -al ${{ env.ADMIN_SERVER }}/spring-petclinic-${{ env.ADMIN_SERVER }}/target/*.jar
+        ls -al ${{ env.API_GATEWAY }}/spring-petclinic-${{ env.API_GATEWAY }}/target/*.jar
+        ls -al ${{ env.CUSTOMERS_SERVICE }}/spring-petclinic-${{ env.CUSTOMERS_SERVICE }}/target/*.jar
+        ls -al ${{ env.VETS_SERVICE }}/spring-petclinic-${{ env.VETS_SERVICE }}/target/*.jar
+        ls -al ${{ env.VISITS_SERVICE }}/spring-petclinic-${{ env.VISITS_SERVICE }}/target/*.jar
+        ls -al ${{ env.CONFIG_SERVER }}/spring-petclinic-${{ env.CONFIG_SERVER }}/target/*.jar
+        ls -al ${{ env.DISCOVERY_SERVER }}/spring-petclinic-${{ env.DISCOVERY_SERVER }}/target/*.jar
+
+        # github.workspace = /home/runner/work/aca-java-petclinic-mic-srv/aca-java-petclinic-mic-srv
+        echo "github.workspace = ${{ github.workspace }}" 
+        # copy jar files at the root as expected by the Dockerfille
+        cp ${{ env.ADMIN_SERVER }}/spring-petclinic-${{ env.ADMIN_SERVER }}/target/*.jar  ${{ github.workspace }}" 
+        cp ${{ env.API_GATEWAY }}/spring-petclinic-${{ env.API_GATEWAY }}/target/*.jar  ${{ github.workspace }}" 
+        cp ${{ env.CUSTOMERS_SERVICE }}/spring-petclinic-${{ env.CUSTOMERS_SERVICE }}/target/*.jar  ${{ github.workspace }}" 
+        cp ${{ env.VETS_SERVICE }}/spring-petclinic-${{ env.VETS_SERVICE }}/target/*.jar  ${{ github.workspace }}" 
+        cp ${{ env.VISITS_SERVICE }}/spring-petclinic-${{ env.VISITS_SERVICE }}/target/*.jar  ${{ github.workspace }}" 
+        cp ${{ env.CONFIG_SERVER }}/spring-petclinic-${{ env.CONFIG_SERVER }}/target/*.jar  ${{ github.workspace }}" 
+        cp ${{ env.DISCOVERY_SERVER }}/spring-petclinic-${{ env.DISCOVERY_SERVER }}/target/*.jar  ${{ github.workspace }}" 
+        ls -al
+
+        ls -al spring-petclinic-${{ env.ADMIN_SERVER }}/target/*.jar
+        ls -al spring-petclinic-${{ env.API_GATEWAY }}/target/*.jar
+        ls -al spring-petclinic-${{ env.CUSTOMERS_SERVICE }}/target/*.jar
+        ls -al spring-petclinic-${{ env.VETS_SERVICE }}/target/*.jar
+        ls -al spring-petclinic-${{ env.VISITS_SERVICE }}/target/*.jar
+        ls -al spring-petclinic-${{ env.CONFIG_SERVER }}/target/*.jar
+        ls -al spring-petclinic-${{ env.DISCOVERY_SERVER }}/target/*.jar
+        
 
     # https://github.com/marketplace/actions/azure-container-registry-login : Use this GitHub Action to log in to a private container registry such as Azure Container registry.
     #- name: Login to ACR
@@ -266,6 +298,7 @@ jobs:
     # https://github.com/marketplace/actions/docker-setup-buildx
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2.0.0
+
 
     # https://github.com/marketplace/actions/azure-container-registry-build
     - name: admin-server ACR build
