@@ -121,8 +121,17 @@ TENANT_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME
 
 # the assignee is an appId
 az role assignment create --assignee $SPN_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV} --role contributor
+
+# "Key Vault Secrets User"
+az role assignment create --assignee $SPN_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV} --role 4633458b-17de-408a-b874-0445c86b69e6
+
 az role assignment create --assignee $SPN_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_APP} --role contributor
 ```
+
+<span style="color:red">**RBAC Permission model is set on KV, the [pre-req](https://learn.microsoft.com/en-us/azure/key-vault/general/rbac-guide?tabs=azure-cli#prerequisites) requires to have Microsoft.Authorization/roleAssignments/write and Microsoft.Authorization/roleAssignments/delete permissions, such as User Access Administrator or Owner.**</span>
+
+<span style="color:red">**"Key Vault Secrets User" [built-in role](https://learn.microsoft.com/en-us/azure/key-vault/general/rbac-guide?tabs=azure-cli#azure-built-in-roles-for-key-vault-data-plane-operations) read secret contents including secret portion of a certificate with private key. Only works for key vaults that use the 'Azure role-based access control' permission model.**
+</span>
 
 Read :
 - [Use GitHub Actions to connect to Azure documentation](https://docs.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Cwindows).
@@ -144,10 +153,9 @@ KV_NAME="kv-petcliaca442"
 az keyvault set-policy -n $KV_NAME --secret-permissions get list --spn $SPN_ID
 ```
 
-Finally Create a GH [PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) to [publish ACA Revisions with GHA](https://learn.microsoft.com/en-us/azure/container-apps/github-actions-cli?tabs=bash#authentication)
+Finally Create a GH [PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) "PKG_PAT" that can be use to [publish ACA Revisions with GHA](https://learn.microsoft.com/en-us/azure/container-apps/github-actions-cli?tabs=bash#authentication), [publish packages](./.github/workflows/maven-build.yml#L101) and [delete packages](./.github/workflows/delete-all-artifacts.yml#)
 
-<span style="color:red">**Your GitHub personal access token needs to have the workflow scope selected.**
-
+<span style="color:red">**Your GitHub personal access token needs to have the workflow scope selected. You need at least delete:packages and read:packages scopes to delete a package. You need contents: read and packages: write permissions to publish and download artifacts**
 
 ## Pipelines
 
@@ -190,23 +198,24 @@ To Deploy the Apps into your VNet, see [Deployment to VNet section](#deployment-
 ├── Create [KV](./iac/bicep/modules/kv/kv.bicep)
 │   ├── Create [KV](./iac/bicep/modules/kv/kv.bicep#L46)
 ├── Create [pre-requisites](./iac/bicep/pre-req.bicep)
-│   ├── Create [logAnalyticsWorkspace](./iac/bicep/pre-req.bicep#L93)
-│   ├── Create [appInsights](./iac/bicep/pre-req.bicep#L110)
-│   ├── Call [ACR Module](./iac/bicep/pre-req.bicep#L129)
-│   ├── Call [ACA Module defaultPublicManagedEnvironment](./iac/bicep/pre-req.bicep#L140)
-│   ├── Call [MySQL Module](./iac/bicep/pre-req.bicep#L152)
-│   ├── Call [VNet Module](./iac/bicep/pre-req.bicep#L169)
+│   ├── Create [logAnalyticsWorkspace](./iac/bicep/pre-req.bicep#L102)
+│   ├── Create [appInsights](./iac/bicep/pre-req.bicep#L118)
+│   ├── Call [ACR Module](./iac/bicep/pre-req.bicep#L138)
+│   ├── Call [ACA Module defaultPublicManagedEnvironment](./iac/bicep/pre-req.bicep#L149)
+│   ├── Call [MySQL Module](./iac/bicep/pre-req.bicep#L166)
 └── If deployToVNet=true
-│   ├── Call [ACA Module corpManagedEnvironment](./iac/bicep/modules/aca/pre-req.bicep#L185)
-│   ├── Call [DNS Private-Zone Module](./iac/bicep/modules/aca/pre-req.bicep#L209)
-│   ├── Call [ClientVM Module](./iac/bicep/modules/aca/pre-req.bicep#L214)
+│   ├── Call [VNet Module](./iac/bicep/pre-req-deploy-to-vnet.bicep#L150)
+│   ├── Call [ACA Module corpManagedEnvironment](./iac/bicep/pre-req-deploy-to-vnet#L171)
+│   ├── Call [DNS Private-Zone Module](./iac/bicep/pre-req-deploy-to-vnet.bicep#L212)
+│   ├── Call [ClientVM Module](./iac/bicep/pre-req-deploy-to-vnet.bicep#L224)
 ├── Run the [Main](./iac/bicep/petclinic-apps.bicep)
-│   ├── Call [ACA Module](./iac/bicep/modules/aca/aca.bicep#185)
-│   ├── Call [roleAssignments Module](./iac/bicep/petclinic-apps.bicep#275)
-│   └── Call [KV Access Policies](./iac/bicep/petclinic-apps.bicep#361)
+│   ├── Call [ACA Module](./iac/bicep/modules/aca/aca.bicep#186)
+│   ├── Call [roleAssignments Module](./iac/bicep/petclinic-apps.bicep#282)
+│   └── Call [KV Access Policies](./iac/bicep/petclinic-apps.bicep#367)
 ```
 
-<span style="color:red">**Be aware that the MySQL DB is NOT deployed in a VNet but network FireWall Rules are Set. So ensure to allow ACA Outbound IP addresses or check the option "Allow public access from any Azure service within Azure to this server" in the Azure Portal / your MySQL DB / Networking / Firewall rules**</span>
+<span style="color:red">**Be aware that the MySQL DB is NOT deployed in a VNet but network FireWall Rules are Set. So ensure to allow ACA Outbound IP addresses or check the option "Allow public access from any Azure service within Azure to this server" in the Azure Portal / your MySQL DB / Networking / Firewall rules. 
+enableRbacAuthorization is set to true in KV (Preview feature), the key vault will use RBAC for authorization of data actions, and the access policies specified in vault properties will be ignored**</span>
 
 ## Security
 ### secret Management
