@@ -106,7 +106,7 @@ jobs:
         ls -al spring-petclinic-${{ env.VETS_SERVICE }}/target/*.jar
         ls -al spring-petclinic-${{ env.VISITS_SERVICE }}/target/*.jar
         ls -al spring-petclinic-${{ env.CONFIG_SERVER }}/target/*.jar
-        ls -al spring-petclinic-${{ env.DISCOVERY_SERVER }}/target/*.jar
+        # ls -al spring-petclinic-${{ env.DISCOVERY_SERVER }}/target/*.jar
 
     # https://docs.github.com/en/packages/learn-github-packages/introduction-to-github-packages
     # https://docs.github.com/en/actions/security-guides/automatic-token-authentication
