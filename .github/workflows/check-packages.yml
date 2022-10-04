@@ -97,6 +97,46 @@ jobs:
         echo "VISITS_SERVICE_API_URL=https://$GH_API/$VISITS_SERVICE_GROUP_ID.$VISITS_SERVICE_ARTIFACT_ID" >> $GITHUB_ENV
       shell: bash
 
+
+    - name: Download Admin-Server GH Package
+      run: |
+        curl ${{ env.ADMIN_SERVER_API_URL }} -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json"
+        PKG_VER_ID=$(curl ${{ env.ADMIN_SERVER_API_URL }} -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json"  | jq .[0].id)
+        PKG_HTML_URL=$(curl ${{ env.ADMIN_SERVER_API_URL }}/$PKG_VER_ID -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" | jq -r .html_url)
+
+        echo "PKG_VER_ID=$PKG_VER_ID"
+        echo "PKG_HTML_URL=$PKG_HTML_URL"
+
+        pwd
+        mkdir $GH_WORKSPACE/${{ env.ADMIN_SERVER }}
+        ls -al
+        ls -al ${{ github.workspace }}
+
+        curl -u username:${{ env.GHA_PAT }} $PKG_HTML_URL | grep "https://github-registry-files.githubusercontent.com" > PKG_HTML_FILE.txt
+
+        sed -i 's/                <a href=\"//g' PKG_HTML_FILE.txt
+        sed -i 's/\" class=\"d-flex\">//g' PKG_HTML_FILE.txt
+        sed -i 's/\&amp\;/\&/g' PKG_HTML_FILE.txt
+
+        PKG_URL_LOCAL_PATH="pkg_url.txt"
+        cat PKG_HTML_FILE.txt |
+        while IFS= read -r line
+        do
+            echo "line ... |$line|"
+            echo "$line" > $PKG_URL_LOCAL_PATH
+            # Content-Type: application/octet-stream not application/java-archive (or application/x-java-archive | application/x-jar)
+            wget $line -O ${{ env.ADMIN_SERVER_PACKAGE_PATH }} --header="Authorization: Bearer ${{ env.GHA_PAT }}" --quiet
+            # Quick & dirty, the first item is the jar file
+            break ;
+        done
+        
+        ls -al $GH_WORKSPACE/${{ env.ADMIN_SERVER }}
+
+      shell: bash
+      env:
+        GHA_PAT: ${{ secrets.PKG_PAT }}
+
+
     # As the Deploy Job runs now in a different Workflow than the Build Job, the data workspace is not shared anymore
     # You need to download the Artifacts from the GH Packages
     # https://docs.github.com/en/rest/reference/packages#get-a-package-for-an-organization
