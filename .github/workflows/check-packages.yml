@@ -114,7 +114,7 @@ jobs:
       id: get_latest_pkg_customers
       with:
         query: |
-          query release($owner:String!,$repo:String!) {
+          query release(owner:$owner,name:$repo) {
             repository(owner:$owner,name:$repo) {
               packages(first: 10, packageType: MAVEN, names: "org.springframework.samples.petclinic.client.${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}") {
                 edges {
