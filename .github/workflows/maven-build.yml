@@ -184,8 +184,8 @@ jobs:
       id: admin-server-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{ secrets.REGISTRY-USR }} # The Service Principal credentials : must be stored in KV
-        service_principal_password: ${{ secrets.REGISTRY-PWD }} # The Service Principal credentials: must be stored in KV
+        service_principal: ${{needs.get-acr-creds.outputs.acr_usr}} # The Service Principal credentials : must be stored in KV
+        service_principal_password: ${{needs.get-acr-creds.outputs.acr_pwd}} # The Service Principal credentials: must be stored in KV
         tenant: ${{ env.AZURE_TENANT_ID }} # The ACR tenant
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }} # The ACR name
         repository: ${{ env.REPOSITORY }} # The repository on the ACR
@@ -199,8 +199,8 @@ jobs:
       id: config-server-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{ secrets.REGISTRY-USR }}
-        service_principal_password: ${{ secrets.REGISTRY-PWD }}
+        service_principal: ${{needs.get-acr-creds.outputs.acr_usr}}
+        service_principal_password: ${{needs.get-acr-creds.outputs.acr_pwd}}
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
@@ -213,8 +213,8 @@ jobs:
       id: api-gateway-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{ secrets.REGISTRY-USR }}
-        service_principal_password: ${{ secrets.REGISTRY-PWD }}
+        service_principal: ${{needs.get-acr-creds.outputs.acr_usr}}
+        service_principal_password: ${{needs.get-acr-creds.outputs.acr_pwd}}
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
@@ -227,8 +227,8 @@ jobs:
       id: customer-service-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{ secrets.REGISTRY-USR }}
-        service_principal_password: ${{ secrets.REGISTRY-PWD }}
+        service_principal: ${{needs.get-acr-creds.outputs.acr_usr}}
+        service_principal_password: ${{needs.get-acr-creds.outputs.acr_pwd}}
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
@@ -241,8 +241,8 @@ jobs:
       id: vets-service-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{ secrets.REGISTRY-USR }}
-        service_principal_password: ${{ secrets.REGISTRY-PWD }}
+        service_principal: ${{needs.get-acr-creds.outputs.acr_usr}}
+        service_principal_password: ${{needs.get-acr-creds.outputs.acr_pwd}}
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
@@ -255,8 +255,8 @@ jobs:
       id: visits-service-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{ secrets.REGISTRY-USR }}
-        service_principal_password: ${{ secrets.REGISTRY-PWD }}
+        service_principal: ${{needs.get-acr-creds.outputs.acr_usr}}
+        service_principal_password: ${{needs.get-acr-creds.outputs.acr_pwd}}
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
@@ -276,7 +276,7 @@ jobs:
     #
     #      az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
     #      # az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
-    #      az acr build -t ${{ env.REGISTRY_URL }}/${{ env.PROJECT_NAME }}:${{ github.sha }} --file "./docker/petclinic-admin-server/Dockerfile"
+    #      az acr build -t ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.PROJECT_NAME }}:${{ github.sha }} --file "./docker/petclinic-admin-server/Dockerfile"
     #      build_id=$(az acr task list-runs --registry $acr_registry_name -o json --query [0].name )
     #
     #      build_id=$(echo $build_id | tr -d '"')
