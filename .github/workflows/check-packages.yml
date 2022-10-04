@@ -1,0 +1,147 @@
+name: Check the GitHub Packages
+# You need at least read:packages scope
+on:
+  workflow_dispatch:
+
+env:
+  
+  AZ_CLI_VERSION: 2.40.0
+  DEPLOYMENT_VERSION: 2.6.3
+
+  GH_API: api.github.com/user/packages/maven
+
+  # ==== APPS ====:
+  API_GATEWAY: api-gateway
+  ADMIN_SERVER: admin-server
+  CUSTOMERS_SERVICE: customers-service
+  VETS_SERVICE: vets-service
+  VISITS_SERVICE: visits-service
+
+  CONFIG_SERVER: config-server
+  DISCOVERY_SERVER: discovery-server
+
+  PRJ_PREFIX: aca-spring-petclinic
+
+jobs:
+
+  check-pkg:
+    permissions: 
+      contents: read
+      packages: read
+
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set Base environment variables
+      run: |
+        echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV
+
+        echo "API_GATEWAY_JAR_ARTIFACT=${{ env.PRJ_PREFIX }}-${{ env.API_GATEWAY }}-${{ env.DEPLOYMENT_VERSION }}.jar" >> $GITHUB_ENV
+        echo "ADMIN_SERVER_JAR_ARTIFACT=${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}-${{ env.DEPLOYMENT_VERSION }}.jar" >> $GITHUB_ENV
+        echo "CONFIG_SERVER_JAR_ARTIFACT=${{ env.PRJ_PREFIX }}-${{ env.CONFIG_SERVER }}-${{ env.DEPLOYMENT_VERSION }}.jar" >> $GITHUB_ENV
+        echo "DISCOVERY_SERVER_JAR_ARTIFACT=${{ env.PRJ_PREFIX }}-${{ env.DISCOVERY_SERVER }}-${{ env.DEPLOYMENT_VERSION }}.jar" >> $GITHUB_ENV
+        echo "CUSTOMERS_SERVICE_JAR_ARTIFACT=${{ env.PRJ_PREFIX }}-${{ env.CUSTOMERS_SERVICE }}-${{ env.DEPLOYMENT_VERSION }}.jar" >> $GITHUB_ENV
+        echo "VETS_SERVICE_JAR_ARTIFACT=${{ env.PRJ_PREFIX }}-${{ env.VETS_SERVICE }}-${{ env.DEPLOYMENT_VERSION }}.jar" >> $GITHUB_ENV
+        echo "VISITS_SERVICE_JAR_ARTIFACT=${{ env.PRJ_PREFIX }}-${{ env.VISITS_SERVICE }}-${{ env.DEPLOYMENT_VERSION }}.jar" >> $GITHUB_ENV
+
+        
+        echo "ADMIN_SERVER_GROUP_ID=org.springframework.samples.petclinic.admin" >> $GITHUB_ENV
+        echo "ADMIN_SERVER_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}" >> $GITHUB_ENV
+
+        echo "API_GATEWAY_GROUP_ID=org.springframework.samples.petclinic.api" >> $GITHUB_ENV
+        echo "API_GATEWAY_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.API_GATEWAY }}" >> $GITHUB_ENV
+
+        echo "CONFIG_SERVER_GROUP_ID=org.springframework.samples.petclinic.config" >> $GITHUB_ENV
+        echo "CONFIG_SERVER_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.CONFIG_SERVER }}" >> $GITHUB_ENV
+
+        echo "CUSTOMERS_SERVICE_GROUP_ID=org.springframework.samples.petclinic.client" >> $GITHUB_ENV
+        echo "CUSTOMERS_SERVICE_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.CUSTOMERS_SERVICE }}" >> $GITHUB_ENV
+
+        echo "DISCOVERY_SERVER_GROUP_ID=org.springframework.samples.petclinic.discovery" >> $GITHUB_ENV
+        echo "DISCOVERY_SERVER_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.DISCOVERY_SERVER }}" >> $GITHUB_ENV
+
+        echo "VETS_SERVICE_GROUP_ID=org.springframework.samples.petclinic.vets" >> $GITHUB_ENV
+        echo "VETS_SERVICE_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.VETS_SERVICE }}" >> $GITHUB_ENV
+
+        echo "VISITS_SERVICE_GROUP_ID=org.springframework.samples.petclinic.visits" >> $GITHUB_ENV
+        echo "VISITS_SERVICE_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.VISITS_SERVICE }}" >> $GITHUB_ENV
+
+        echo "GH_WORKSPACE=${{ github.workspace }}" >> $GITHUB_ENV # "/github/workspace"
+      shell: bash
+
+    # Variables in the env map cannot be defined in terms of other variables in the map
+    - name: Set dependent environment variables
+      run: |
+        # ==== JARS ====: PWD already in /home/runner/work/azure-spring-cloud-petclinic-mic-srv >> $GITHUB_ENV
+        echo "API_GATEWAY_JAR=${{ env.PRJ_PREFIX }}-${{ env.API_GATEWAY }}/target/$API_GATEWAY_JAR_ARTIFACT" >> $GITHUB_ENV
+        echo "ADMIN_SERVER_JAR=${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}/target/$ADMIN_SERVER_JAR_ARTIFACT" >> $GITHUB_ENV
+        echo "CONFIG_SERVER_JAR=${{ env.PRJ_PREFIX }}-${{ env.CONFIG_SERVER }}/target/$CONFIG_SERVER_JAR_ARTIFACT" >> $GITHUB_ENV
+        echo "CUSTOMERS_SERVICE_JAR=${{ env.PRJ_PREFIX }}-${{ env.CUSTOMERS_SERVICE }}/target/$CUSTOMERS_SERVICE_JAR_ARTIFACT" >> $GITHUB_ENV
+        echo "DISCOVERY_SERVER_JAR=${{ env.PRJ_PREFIX }}-${{ env.DISCOVERY_SERVER }}/target/$DISCOVERY_SERVER_JAR_ARTIFACT" >> $GITHUB_ENV
+        echo "VETS_SERVICE_JAR=${{ env.PRJ_PREFIX }}-${{ env.VETS_SERVICE }}/target/$VETS_SERVICE_JAR_ARTIFACT" >> $GITHUB_ENV
+        echo "VISITS_SERVICE_JAR=${{ env.PRJ_PREFIX }}-${{ env.VISITS_SERVICE }}/target/$VISITS_SERVICE_JAR_ARTIFACT" >> $GITHUB_ENV
+
+        echo "API_GATEWAY_PACKAGE_PATH=$GH_WORKSPACE/${{ env.API_GATEWAY }}/${{ env.API_GATEWAY_JAR_ARTIFACT }}" >> $GITHUB_ENV
+        echo "ADMIN_SERVER_PACKAGE_PATH=$GH_WORKSPACE/${{ env.ADMIN_SERVER }}/${{ env.ADMIN_SERVER_JAR_ARTIFACT }}" >> $GITHUB_ENV
+        echo "CONFIG_SERVER_PACKAGE_PATH=$GH_WORKSPACE/${{ env.CONFIG_SERVER }}/${{ env.CONFIG_SERVER_JAR_ARTIFACT }}" >> $GITHUB_ENV
+        echo "CUSTOMERS_SERVICE_PACKAGE_PATH=$GH_WORKSPACE/${{ env.CUSTOMERS_SERVICE }}/${{ env.CUSTOMERS_SERVICE_JAR_ARTIFACT }}" >> $GITHUB_ENV
+        echo "DISCOVERY_SERVER_PACKAGE_PATH=$GH_WORKSPACE/${{ env.DISCOVERY_SERVER }}/${{ env.DISCOVERY_SERVER_JAR_ARTIFACT }}" >> $GITHUB_ENV
+        echo "VETS_SERVICE_PACKAGE_PATH=$GH_WORKSPACE/${{ env.VETS_SERVICE }}/${{ env.VETS_SERVICE_JAR_ARTIFACT }}" >> $GITHUB_ENV
+        echo "VISITS_SERVICE_PACKAGE_PATH=$GH_WORKSPACE/${{ env.VISITS_SERVICE }}/${{ env.VISITS_SERVICE_JAR_ARTIFACT }}" >> $GITHUB_ENV
+
+        echo "ADMIN_SERVER_API_URL=https://$GH_API/$ADMIN_SERVER_GROUP_ID.$ADMIN_SERVER_ARTIFACT_ID" >> $GITHUB_ENV
+        echo "API_GATEWAY_API_URL=https://$GH_API/$API_GATEWAY_GROUP_ID.$API_GATEWAY_ARTIFACT_ID" >> $GITHUB_ENV
+        echo "CONFIG_SERVER_API_URL=https://$GH_API/$CONFIG_SERVER_GROUP_ID.$CONFIG_SERVER_ARTIFACT_ID" >> $GITHUB_ENV
+        echo "CUSTOMERS_SERVICE_API_URL=https://$GH_API/$CUSTOMERS_SERVICE_GROUP_ID.$CUSTOMERS_SERVICE_ARTIFACT_ID" >> $GITHUB_ENV
+        echo "DISCOVERY_SERVER_API_URL=https://$GH_API/$DISCOVERY_SERVER_GROUP_ID.$DISCOVERY_SERVER_ARTIFACT_ID" >> $GITHUB_ENV
+        echo "VETS_SERVICE_API_URL=https://$GH_API/$VETS_SERVICE_GROUP_ID.$VETS_SERVICE_ARTIFACT_ID" >> $GITHUB_ENV
+        echo "VISITS_SERVICE_API_URL=https://$GH_API/$VISITS_SERVICE_GROUP_ID.$VISITS_SERVICE_ARTIFACT_ID" >> $GITHUB_ENV
+      shell: bash
+
+    # As the Deploy Job runs now in a different Workflow than the Build Job, the data workspace is not shared anymore
+    # You need to download the Artifacts from the GH Packages
+    # https://docs.github.com/en/rest/reference/packages#get-a-package-for-an-organization
+    # generate a PAT : https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+    # /!\ IMPORTANT: If package_type is not container, your token must also include the repo scope.
+    # https://gist.github.com/maxim/6e15aa45ba010ab030c4
+    # local test with: curl -u username:<Your PAT Token> -H "Accept: application/vnd.github.v3+json" https://api.github.com
+    # curl -u username:<Your PAT Token> -H "Accept: application/vnd.github.v3+json" https://api.github.com/user/packages/maven/org.springframework.samples.petclinic.admin.spring-petclinic-admin-server/versions
+    # curl -u username:<Your PAT Token> -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/ezYakaEagle442/azure-spring-apps-petclinic-mic-srv/releases
+
+    # TODO: replace the curl workaround with https://gist.github.com/tgrall/25f82f69bfdbc630bfc7a2e4c3acd39d 
+    # https://github.com/octokit/graphql-action
+    - name: Get Admin-Server GH Package URL
+      uses: octokit/graphql-action@v2.2.22
+      id: get_latest_pkg_customers
+      with:
+        query: |
+          query release($owner:String!,$repo:String!) {
+            repository(owner: $owner:String!, name: $repo:String!) {
+              packages(first: 10, packageType: MAVEN, names: "org.springframework.samples.petclinic.client.${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}") {
+                edges {
+                  node {
+                    id
+                    name
+                    packageType
+                    versions(first: 100) {
+                      nodes {
+                        id
+                        version
+                        files(first: 10) {
+                          nodes {
+                            name
+                            url
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        owner: ${{ github.event.repository.owner.name }} # ${{ github.repository_owner }}
+        repo: ${{ github.event.repository.name }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.PKG_PAT }}
+    - run: "echo 'latest release: ${{ steps.get_latest_pkg_customers.outputs.data }}'"
+
