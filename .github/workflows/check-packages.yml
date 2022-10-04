@@ -102,7 +102,7 @@ jobs:
       run: |
         curl ${{ env.ADMIN_SERVER_API_URL }} -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json"
         PKG_VER_ID=$(curl ${{ env.ADMIN_SERVER_API_URL }} -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json"  | jq .id)
-        PKG_HTML_URL=$(curl ${{ env.ADMIN_SERVER_API_URL }}/$PKG_VER_ID -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" | jq -r .html_url)
+        PKG_HTML_URL=$(curl ${{ env.ADMIN_SERVER_API_URL }} -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" | jq -r .html_url)
 
         echo "PKG_VER_ID=$PKG_VER_ID"
         echo "PKG_HTML_URL=$PKG_HTML_URL"
