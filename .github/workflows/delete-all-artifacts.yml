@@ -5,8 +5,11 @@ on:
   workflow_dispatch:
 
 env:
+  
   AZ_CLI_VERSION: 2.40.0
   DEPLOYMENT_VERSION: 2.6.3
+
+  GH_API: api.github.com/user/packages/maven
 
   # ==== APPS ====:
   API_GATEWAY: api-gateway
@@ -32,8 +35,6 @@ jobs:
     - name: Set Base environment variables
       run: |
         echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV
-
-        echo "GH_API=api.github.com/user/packages/maven" >> $GITHUB_ENV
 
         echo "API_GATEWAY_JAR_ARTIFACT=${{ env.PRJ_PREFIX }}-${{ env.API_GATEWAY }}-${{ env.DEPLOYMENT_VERSION }}.jar" >> $GITHUB_ENV
         echo "ADMIN_SERVER_JAR_ARTIFACT=${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}-${{ env.DEPLOYMENT_VERSION }}.jar" >> $GITHUB_ENV
@@ -109,7 +110,7 @@ jobs:
         curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" ${{ env.VETS_SERVICE_API_URL }}
         curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" ${{ env.VISITS_SERVICE_API_URL }}
 
-        curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" https://${{ env.GH_API }}/org.springframework.samples.${{ env.PRJ_PREFIX }}-spring-petclinic-microservices
+        curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" https://${{ env.GH_API }}/org.springframework.samples.${{ env.PRJ_PREFIX }}-spring-petclinic-microservices/spring-petclinic-microservices
         # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
         # https://learn.microsoft.com/en-us/azure/developer/github/github-variable-substitution
         echo "All artifacts have been deleted, check at https://github.com/${{github.repository}}/packages/"
