@@ -6,7 +6,7 @@ on:
 env:
   
   AZ_CLI_VERSION: 2.40.0
-  DEPLOYMENT_VERSION: 2.6.3
+  DEPLOYMENT_VERSION: 2.6.6
 
   GH_API: api.github.com/user/packages/maven
 
@@ -71,7 +71,7 @@ jobs:
     # Variables in the env map cannot be defined in terms of other variables in the map
     - name: Set dependent environment variables
       run: |
-        # ==== JARS ====: PWD already in /home/runner/work/azure-spring-cloud-petclinic-mic-srv >> $GITHUB_ENV
+        # ==== JARS ====: PWD already in /home/runner/work/azure-spring-apps-petclinic-mic-srv >> $GITHUB_ENV
         echo "API_GATEWAY_JAR=${{ env.PRJ_PREFIX }}-${{ env.API_GATEWAY }}/target/$API_GATEWAY_JAR_ARTIFACT" >> $GITHUB_ENV
         echo "ADMIN_SERVER_JAR=${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}/target/$ADMIN_SERVER_JAR_ARTIFACT" >> $GITHUB_ENV
         echo "CONFIG_SERVER_JAR=${{ env.PRJ_PREFIX }}-${{ env.CONFIG_SERVER }}/target/$CONFIG_SERVER_JAR_ARTIFACT" >> $GITHUB_ENV
@@ -113,11 +113,11 @@ jobs:
     # Can be tested at https://docs.github.com/en/graphql/overview/explorer
     - name: Get Admin-Server GH Package URL
       uses: octokit/graphql-action@v2.2.22
-      id: get_latest_pkg_customers
+      id: get_latest_pkg_admin
       with:
         query: |
           query packages($owner:String!,$repo:String!) {
-            repository(owner:$owner,name:$repo) {
+            repository(owner:${{ env.OWNER }},name:${{ env.REPO }}) {
               packages(first: 10, packageType: MAVEN, names: "org.springframework.samples.petclinic.admin.${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}") {
                 edges {
                   node {
@@ -141,11 +141,33 @@ jobs:
               }
             }
           }
+        # owner: ${{ github.repository_owner }} # ${{ github.event.repository.owner.name }}
+        # repo: ${{ github.event.repository.name }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         # GITHUB_TOKEN: ${{ secrets.PKG_PAT }}
         OWNER: ${{ github.repository_owner }} # # ${{ github.event.repository.owner.name }} 
         REPO: ${{ github.event.repository.name }}
 
-    - run: "echo 'latest release: ${{ steps.get_latest_pkg_customers.outputs.data }}'"
+    - run: |
+        # https://www.baeldung.com/linux/jq-command-json
+        echo "latest release: ${{ steps.get_latest_pkg_admin.outputs.data }}"
+        # .repository.packages.edges[0].node.versions.nodes["version": "2.6.6"].files.nodes[0].url
+        jarURL=${{ steps.get_latest_pkg_admin.outputs.data }} | jq '.repository.packages.edges[0].node.versions.nodes[] | select(.name|test("^.*\.jar$")) | .url'
+        shaURL=${{ steps.get_latest_pkg_admin.outputs.data }} | jq '.repository.packages.edges[0].node.versions.nodes[] | select(.name|test("^.*\.jar\.sha1$")) | .url'
+        md5URL=${{ steps.get_latest_pkg_admin.outputs.data }} | jq '.repository.packages.edges[0].node.versions.nodes[] | select(.name|test("^.*\.jar\.md5$")) | .url'
+        pomURL=${{ steps.get_latest_pkg_admin.outputs.data }} | jq '.repository.packages.edges[0].node.versions.nodes[] | select(.name|test("^.*\.pom$")) | .url'
+        pomSHA=${{ steps.get_latest_pkg_admin.outputs.data }} | jq '.repository.packages.edges[0].node.versions.nodes[] | select(.name|test("^.*\.pom\.sha1$")) | .url'
+        pomMD5=${{ steps.get_latest_pkg_admin.outputs.data }} | jq '.repository.packages.edges[0].node.versions.nodes[] | select(.name|test("^.*\.pom\.md5$")) | .url'
 
+        # Content-Type: application/octet-stream not application/java-archive (or application/x-java-archive | application/x-jar)
+        wget jarURL -O $ADMIN_SERVER_JAR_ARTIFACT --header="Authorization: Bearer ${{ env.GHA_PAT }}" --quiet
+        mkdir spring-petclinic-admin-server/target
+        cp $ADMIN_SERVER_JAR_ARTIFACT spring-petclinic-admin-server/target/
+        pwd
+        ls -al
+        mkdir $GH_WORKSPACE/${{ env.ADMIN_SERVER }}
+        ls -al
+
+      env:
+        GHA_PAT: ${{ secrets.PKG_PAT }}
