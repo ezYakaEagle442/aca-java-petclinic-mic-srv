@@ -109,26 +109,30 @@ jobs:
 
     # TODO: replace the curl workaround with https://gist.github.com/tgrall/25f82f69bfdbc630bfc7a2e4c3acd39d 
     # https://github.com/octokit/graphql-action
+
+    # Can be tested at https://docs.github.com/en/graphql/overview/explorer
     - name: Get Admin-Server GH Package URL
       uses: octokit/graphql-action@v2.2.22
       id: get_latest_pkg_customers
       with:
         query: |
-          repository(owner:$owner,name:$repo) {
-            packages(first: 10, packageType: MAVEN, names: "org.springframework.samples.petclinic.client.${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}") {
-              edges {
-                node {
-                  id
-                  name
-                  packageType
-                  versions(first: 100) {
-                    nodes {
-                      id
-                      version
-                      files(first: 10) {
-                        nodes {
-                          name
-                          url
+          query packages($owner:String!,$repo:String!) {
+            repository(owner:$owner,name:$repo) {
+              packages(first: 10, packageType: MAVEN, names: "org.springframework.samples.petclinic.admin.${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}") {
+                edges {
+                  node {
+                    id
+                    name
+                    packageType
+                    versions(first: 100) {
+                      nodes {
+                        id
+                        version
+                        files(first: 10) {
+                          nodes {
+                            name
+                            url
+                          }
                         }
                       }
                     }
@@ -137,9 +141,11 @@ jobs:
               }
             }
           }
-        owner: ${{ github.event.repository.owner.name }} # ${{ github.repository_owner }}
-        repo: ${{ github.event.repository.name }}
       env:
-        GITHUB_TOKEN: ${{ secrets.PKG_PAT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # GITHUB_TOKEN: ${{ secrets.PKG_PAT }}
+        OWNER: ${{ github.repository_owner }} # # ${{ github.event.repository.owner.name }} 
+        REPO: ${{ github.event.repository.name }}
+
     - run: "echo 'latest release: ${{ steps.get_latest_pkg_customers.outputs.data }}'"
 
