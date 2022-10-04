@@ -114,23 +114,21 @@ jobs:
       id: get_latest_pkg_customers
       with:
         query: |
-          query release(owner:$owner,name:$repo) {
-            repository(owner:$owner,name:$repo) {
-              packages(first: 10, packageType: MAVEN, names: "org.springframework.samples.petclinic.client.${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}") {
-                edges {
-                  node {
-                    id
-                    name
-                    packageType
-                    versions(first: 100) {
-                      nodes {
-                        id
-                        version
-                        files(first: 10) {
-                          nodes {
-                            name
-                            url
-                          }
+          repository(owner:$owner,name:$repo) {
+            packages(first: 10, packageType: MAVEN, names: "org.springframework.samples.petclinic.client.${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}") {
+              edges {
+                node {
+                  id
+                  name
+                  packageType
+                  versions(first: 100) {
+                    nodes {
+                      id
+                      version
+                      files(first: 10) {
+                        nodes {
+                          name
+                          url
                         }
                       }
                     }
