@@ -7,7 +7,7 @@ on:
 env:
   
   AZ_CLI_VERSION: 2.40.0
-  DEPLOYMENT_VERSION: 2.6.3
+  DEPLOYMENT_VERSION: 2.6.6
 
   GH_API: api.github.com/user/packages/maven
 
