@@ -33,6 +33,8 @@ env:
   # ==== Secrets ====
   credentials: ${{ secrets.AZURE_CREDENTIALS }}
   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  SPN_ID: ${{ secrets.SPN_ID }}
+  SPN_PWD: ${{ secrets.SPN_PWD }}
   
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
 on:
@@ -167,13 +169,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: [get-acr-creds, maven-build] # https://docs.github.com/en/actions/using-jobs/using-jobs-in-a-workflow#defining-prerequisite-jobs
     steps:
+    
     # https://github.com/marketplace/actions/azure-container-registry-login
-    - name: Login to ACR
-      uses: azure/docker-login@v1
-      with:
-        login-server: '${{ env.REGISTRY_URL }}' # default: index.docker.io
-        username: ${{needs.get-acr-creds.outputs.acr_usr}}
-        password: ${{needs.get-acr-creds.outputs.acr_pwd}}
+    #- name: Login to ACR
+    #  uses: azure/docker-login@v1
+    #  with:
+    #    login-server: '${{ env.REGISTRY_URL }}' # default: index.docker.io
+    #    username: ${{ env.SPN_ID }}
+    #    password: ${{ env.SPN_PWD }}
 
     # https://github.com/marketplace/actions/docker-setup-buildx
     - name: Set up Docker Buildx
@@ -184,8 +187,8 @@ jobs:
       id: admin-server-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{needs.get-acr-creds.outputs.acr_usr}} # The Service Principal credentials : must be stored in KV
-        service_principal_password: ${{needs.get-acr-creds.outputs.acr_pwd}} # The Service Principal credentials: must be stored in KV
+        service_principal: ${{ env.SPN_ID }} # The Service Principal credentials : must be stored in KV
+        service_principal_password: ${{ env.SPN_PWD }} # The Service Principal credentials: must be stored in KV
         tenant: ${{ env.AZURE_TENANT_ID }} # The ACR tenant
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }} # The ACR name
         repository: ${{ env.REPOSITORY }} # The repository on the ACR
@@ -199,8 +202,8 @@ jobs:
       id: config-server-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{needs.get-acr-creds.outputs.acr_usr}}
-        service_principal_password: ${{needs.get-acr-creds.outputs.acr_pwd}}
+        service_principal: ${{ env.SPN_ID }}
+        service_principal_password: ${{ env.SPN_PWD }}
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
@@ -213,8 +216,8 @@ jobs:
       id: api-gateway-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{needs.get-acr-creds.outputs.acr_usr}}
-        service_principal_password: ${{needs.get-acr-creds.outputs.acr_pwd}}
+        service_principal: ${{ env.SPN_ID }}
+        service_principal_password: ${{ env.SPN_PWD }}
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
@@ -227,8 +230,8 @@ jobs:
       id: customer-service-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{needs.get-acr-creds.outputs.acr_usr}}
-        service_principal_password: ${{needs.get-acr-creds.outputs.acr_pwd}}
+        service_principal: ${{ env.SPN_ID }}
+        service_principal_password: ${{ env.SPN_PWD }}
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
@@ -241,8 +244,8 @@ jobs:
       id: vets-service-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{needs.get-acr-creds.outputs.acr_usr}}
-        service_principal_password: ${{needs.get-acr-creds.outputs.acr_pwd}}
+        service_principal: ${{ env.SPN_ID }}
+        service_principal_password: ${{ env.SPN_PWD }}
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
@@ -255,8 +258,8 @@ jobs:
       id: visits-service-acr-build
       uses: azure/acr-build@v1
       with:
-        service_principal: ${{needs.get-acr-creds.outputs.acr_usr}}
-        service_principal_password: ${{needs.get-acr-creds.outputs.acr_pwd}}
+        service_principal: ${{ env.SPN_ID }}
+        service_principal_password: ${{ env.SPN_PWD }}
         tenant: ${{ env.AZURE_TENANT_ID }}
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
