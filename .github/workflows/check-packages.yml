@@ -115,7 +115,7 @@ jobs:
       with:
         query: |
           query release($owner:String!,$repo:String!) {
-            repository(owner: $owner:String!, name: $repo:String!) {
+            repository(owner:$owner,name:$repo) {
               packages(first: 10, packageType: MAVEN, names: "org.springframework.samples.petclinic.client.${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}") {
                 edges {
                   node {
