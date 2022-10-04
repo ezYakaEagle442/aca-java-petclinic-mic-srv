@@ -98,9 +98,14 @@ jobs:
         echo "VISITS_SERVICE_API_URL=https://$GH_API/$VISITS_SERVICE_GROUP_ID.$VISITS_SERVICE_ARTIFACT_ID" >> $GITHUB_ENV
       shell: bash
 
-    # You can  download all artifacts in a workflow run by not specifying a name.
     - name: Delete ALL Jar artifacts
       run: |
+        echo "checking package files ..."
+        curl \
+        -H "Authorization: Bearer ${{ env.GHA_PAT }}" \
+        -H "Accept: application/vnd.github.v3+json" \
+        https://${GH_API}
+
         echo "About to delete all jars files ..."
         curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" ${{ env.ADMIN_SERVER_API_URL }}
         curl -X DELETE -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" ${{ env.API_GATEWAY_API_URL }}
