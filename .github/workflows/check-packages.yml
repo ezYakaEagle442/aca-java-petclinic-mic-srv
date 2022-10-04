@@ -118,7 +118,8 @@ jobs:
         query: |
           query packages($owner:String!,$repo:String!) {
             repository(owner:${{ env.OWNER }},name:${{ env.REPO }}) {
-              packages(first: 10, packageType: MAVEN, names: "org.springframework.samples.petclinic.admin.${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}") {
+              # /!\ '_' dash char. NOT supported in org.springframework.samples.petclinic.admin.${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}
+              packages(first: 10, packageType: MAVEN, names: "org.springframework.samples.petclinic.admin.aca-spring-petclinic-admin-server") {
                 edges {
                   node {
                     id
@@ -159,6 +160,13 @@ jobs:
         pomURL=${{ steps.get_latest_pkg_admin.outputs.data }} | jq '.repository.packages.edges[0].node.versions.nodes[] | select(.name|test("^.*\.pom$")) | .url'
         pomSHA=${{ steps.get_latest_pkg_admin.outputs.data }} | jq '.repository.packages.edges[0].node.versions.nodes[] | select(.name|test("^.*\.pom\.sha1$")) | .url'
         pomMD5=${{ steps.get_latest_pkg_admin.outputs.data }} | jq '.repository.packages.edges[0].node.versions.nodes[] | select(.name|test("^.*\.pom\.md5$")) | .url'
+
+        echo jarURL=$jarURL
+        echo shaURL=$shaURL
+        echo md5URL=$md5URL
+        echo pomURL=$pomURL
+        echo pomSHA=$pomSHA
+        echo pomMD5=$pomMD5
 
         # Content-Type: application/octet-stream not application/java-archive (or application/x-java-archive | application/x-jar)
         wget jarURL -O $ADMIN_SERVER_JAR_ARTIFACT --header="Authorization: Bearer ${{ env.GHA_PAT }}" --quiet
