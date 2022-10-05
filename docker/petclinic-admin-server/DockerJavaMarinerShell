@@ -1,0 +1,6 @@
+# docker build --build-arg --no-cache -t "java-mariner-shell" -f "./docker/petclinic-admin-server/DockerJavaMarinerShell" .
+# docker image ls
+# docker run -it java-mariner-shell
+FROM mcr.microsoft.com/openjdk/jdk:11-mariner as builder
+RUN java -version
+RUN ls -al /usr/lib/jvm/msopenjdk-11
