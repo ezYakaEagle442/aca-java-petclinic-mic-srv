@@ -175,7 +175,7 @@ jobs:
         repository: ${{ env.REPOSITORY }} # The repository on the ACR
         image: ${{ env.ADMIN_SERVER }} # Docker image name. Default tag: The action will default to use the first 8 characters of the commit SHA if no tag is specified. Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
         # git_access_token: ${{ secrets.git_access_token }} # The Github access token for private repositories
-        folder: ./ # Build context for Docker agent
+        folder: ${{ github.workspace }} # Build context for Docker agent
         dockerfile: ./docker/petclinic-admin-server/Dockerfile # Path to the Dockerfile relative to `folder`
         branch: main # Branch to root the context off of
 
@@ -189,7 +189,7 @@ jobs:
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
         image: ${{ env.CONFIG_SERVER }}
-        folder: ./
+        folder: ${{ github.workspace }}
         dockerfile: ./docker/petclinic-config-server/Dockerfile
         branch: main
 
@@ -203,7 +203,7 @@ jobs:
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
         image: ${{ env.API_GATEWAY }}
-        folder: ./
+        folder: ${{ github.workspace }}
         dockerfile: ./docker/petclinic-api-gateway/Dockerfile
         branch: main
 
@@ -217,7 +217,7 @@ jobs:
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
         image: ${{ env.CUSTOMERS_SERVICE }}
-        folder: ./
+        folder: ${{ github.workspace }}
         dockerfile: ./docker/petclinic-customers-service/Dockerfile
         branch: main        
 
@@ -231,7 +231,7 @@ jobs:
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
         image: ${{ env.VETS_SERVICE }}
-        folder: ./
+        folder: ${{ github.workspace }}
         dockerfile: ./docker/petclinic-vets-service/Dockerfile
         branch: main
 
@@ -245,6 +245,6 @@ jobs:
         registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
         repository: ${{ env.REPOSITORY }}
         image: ${{ env.VISITS_SERVICE }}
-        folder: ./
+        folder: ${{ github.workspace }}
         dockerfile: ./docker/petclinic-visits-service/Dockerfile
         branch: main
