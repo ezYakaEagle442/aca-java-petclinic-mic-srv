@@ -163,15 +163,25 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2.0.0
 
+    - name: Azure Login
+      uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
+      with:
+        creds: ${{ env.credentials }}
+
     - name: Build image and push it to ACR
       run: |
+          acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryUsr.value | tr -d '"')
+          acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryPwd.value | tr -d '"')
 
-          # tenantId=$(az account show --query tenantId -o tsv)
-          # echo AZURE_TENANT_ID >> $GITHUB_ENV
-    
+          # az acr login --name ${{ env.REGISTRY_URL }} -u $acr_usr -p $acr_pwd
+
           az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
-          # az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
-          az acr build -t ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }} --file "./docker/petclinic-admin-server/Dockerfile"
+          
+          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
+            -t ${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }}:{{.Run.ID}} \
+            --file "./docker/petclinic-admin-server/Dockerfile" \
+            ${{ github.workspace }}
+
           build_id=$(az acr task list-runs --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -o json --query [0].name )
     
           build_id=$(echo $build_id | tr -d '"')
