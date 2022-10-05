@@ -12,7 +12,7 @@ LABEL Maintainer="pinpin <noname@microsoft.com>"
 LABEL Description="PetClinic Config Server: Java Spring Boot microservice built from MS OpenJDK 11-Mariner"
 RUN mkdir /tmp/app
 WORKDIR /tmp/app
-COPY "./spring-petclinic-config-server/target/*.jar" /tmp/app/app.jar
+COPY "./aca-spring-petclinic-config-server/target/*.jar" /tmp/app/app.jar
 RUN java -Djarmode=layertools -jar "/tmp/app/app.jar" extract
 RUN curl -SL --output ${APP_INSIGHTS_AGENT_JAR_FILE_PATH} https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.3.0/applicationinsights-agent-3.3.0.jar
 

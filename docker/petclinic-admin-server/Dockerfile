@@ -28,7 +28,7 @@ RUN ls -al /usr/lib/jvm/msopenjdk-11
 RUN mkdir /tmp/app
 WORKDIR /tmp/app
 
-COPY "spring-petclinic-admin-server/target/*.jar" /tmp/app/app.jar
+COPY "aca-spring-petclinic-admin-server/target/*.jar" /tmp/app/app.jar
 
 # RUN yum install maven -y
 
