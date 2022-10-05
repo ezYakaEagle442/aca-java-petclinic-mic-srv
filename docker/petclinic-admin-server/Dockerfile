@@ -15,7 +15,8 @@
 
 # https://docs.microsoft.com/en-us/java/openjdk/containers
 FROM mcr.microsoft.com/openjdk/jdk:11-mariner as builder
-ENV APP_INSIGHTS_AGENT_JAR_FILE_PATH  = "/tmp/app/applicationinsights-agent-3.3.0.jar"
+ENV APPI_VERSION="3.4.1"
+ENV APP_INSIGHTS_AGENT_JAR_FILE_PATH="/tmp/app/applicationinsights-agent-${APPI_VERSION}.jar"
 
 LABEL Maintainer="pinpin <noname@microsoft.com>"
 LABEL Description="PetClinic admin-server: Java Spring Boot microservice built from MS OpenJDK 11-Mariner"
@@ -28,7 +29,7 @@ RUN ls -al /usr/lib/jvm/msopenjdk-11
 RUN mkdir /tmp/app
 WORKDIR /tmp/app
 
-COPY "aca-spring-petclinic-admin-server/target/*.jar" /tmp/app/app.jar
+COPY "spring-petclinic-admin-server/target/*.jar" /tmp/app/app.jar
 
 # RUN yum install maven -y
 
@@ -53,13 +54,19 @@ COPY "aca-spring-petclinic-admin-server/target/*.jar" /tmp/app/app.jar
 # ENV AZURE_TENANT_ID=ThisIsASecretValue
 
 
-RUN curl -SL --output ${APP_INSIGHTS_AGENT_JAR_FILE_PATH} https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.3.0/applicationinsights-agent-3.3.0.jar
+RUN curl -SL --output ${APP_INSIGHTS_AGENT_JAR_FILE_PATH} https://github.com/microsoft/ApplicationInsights-Java/releases/download/${APPI_VERSION}/applicationinsights-agent-${APPI_VERSION}.jar
 RUN java -Djarmode=layertools -jar "/tmp/app/app.jar" extract
 
 # wget is not installed on adoptopenjdk:11-jre-hotspot
 FROM mcr.microsoft.com/openjdk/jdk:11-mariner
 WORKDIR /tmp/app
 # VOLUME /tmp
+
+ENV APPI_VERSION="3.4.1"
+ENV APP_INSIGHTS_AGENT_JAR_FILE_PATH="/tmp/app/applicationinsights-agent-${APPI_VERSION}.jar"
+ENV SPRING_PROFILES_ACTIVE="docker,mysql"
+# ENV APPLICATIONINSIGHTS_CONNECTION_STRING=""
+
 COPY --from=builder ${APP_INSIGHTS_AGENT_JAR_FILE_PATH} ./
 COPY --from=builder /tmp/app/dependencies/ ./
 COPY --from=builder /tmp/app/snapshot-dependencies/ ./
@@ -70,8 +77,7 @@ COPY --from=builder /tmp/app/application/ ./
 # RUN touch /app.jar
 EXPOSE 80 8080 8081 8082 8083 8084 8888 9090
 
-ENV APP_INSIGHTS_AGENT_JAR_FILE_PATH = "/tmp/app/applicationinsights-agent-3.3.0.jar"
-ENV SPRING_PROFILES_ACTIVE = "docker,mysql"
-
-ENTRYPOINT ["java", "-javaagent:${APP_INSIGHTS_AGENT_JAR_FILE_PATH}", "org.springframework.boot.loader.JarLauncher", "--server.port=9090", "--spring.profiles.active=docker,mysql"]
+# https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot
+ENTRYPOINT ["java", "-javaagent:/tmp/app/applicationinsights-agent-3.4.1.jar", "org.springframework.boot.loader.JarLauncher", "--server.port=9090", "--spring.profiles.active=docker,mysql"]
 # ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/tmp/app/app.jar"]
+#ENTRYPOINT ["java", "-javaagent:"{$APP_INSIGHTS_AGENT_JAR_FILE_PATH}, "-jar", "/tmp/app/app.jar" , "--server.port=9090", "--spring.profiles.active=docker,mysql"]
