@@ -163,6 +163,26 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2.0.0
 
+    - name: Build image and push it to ACR
+      run: |
+
+          # tenantId=$(az account show --query tenantId -o tsv)
+          # echo AZURE_TENANT_ID >> $GITHUB_ENV
+    
+          az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
+          # az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
+          az acr build -t ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }} --file "./docker/petclinic-admin-server/Dockerfile"
+          build_id=$(az acr task list-runs --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -o json --query [0].name )
+    
+          build_id=$(echo $build_id | tr -d '"')
+          echo "Successfully pushed image with ID " $build_id
+          az acr task logs --registry ${{ env.AZURE_CONTAINER_REGISTRY }} --run-id $build_id
+
+          # verify
+          az acr repository list  ${{ env.AZURE_CONTAINER_REGISTRY }} --output table
+          az acr repository show --name ${{ env.AZURE_CONTAINER_REGISTRY }} --repository ${{ env.PROJECT_NAME }}
+
+
     # https://github.com/marketplace/actions/azure-container-registry-build
     - name: admin-server ACR build
       id: admin-server-acr-build
@@ -178,6 +198,7 @@ jobs:
         folder: ${{ github.workspace }} # Build context for Docker agent
         dockerfile: ./docker/petclinic-admin-server/Dockerfile # Path to the Dockerfile relative to `folder`
         branch: main # Branch to root the context off of
+
 
     - name: config-server ACR build
       id: config-server-acr-build
