@@ -149,6 +149,7 @@ jobs:
         pwd
         ls -al
 
+        echo "Checking all artifacts Jar files :"
         ls -al spring-petclinic-${{ env.ADMIN_SERVER }}/target/*.jar
         ls -al spring-petclinic-${{ env.API_GATEWAY }}/target/*.jar
         ls -al spring-petclinic-${{ env.CUSTOMERS_SERVICE }}/target/*.jar
