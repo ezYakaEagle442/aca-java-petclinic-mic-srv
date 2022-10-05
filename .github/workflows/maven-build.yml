@@ -72,6 +72,28 @@ jobs:
         echo "VETS_SERVICE_JAR_ARTIFACT=${{ env.PRJ_PREFIX }}-${{ env.VETS_SERVICE }}-${{ env.DEPLOYMENT_VERSION }}.jar" >> $GITHUB_ENV
         echo "VISITS_SERVICE_JAR_ARTIFACT=${{ env.PRJ_PREFIX }}-${{ env.VISITS_SERVICE }}-${{ env.DEPLOYMENT_VERSION }}.jar" >> $GITHUB_ENV
 
+        echo "ADMIN_SERVER_GROUP_ID=org.springframework.samples.petclinic.admin" >> $GITHUB_ENV
+        echo "ADMIN_SERVER_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}" >> $GITHUB_ENV
+
+        echo "API_GATEWAY_GROUP_ID=org.springframework.samples.petclinic.api" >> $GITHUB_ENV
+        echo "API_GATEWAY_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.API_GATEWAY }}" >> $GITHUB_ENV
+
+        echo "CONFIG_SERVER_GROUP_ID=org.springframework.samples.petclinic.config" >> $GITHUB_ENV
+        echo "CONFIG_SERVER_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.CONFIG_SERVER }}" >> $GITHUB_ENV
+
+        echo "CUSTOMERS_SERVICE_GROUP_ID=org.springframework.samples.petclinic.client" >> $GITHUB_ENV
+        echo "CUSTOMERS_SERVICE_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.CUSTOMERS_SERVICE }}" >> $GITHUB_ENV
+
+        echo "DISCOVERY_SERVER_GROUP_ID=org.springframework.samples.petclinic.discovery" >> $GITHUB_ENV
+        echo "DISCOVERY_SERVER_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.DISCOVERY_SERVER }}" >> $GITHUB_ENV
+
+        echo "VETS_SERVICE_GROUP_ID=org.springframework.samples.petclinic.vets" >> $GITHUB_ENV
+        echo "VETS_SERVICE_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.VETS_SERVICE }}" >> $GITHUB_ENV
+
+        echo "VISITS_SERVICE_GROUP_ID=org.springframework.samples.petclinic.visits" >> $GITHUB_ENV
+        echo "VISITS_SERVICE_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.VISITS_SERVICE }}" >> $GITHUB_ENV
+
+        echo "GH_WORKSPACE=${{ github.workspace }}" >> $GITHUB_ENV # "/github/workspace"
       shell: bash
 
     - name: Checkout
@@ -121,86 +143,11 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Set GROUP and ARTIFACT environment variables
-      run: |
 
-        echo "ADMIN_SERVER_GROUP_ID=org.springframework.samples.petclinic.admin" >> $GITHUB_ENV
-        echo "ADMIN_SERVER_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}" >> $GITHUB_ENV
-
-        echo "API_GATEWAY_GROUP_ID=org.springframework.samples.petclinic.api" >> $GITHUB_ENV
-        echo "API_GATEWAY_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.API_GATEWAY }}" >> $GITHUB_ENV
-
-        echo "CONFIG_SERVER_GROUP_ID=org.springframework.samples.petclinic.config" >> $GITHUB_ENV
-        echo "CONFIG_SERVER_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.CONFIG_SERVER }}" >> $GITHUB_ENV
-
-        echo "CUSTOMERS_SERVICE_GROUP_ID=org.springframework.samples.petclinic.client" >> $GITHUB_ENV
-        echo "CUSTOMERS_SERVICE_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.CUSTOMERS_SERVICE }}" >> $GITHUB_ENV
-
-        echo "DISCOVERY_SERVER_GROUP_ID=org.springframework.samples.petclinic.discovery" >> $GITHUB_ENV
-        echo "DISCOVERY_SERVER_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.DISCOVERY_SERVER }}" >> $GITHUB_ENV
-
-        echo "VETS_SERVICE_GROUP_ID=org.springframework.samples.petclinic.vets" >> $GITHUB_ENV
-        echo "VETS_SERVICE_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.VETS_SERVICE }}" >> $GITHUB_ENV
-
-        echo "VISITS_SERVICE_GROUP_ID=org.springframework.samples.petclinic.visits" >> $GITHUB_ENV
-        echo "VISITS_SERVICE_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.VISITS_SERVICE }}" >> $GITHUB_ENV
-
-        echo "GH_WORKSPACE=${{ github.workspace }}" >> $GITHUB_ENV # "/github/workspace"
-
-      shell: bash
-
-    - name: Copy and Check all Jar artifacts
+    - name: Check all Jar artifacts
       run: |
         pwd
         ls -al
-
-        # github.workspace = /home/runner/work/aca-java-petclinic-mic-srv/aca-java-petclinic-mic-srv
-        echo "github.workspace = ${{ github.workspace }}" 
-
-        mkdir -p ~/.m2
-        echo "<settings><servers><server><id>github-aca</id><username>$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')</username><password>\${env.GITHUB_TOKEN}</password></server></servers></settings>" > ~/.m2/settings.xml
-
-        echo "copy jar files to each <service>/target/*.jar as expected by the Dockerfille"
-
-        mkdir spring-petclinic-${{ env.ADMIN_SERVER }}
-        mkdir spring-petclinic-${{ env.API_GATEWAY }}
-        mkdir spring-petclinic-${{ env.CUSTOMERS_SERVICE }}
-        mkdir spring-petclinic-${{ env.VETS_SERVICE }}
-        mkdir spring-petclinic-${{ env.VISITS_SERVICE }}
-        mkdir spring-petclinic-${{ env.CONFIG_SERVER }}
-        mkdir spring-petclinic-${{ env.DISCOVERY_SERVER }}
-
-        mkdir spring-petclinic-${{ env.ADMIN_SERVER }}/target
-        mkdir spring-petclinic-${{ env.API_GATEWAY }}/target
-        mkdir spring-petclinic-${{ env.CUSTOMERS_SERVICE }}/target
-        mkdir spring-petclinic-${{ env.VETS_SERVICE }}/target
-        mkdir spring-petclinic-${{ env.VISITS_SERVICE }}/target
-        mkdir spring-petclinic-${{ env.CONFIG_SERVER }}/target
-        mkdir spring-petclinic-${{ env.DISCOVERY_SERVER }}/target
-
-        mvn org.apache.maven.plugins:maven-dependency-plugin:3.3.0:copy \
-        -Dartifact=$ADMIN_SERVER_GROUP_ID:$ADMIN_SERVER_JAR_ARTIFACT \
-        -DoutputDirectory=spring-petclinic-${{ env.ADMIN_SERVER }}/target -s ~/.m2/settings.xml \
-        
-        mvn org.apache.maven.plugins:maven-dependency-plugin:3.3.0:copy \
-        -Dartifact=$API_GATEWAY_GROUP_ID:$API_GATEWAY_JAR_ARTIFACT \
-        -DoutputDirectory=spring-petclinic-${{ env.API_GATEWAY }}/target -s ~/.m2/settings.xml \
-
-        mvn org.apache.maven.plugins:maven-dependency-plugin:3.3.0:copy \
-        -Dartifact=$CONFIG_SERVER_GROUP_ID:$CONFIG_SERVER_JAR_ARTIFACT \
-        -DoutputDirectory=spring-petclinic-${{ env.CONFIG_SERVER }}/target -s ~/.m2/settings.xml \
-
-        mvn org.apache.maven.plugins:maven-dependency-plugin:3.3.0:copy \
-        -Dartifact=$CUSTOMERS_SERVICE_GROUP_ID:$CUSTOMERS_SERVICE_JAR_ARTIFACT \
-        -DoutputDirectory=spring-petclinic-${{ env.CUSTOMERS_SERVICE }}/target -s ~/.m2/settings.xml \
-        
-        mvn org.apache.maven.plugins:maven-dependency-plugin:3.3.0:copy \
-        -Dartifact=$VETS_SERVICE_GROUP_ID:$VETS_SERVICE_JAR_ARTIFACT \
-        -DoutputDirectory=spring-petclinic-${{ env.VETS_SERVICE }}/target -s ~/.m2/settings.xml \
-
-        mvn org.apache.maven.plugins:maven-dependency-plugin:3.3.0:copy \
-        -Dartifact=$VISITS_SERVICE_GROUP_ID:$VISITS_SERVICE_JAR_ARTIFACT \
-        -DoutputDirectory=spring-petclinic-${{ env.VISITS_SERVICE }}/target -s ~/.m2/settings.xml \
 
         ls -al spring-petclinic-${{ env.ADMIN_SERVER }}/target/*.jar
         ls -al spring-petclinic-${{ env.API_GATEWAY }}/target/*.jar
