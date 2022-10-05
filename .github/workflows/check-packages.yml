@@ -8,6 +8,7 @@ env:
   AZ_CLI_VERSION: 2.40.0
   DEPLOYMENT_VERSION: 2.6.6
 
+  # https://docs.github.com/en/rest/packages#get-a-package-for-the-authenticated-user
   GH_API: api.github.com/user/packages/maven
 
   # ==== APPS ====:
@@ -151,6 +152,8 @@ jobs:
     # https://github.com/octokit/graphql-action
 
     # Can be tested at https://docs.github.com/en/graphql/overview/explorer
+    # see https://github.com/octokit/graphql-action/issues/160
+    # https://github.com/community/community/discussions/35159
     - name: Get Admin-Server GH Package URL
       uses: octokit/graphql-action@v2.2.22
       id: get_latest_pkg_admin
