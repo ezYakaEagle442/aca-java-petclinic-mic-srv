@@ -315,7 +315,33 @@
                 </pluginManagement>
             </build>
         </profile>
+        <!-- https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry
+        <profiles>
+            <profile>
+            <id>github</id>
+            <repositories>
+                <repository>
+                <id>central</id>
+                <url>https://repo1.maven.org/maven2</url>
+                </repository>
+                <repository>
+                <id>github</id>
+                <url>https://maven.pkg.github.com/OWNER/REPOSITORY</url>
+                <snapshots>
+                    <enabled>true</enabled>
+                </snapshots>
+                </repository>
+            </repositories>
+            </profile>
+        -->      
     </profiles>
+
+    <!-- 
+    <activeProfiles>
+        <activeProfile>github</activeProfile>
+    </activeProfiles>
+    -->
+
     <!--
     <repositories>
         <repository>
@@ -323,6 +349,43 @@
             <name>Spring Milestones</name>
             <url>https://repo.spring.io/milestone</url>
         </repository>
+        <repository>
+            <id>gh</id>
+            <name>gh-snapshot</name>
+            
+            <url>http://localhost:8081/repository/maven-snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>        
     </repositories>
     -->
+
+    <!--
+    https://www.baeldung.com/maven-snapshot-release-repository
+    <distributionManagement>
+        <snapshotRepository>
+            <id>gh</id>
+            <name>gh-snapshot</name>
+            <url>http://localhost:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+    </snapshots>    
+
+    <servers>
+        <server>
+        <id>github</id>
+        <username>USERNAME</username>
+        <password>TOKEN</password>
+        </server>
+    </servers>    
+    -->
+
 </project>
