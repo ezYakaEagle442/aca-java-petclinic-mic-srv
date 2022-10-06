@@ -35,40 +35,6 @@ param kvRGName string
 
 param setKVAccessPolicies bool = true
 
-@description('Is KV Network access public ?')
-@allowed([
-  'enabled'
-  'disabled'
-])
-param publicNetworkAccess string = 'enabled'
-
-@description('The KV SKU name')
-@allowed([
-  'premium'
-  'standard'
-])
-param kvSkuName string = 'standard'
-
-/*
-@secure()
-@description('The Azure Active Directory tenant ID that should be used by Key Vault in the Spring Config')
-param springCloudAzureTenantId string
-
-@secure()
-@description('The Azure Key Vault EndPoint that should be used by Key Vault in the Spring Config. Ex: https://<key-vault-name>.vault.azure.net')
-param springCloudAzureKeyVaultEndpoint string
-
-@secure()
-@description('The Spring Datasource / MySQL DB admin user name  - this is a secret stored in Key Vault')
-param springDataSourceUsr string
-@secure()
-@description('The Spring Datasource / MySQL DB admin user password  - this is a secret stored in Key Vault')
-param springDataSourcePwd string
-@secure()
-@description('The Spring Datasource / MySQL DB URL - this is a secret stored in Key Vault')
-param springDataSourceUrl string
-*/
-
 @description('The Azure Active Directory tenant ID that should be used for authenticating requests to the Key Vault.')
 param tenantId string = subscription().tenantId
 
