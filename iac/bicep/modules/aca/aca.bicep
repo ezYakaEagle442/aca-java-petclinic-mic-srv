@@ -60,6 +60,7 @@ param tenantId string = subscription().tenantId
 param subscriptionId string = subscription().id
 
 
+
 @allowed([
   '0.25'
   '0.5'
@@ -70,25 +71,26 @@ param subscriptionId string = subscription().id
   '1.75'
   '2.0'    
 ])
-@description('The container Resources CPU')
+@description('The container Resources CPU. The total CPU and memory allocations requested for all the containers in a container app must add up to one of the following combinations. See https://learn.microsoft.com/en-us/azure/container-apps/containers#configuration')
 param containerResourcesCpu string = '0.5'
 
 @allowed([
-  '0.5'
-  '1.0'  
-  '1.5'
-  '2.0'    
-  '2.5'
-  '3.0'  
-  '3.5'
-  '4.0'    
+  '0.5Gi'
+  '1.0Gi'  
+  '1.5Gi'
+  '2.0Gi'    
+  '2.5Gi'
+  '3.0Gi'  
+  '3.5Gi'
+  '4.0Gi'    
 ])
-@description('The container Resources Memory')
-param containerResourcesMemory string = '1.0'
+@description('The container Resources Memory. The total CPU and memory allocations requested for all the containers in a container app must add up to one of the following combinations. See https://learn.microsoft.com/en-us/azure/container-apps/containers#configuration')
+param containerResourcesMemory string = '1.0Gi'
+
 
 
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
-param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.3.0.jar'
+param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.1.jar'
 
 @secure()
 @description('The Application Insights Intrumention Key. see https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string')
@@ -220,7 +222,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         traffic: [
           {
             latestRevision: true
-            revisionName: revisionName
+            // revisionName: revisionName Traffic weight cannot use "LatestRevision: true" and "RevisionName" at the same time
             weight: 100
           }
         ]
@@ -243,11 +245,11 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           value: appInsightsInstrumentationKey
         }
         {
-          name: 'SPRING-CLOUD-AZURE-TENANT-ID'
+          name: 'springcloudazuretenantid'
           value: springCloudAzureTenantId
         }
         {
-          name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+          name: 'springcloudazurekvendpoint'
           value: springCloudAzureKeyVaultEndpoint
         }                
       ]
@@ -263,7 +265,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           ]
           */
           command: [
-            '["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            '["java", "-javaagent:/tmp/app/applicationinsights-agent-3.4.1.jar", "org.springframework.boot.loader.JarLauncher", "--server.port=9090", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
@@ -276,12 +278,12 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'appinscon'
             }
             {
-              name: 'SPRING-CLOUD-AZURE-TENANT-ID'
-              secretRef: 'SPRING-CLOUD-AZURE-TENANT-ID'
+              name: 'SPRING_CLOUD_AZURE_TENANT_ID'
+              secretRef: 'springcloudazuretenantid'
             }   
             {
-              name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
-              secretRef: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+              name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
+              secretRef: 'springcloudazurekvendpoint'
             }                                 
           ]
           image: '${acrName}/${acrRepository}/${adminServerContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
@@ -347,8 +349,8 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }            
           ]
           resources: {
-            cpu: json(containerResourcesCpu) // 250m
-            memory: json(containerResourcesMemory) // Gi
+            cpu: json(containerResourcesCpu)
+            memory: containerResourcesMemory
           }
           /*
           volumeMounts: [
@@ -420,7 +422,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         traffic: [
           {
             latestRevision: true
-            revisionName: revisionName
+            // revisionName: revisionName Traffic weight cannot use "LatestRevision: true" and "RevisionName" at the same time
             weight: 100
           }
         ]
@@ -443,11 +445,11 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           value: appInsightsInstrumentationKey
         }
         {
-          name: 'SPRING-CLOUD-AZURE-TENANT-ID'
+          name: 'springcloudazuretenantid'
           value: springCloudAzureTenantId
         }
         {
-          name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+          name: 'springcloudazurekvendpoint'
           value: springCloudAzureKeyVaultEndpoint
         }            
       ]
@@ -456,7 +458,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       containers: [
         {
           command: [
-            '["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            '["java", "-javaagent:/tmp/app/applicationinsights-agent-3.4.1.jar", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
@@ -469,12 +471,12 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'appinscon'
             }
             {
-              name: 'SPRING-CLOUD-AZURE-TENANT-ID'
-              secretRef: 'SPRING-CLOUD-AZURE-TENANT-ID'
+              name: 'SPRING_CLOUD_AZURE_TENANT_ID'
+              secretRef: 'springcloudazuretenantid'
             }   
             {
-              name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
-              secretRef: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+              name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
+              secretRef: 'springcloudazurekvendpoint'
             }                    
           ]
           image: '${acrName}/${acrRepository}/${apiGatewayContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
@@ -510,8 +512,8 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }            
           ]
           resources: {
-            cpu: json(containerResourcesCpu) // 250m
-            memory: json(containerResourcesMemory) // Gi
+            cpu: json(containerResourcesCpu)
+            memory: containerResourcesMemory
           }
         }
       ]
@@ -565,7 +567,7 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         traffic: [
           {
             latestRevision: true
-            revisionName: revisionName
+            // revisionName: revisionName Traffic weight cannot use "LatestRevision: true" and "RevisionName" at the same time
             weight: 100
           }
         ]
@@ -588,11 +590,11 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           value: appInsightsInstrumentationKey
         }
         {
-          name: 'SPRING-CLOUD-AZURE-TENANT-ID'
+          name: 'SPRING_CLOUD_AZURE_TENANT_ID'
           value: springCloudAzureTenantId
         } 
         {
-          name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+          name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
           value: springCloudAzureKeyVaultEndpoint
         }        
       ]
@@ -601,7 +603,7 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       containers: [
         {
           command: [
-            '["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8888", "--spring.profiles.active=docker,mysql"]'
+            '["java", "-javaagent:/tmp/app/applicationinsights-agent-3.4.1.jar", "org.springframework.boot.loader.JarLauncher", "--server.port=8888", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
@@ -614,12 +616,12 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'appinscon'
             }
             {
-              name: 'SPRING-CLOUD-AZURE-TENANT-ID'
-              secretRef: 'SPRING-CLOUD-AZURE-TENANT-ID'
+              name: 'SPRING_CLOUD_AZURE_TENANT_ID'
+              secretRef: 'springcloudazuretenantid'
             }
             {
-              name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
-              secretRef: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+              name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
+              secretRef: 'springcloudazurekvendpoint'
             }
           ]
           image: '${acrName}/${acrRepository}/${configServerContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
@@ -655,8 +657,8 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }            
           ]
           resources: {
-            cpu: json(containerResourcesCpu) // 250m
-            memory: json(containerResourcesMemory) // Gi
+            cpu: json(containerResourcesCpu)
+            memory: containerResourcesMemory
           }
         }
       ]
@@ -711,7 +713,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
         traffic: [
           {
             latestRevision: true
-            revisionName: revisionName
+            // revisionName: revisionName Traffic weight cannot use "LatestRevision: true" and "RevisionName" at the same time
             weight: 100
           }
         ]
@@ -734,32 +736,20 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
           value: appInsightsInstrumentationKey
         }
         {
-          name: 'SPRING-CLOUD-AZURE-TENANT-ID'
+          name: 'springcloudazuretenantid'
           value: springCloudAzureTenantId
         } 
         {
-          name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+          name: 'springcloudazurekvendpoint'
           value: springCloudAzureKeyVaultEndpoint
         }
-        {
-          name: 'SPRING-DATASOURCE-USERNAME'
-          value: springDataSourceUsr
-        }
-        {
-          name: 'SPRING-DATASOURCE-PASSWORD'
-          value: springDataSourcePwd
-        } 
-        {
-          name: 'SPRING-DATASOURCE-URL'
-          value: springDataSourceUrl
-        }                              
       ]
     }
     template: {
       containers: [
         {
           command: [
-            '["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            '["java", "-javaagent:/tmp/app/applicationinsights-agent-3.4.1.jar", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
@@ -772,25 +762,13 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               secretRef: 'appinscon'
             }
             {
-              name: 'SPRING-CLOUD-AZURE-TENANT-ID'
+              name: 'SPRING_CLOUD_AZURE_TENANT_ID'
               secretRef: springCloudAzureTenantId
             } 
             {
-              name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+              name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
               secretRef: springCloudAzureKeyVaultEndpoint
             }
-            {
-              name: 'SPRING-DATASOURCE-USERNAME'
-              secretRef: springDataSourceUsr
-            }
-            {
-              name: 'SPRING-DATASOURCE-PASSWORD'
-              secretRef: springDataSourcePwd
-            } 
-            {
-              name: 'SPRING-DATASOURCE-URL'
-              secretRef: springDataSourceUrl
-            }                          
           ]
           image: '${acrName}/${acrRepository}/${customersServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: customersServiceContainerAppName
@@ -825,8 +803,8 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
             }            
           ]
           resources: {
-            cpu: json(containerResourcesCpu) // 250m
-            memory: json(containerResourcesMemory) // Gi
+            cpu: json(containerResourcesCpu)
+            memory: containerResourcesMemory
           }
         }
       ]
@@ -881,7 +859,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         traffic: [
           {
             latestRevision: true
-            revisionName: revisionName
+            // revisionName: revisionName Traffic weight cannot use "LatestRevision: true" and "RevisionName" at the same time
             weight: 100
           }
         ]
@@ -904,32 +882,20 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           value: appInsightsInstrumentationKey
         }
         {
-          name: 'SPRING-CLOUD-AZURE-TENANT-ID'
+          name: 'springcloudazuretenantid'
           value: springCloudAzureTenantId
         } 
         {
-          name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+          name: 'springcloudazurekvendpoint'
           value: springCloudAzureKeyVaultEndpoint
-        }
-        {
-          name: 'SPRING-DATASOURCE-USERNAME'
-          value: springDataSourceUsr
-        }
-        {
-          name: 'SPRING-DATASOURCE-PASSWORD'
-          value: springDataSourcePwd
-        } 
-        {
-          name: 'SPRING-DATASOURCE-URL'
-          value: springDataSourceUrl
-        }               
+        }             
       ]
     }
     template: {
       containers: [
         {
           command: [
-            '["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            '["java", "-javaagent:/tmp/app/applicationinsights-agent-3.4.1.jar", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
@@ -942,25 +908,13 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'appinscon'
             }
             {
-              name: 'SPRING-CLOUD-AZURE-TENANT-ID'
+              name: 'SPRING_CLOUD_AZURE_TENANT_ID'
               secretRef: springCloudAzureTenantId
             } 
             {
-              name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+              name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
               secretRef: springCloudAzureKeyVaultEndpoint
             }
-            {
-              name: 'SPRING-DATASOURCE-USERNAME'
-              secretRef: springDataSourceUsr
-            }
-            {
-              name: 'SPRING-DATASOURCE-PASSWORD'
-              secretRef: springDataSourcePwd
-            } 
-            {
-              name: 'SPRING-DATASOURCE-URL'
-              secretRef: springDataSourceUrl
-            }                      
           ]
           image: '${acrName}/${acrRepository}/${vetsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: vetsServiceContainerAppName
@@ -995,8 +949,8 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }            
           ]
           resources: {
-            cpu: json(containerResourcesCpu) // 250m
-            memory: json(containerResourcesMemory) // Gi
+            cpu: json(containerResourcesCpu)
+            memory: containerResourcesMemory
           }
         }
       ]
@@ -1051,7 +1005,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         traffic: [
           {
             latestRevision: true
-            revisionName: revisionName
+            // revisionName: revisionName Traffic weight cannot use "LatestRevision: true" and "RevisionName" at the same time
             weight: 100
           }
         ]
@@ -1074,32 +1028,20 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           value: appInsightsInstrumentationKey
         }
         {
-          name: 'SPRING-CLOUD-AZURE-TENANT-ID'
+          name: 'springcloudazuretenantid'
           value: springCloudAzureTenantId
         } 
         {
-          name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+          name: 'springcloudazurekvendpoint'
           value: springCloudAzureKeyVaultEndpoint
-        }
-        {
-          name: 'SPRING-DATASOURCE-USERNAME'
-          value: springDataSourceUsr
-        }
-        {
-          name: 'SPRING-DATASOURCE-PASSWORD'
-          value: springDataSourcePwd
-        } 
-        {
-          name: 'SPRING-DATASOURCE-URL'
-          value: springDataSourceUrl
-        }          
+        }        
       ]
     }
     template: {
       containers: [
         {
           command: [
-            '["java", "-javaagent:${applicationInsightsAgentJarFilePath}", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
+            '["java", "-javaagent:/tmp/app/applicationinsights-agent-3.4.1.jar", "org.springframework.boot.loader.JarLauncher", "--server.port=8080", "--spring.profiles.active=docker,mysql"]'
           ]
           env: [
             {
@@ -1112,25 +1054,13 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'appinscon'
             }
             {
-              name: 'SPRING-CLOUD-AZURE-TENANT-ID'
+              name: 'SPRING_CLOUD_AZURE_TENANT_ID'
               secretRef: springCloudAzureTenantId
             } 
             {
-              name: 'SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT'
+              name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
               secretRef: springCloudAzureKeyVaultEndpoint
-            }
-            {
-              name: 'SPRING-DATASOURCE-USERNAME'
-              secretRef: springDataSourceUsr
-            }
-            {
-              name: 'SPRING-DATASOURCE-PASSWORD'
-              secretRef: springDataSourcePwd
-            } 
-            {
-              name: 'SPRING-DATASOURCE-URL'
-              secretRef: springDataSourceUrl
-            }                           
+            }                          
           ]
           image: '${acrName}/${acrRepository}/${visitsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: visitsServiceContainerAppName
@@ -1165,8 +1095,8 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }            
           ]
           resources: {
-            cpu: json(containerResourcesCpu) // 250m
-            memory: json(containerResourcesMemory) // Gi
+            cpu: json(containerResourcesCpu)
+            memory: containerResourcesMemory
           }
         }
       ]
