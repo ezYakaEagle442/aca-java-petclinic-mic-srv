@@ -53,6 +53,9 @@ param appInsightsName string = 'appi-${appName}'
 @description('The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.')
 param acrName string = 'acr${appName}' // ==> $acr_registry_name.azurecr.io
 
+@description('The name of the ACR Repository')
+param acrRepository string = 'petclinic'
+
 @description('The Azure Container App Environment name')
 param azureContainerAppEnvName string = 'aca-env-${appName}'
 
@@ -193,6 +196,7 @@ module azurecontainerapp './modules/aca/aca.bicep' = {
     appName: appName
     location: location
     acrName: acrName
+    acrRepository:acrRepository
     azureContainerAppEnvName: azureContainerAppEnvName
     logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
     appInsightsInstrumentationKey: appInsights.properties.ConnectionString
