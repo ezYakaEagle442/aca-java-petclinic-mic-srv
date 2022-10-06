@@ -38,10 +38,18 @@ on:
   workflow_dispatch:
 
 jobs:
-   
   deploy-apps:
     runs-on: ubuntu-latest
     steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Azure Login
+      uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
+      with:
+        creds: ${{ env.credentials }}
+              
     - name: Deploy Azure Container Apps
       run: |
           echo "About to call ACA, roleAssignments and KV Module iac/bicep/petclinic-apps.bicep#284" 
