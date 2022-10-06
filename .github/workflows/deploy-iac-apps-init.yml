@@ -54,7 +54,7 @@ jobs:
       run: |
           echo "About to call ACA, roleAssignments and KV Module iac/bicep/petclinic-apps.bicep#284" 
           
-          az deployment group create --name aca-petclinic-apps -f iac/bicep/petclinic-apps.bicep -g ${{ env.RG_APP }} \
+          az deployment group create --name aca-petclinic-apps -f iac/bicep/petclinic-apps.bicep -g ${{ env.RG_APP }} --debug \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
             -p acrName=${{ env.AZURE_CONTAINER_REGISTRY }} \
