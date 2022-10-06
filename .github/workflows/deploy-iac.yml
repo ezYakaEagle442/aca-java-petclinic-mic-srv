@@ -349,7 +349,6 @@ jobs:
             -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p kvRGName=${{ env.RG_KV }} \
-            -p ghaSettingsCfgRegistryUrl=${{ env.GHA_SETTINGS_CFG_REGISTRY_URL }} \
             -p ghaSettingsCfgRepoUrl=${{ env.GHA_SETTINGS_CFG_REPO_URL }} \
             -p revisionName=${{ env.GHA_REVISION_NAME }} \
             -p publicNetworkAccess=enabled \
