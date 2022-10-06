@@ -183,6 +183,7 @@ resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' e
   name: azureContainerAppEnvName
 }
 
+// https://learn.microsoft.com/en-us/azure/templates/microsoft.app/containerapps?pivots=deployment-language-bicep
 resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: adminServerContainerAppName
   location: location
@@ -1497,7 +1498,7 @@ resource githubActionSettingsCustomers 'Microsoft.App/containerApps/sourcecontro
         subscriptionId: subscriptionId
         tenantId: tenantId
       }
-      dockerfilePath: ghaSettingsCfgDockerFilePathCustomersService
+      contextPath: ghaSettingsCfgDockerFilePathCustomersService
       os: 'Linux'
       registryInfo: {
         registryPassword: ghaSettingsCfgRegistryPassword
@@ -1522,7 +1523,7 @@ resource githubActionSettingsVets 'Microsoft.App/containerApps/sourcecontrols@20
         subscriptionId: subscriptionId
         tenantId: tenantId
       }
-      dockerfilePath: ghaSettingsCfgDockerFilePathVetsService
+      contextPath: ghaSettingsCfgDockerFilePathVetsService
       os: 'Linux'
       registryInfo: {
         registryPassword: ghaSettingsCfgRegistryPassword
@@ -1547,7 +1548,83 @@ resource githubActionSettingsVisits 'Microsoft.App/containerApps/sourcecontrols@
         subscriptionId: subscriptionId
         tenantId: tenantId
       }
-      dockerfilePath: ghaSettingsCfgDockerFilePathVisitsService
+      contextPath: ghaSettingsCfgDockerFilePathVisitsService
+      os: 'Linux'
+      registryInfo: {
+        registryPassword: ghaSettingsCfgRegistryPassword
+        registryUrl: ghaSettingsCfgRegistryUrl
+        registryUserName: ghaSettingsCfgRegistryUserName
+      }
+      publishType: ghaSettingsCfgPublishType
+    }
+    repoUrl: ghaSettingsCfgRepoUrl
+  }
+}
+
+resource githubActionSettingsAPI 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
+  name: 'aca-gha-set-api-gw'
+  parent: ApiGatewayContainerApp
+  properties: {
+    branch: ghaGitBranchName
+    githubActionConfiguration: {
+      azureCredentials: {
+        clientId:ghaSettingsCfgCredClientId
+        clientSecret: ghaSettingsCfgCredClientSecret
+        subscriptionId: subscriptionId
+        tenantId: tenantId
+      }
+      contextPath: ghaSettingsCfgDockerFilePathApiGateway
+      os: 'Linux'
+      registryInfo: {
+        registryPassword: ghaSettingsCfgRegistryPassword
+        registryUrl: ghaSettingsCfgRegistryUrl
+        registryUserName: ghaSettingsCfgRegistryUserName
+      }
+      publishType: ghaSettingsCfgPublishType
+    }
+    repoUrl: ghaSettingsCfgRepoUrl
+  }
+}
+
+resource githubActionSettingsConfigServer 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
+  name: 'aca-gha-set-cfg-srv'
+  parent: ConfigServerContainerApp
+  properties: {
+    branch: ghaGitBranchName
+    githubActionConfiguration: {
+      azureCredentials: {
+        clientId:ghaSettingsCfgCredClientId
+        clientSecret: ghaSettingsCfgCredClientSecret
+        subscriptionId: subscriptionId
+        tenantId: tenantId
+      }
+      contextPath: ghaSettingsCfgDockerFilePathConfigserver
+      os: 'Linux'
+      registryInfo: {
+        registryPassword: ghaSettingsCfgRegistryPassword
+        registryUrl: ghaSettingsCfgRegistryUrl
+        registryUserName: ghaSettingsCfgRegistryUserName
+      }
+      publishType: ghaSettingsCfgPublishType
+    }
+    repoUrl: ghaSettingsCfgRepoUrl
+  }
+}
+
+
+resource githubActionSettingsAdminServer 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
+  name: 'aca-gha-set-admin-srv'
+  parent: AdminServerContainerApp
+  properties: {
+    branch: ghaGitBranchName
+    githubActionConfiguration: {
+      azureCredentials: {
+        clientId:ghaSettingsCfgCredClientId
+        clientSecret: ghaSettingsCfgCredClientSecret
+        subscriptionId: subscriptionId
+        tenantId: tenantId
+      }
+      contextPath: ghaSettingsCfgDockerFilePathAdminServer
       os: 'Linux'
       registryInfo: {
         registryPassword: ghaSettingsCfgRegistryPassword
