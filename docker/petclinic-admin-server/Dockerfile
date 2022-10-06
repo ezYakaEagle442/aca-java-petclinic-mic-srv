@@ -5,6 +5,9 @@
 # Multi-Stage pipeline: 
 
 # docker build --build-arg --no-cache -t "petclinic-admin-server" -f "./docker/petclinic-admin-server/Dockerfile" .
+# docker tag petclinic-admin-server acrpetcliaca.azurecr.io/petclinic/petclinic-admin-server
+# az acr login --name acrpetcliaca.azurecr.io -u $acr_usr -p $acr_pwd
+# docker push acrpetcliaca.azurecr.io/petclinic/petclinic-admin-server
 # docker image ls
 # docker run -p 8080:8080 -p 8081:8081 -p 8888:8888 -p 9090:9090 petclinic-admin-server 
 # docker container ls
@@ -66,6 +69,8 @@ ENV APPI_VERSION="3.4.1"
 ENV APP_INSIGHTS_AGENT_JAR_FILE_PATH="/tmp/app/applicationinsights-agent-${APPI_VERSION}.jar"
 ENV SPRING_PROFILES_ACTIVE="docker,mysql"
 # ENV APPLICATIONINSIGHTS_CONNECTION_STRING=""
+
+RUN ls -al /tmp/app
 
 COPY --from=builder ${APP_INSIGHTS_AGENT_JAR_FILE_PATH} ./
 COPY --from=builder /tmp/app/dependencies/ ./

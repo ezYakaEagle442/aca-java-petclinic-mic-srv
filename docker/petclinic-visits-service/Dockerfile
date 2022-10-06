@@ -1,4 +1,6 @@
 # docker build --build-arg --no-cache -t "petclinic-visits-service" -f "./docker/petclinic-visits-service/Dockerfile" .
+# docker tag petclinic-admin-server acrpetcliaca.azurecr.io/petclinic/petclinic-visits-service
+# docker push acrpetcliaca.azurecr.io/petclinic/petclinic-visits-service
 # docker image ls
 # docker run -p 8080:8080 -p 8081:8081 -p 8888:8888 -p 9090:9090 petclinic-visits-service
 # docker container ls
