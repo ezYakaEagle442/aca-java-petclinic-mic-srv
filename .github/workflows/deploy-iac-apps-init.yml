@@ -1,0 +1,71 @@
+# This workflow will deploy all the Azure services, including ACA, ACA Env., ACR, KV & secrets, MYSQL (eventually with a Firewall rule to allow your workstation IP)
+# eventually if DEPLOY_TO_VNET is set to true : also VNet, ACA Env. deployed to VNet, private DNS-Zone, client VM deployed to the VNet
+
+name: Deploy ACA Apps with Azure Bicep
+
+env:
+  APP_NAME: petcliaca
+  LOCATION: westeurope
+  RG_KV: rg-iac-kv777 # RG where to deploy KV
+  RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
+  
+  ACA_ENV_NAME: aca-env-pub # ACA Environment name. Ex 'aca-env-pub' or 'aca-env-corp' when deployed to your VNet
+  DEPLOY_TO_VNET: false
+
+  KV_NAME: kv-petcliaca442 # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
+  SET_KV_ACCESS_POLICIES: false # let it to false
+
+  AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
+  REPOSITORY: petclinic                  # set this to your ACR repository
+
+  # GitHub Actions settings
+  GHA_SETTINGS_CFG_REGISTRY_URL: acrpetcliaca.azurecr.io
+  GHA_SETTINGS_CFG_REPO_URL: https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv
+  #GHA_SETTINGS_CFG_CRD_CLIENT_ID: ${{ secrets.GHA_SETTINGS_CFG_CRD_CLIENT_ID }}
+  #GHA_SETTINGS_CFG_CRD_CLIENT_SECRET: ${{ secrets.GHA_SETTINGS_CFG_CRD_CLIENT_SECRET }}
+  GHA_REVISION_NAME: aca-poc-101
+
+  credentials: ${{ secrets.AZURE_CREDENTIALS }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  # ==== Versions ====
+  DEPLOYMENT_VERSION: 2.6.6
+  AZ_CLI_VERSION: 2.40.0
+  JAVA_VERSION: 11
+
+on:
+  workflow_dispatch:
+
+jobs:
+   
+  deploy-apps:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy Azure Container Apps
+      run: |
+          echo "About to call ACA, roleAssignments and KV Module iac/bicep/petclinic-apps.bicep#284" 
+          
+          az deployment group create --name aca-petclinic-apps -f iac/bicep/petclinic-apps.bicep -g ${{ env.RG_APP }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p location=${{ env.LOCATION }} \
+            -p acrName=${{ env.AZURE_CONTAINER_REGISTRY }} \
+            -p acrRepository=${{ env.REPOSITORY }} \
+            -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p kvRGName=${{ env.RG_KV }} \
+            -p ghaSettingsCfgRegistryUrl=${{ env.GHA_SETTINGS_CFG_REGISTRY_URL }} \
+            -p ghaSettingsCfgRepoUrl=${{ env.GHA_SETTINGS_CFG_REPO_URL }} \
+            -p revisionName=${{ env.GHA_REVISION_NAME }} \
+            -p deployToVNet=${{ env.DEPLOY_TO_VNET }}
+      shell: bash
+
+    # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
+    # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#hardening-for-self-hosted-runners
+    # if the runner is self-hosted which is not github provided it is recommended to manually logout at the end of the workflow as shown below.
+    - name: Azure Logout security hardening
+      run: |
+          az logout
+          az cache purge
+          az account clear
+      shell: bash
