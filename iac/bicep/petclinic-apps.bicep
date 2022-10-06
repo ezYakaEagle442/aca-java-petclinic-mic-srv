@@ -189,6 +189,8 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
 // Use - instead of . in secret name. . isn’t supported in secret name. If your application have property name which contains ., 
 // like spring.datasource.url, just replace . to - when save secret in Azure Key Vault. 
 // For example: Save spring-datasource-url in Azure Key Vault. In your application, you can still use spring.datasource.url to retrieve property value.
+
+// https://learn.microsoft.com/en-us/azure/templates/microsoft.app/containerapps?pivots=deployment-language-bicep
 module azurecontainerapp './modules/aca/aca.bicep' = {
   name: 'azurecontainerapp'
   // scope: resourceGroup(rg.name)
