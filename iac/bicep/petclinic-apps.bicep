@@ -155,10 +155,10 @@ param apiGatewayContainerAppName string = 'aca-${appName}-api-gateway'
 param customersServiceContainerAppName string = 'aca-${appName}-customers-service'
 
 @description('The Azure Container App instance name for vets-service')
-param vetsServiceContainerAppName string = 'aca-env-${appName}-vets-service'
+param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
 
 @description('The Azure Container App instance name for visits-service')
-param visitsServiceContainerAppName string = 'aca-env-${appName}-visits-service'
+param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
 
 resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = if (deployToVNet) {
   name: vnetName
@@ -236,27 +236,15 @@ module azurecontainerapp './modules/aca/aca.bicep' = {
   }
 }
 
-resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
-  name: customersServiceContainerAppName
-}
-
-resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
-  name: vetsServiceContainerAppName
-}
-
-resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
-  name: visitsServiceContainerAppName
-}
-
 // https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scope-extension-resources
 module roleAssignments './modules/aca/roleAssignments.bicep' = {
   name: 'role-assignments'
   params: {
     acrName: acrName
     acrRoleType: 'AcrPull'
-    acaCustomersServicePrincipalId: CustomersServiceContainerApp.identity.principalId
-    acaVetsServicePrincipalId: VetsServiceContainerApp.identity.principalId
-    acaVisitsServicePrincipalId: VisitsServiceContainerApp.identity.principalId
+    acaCustomersServicePrincipalId: azurecontainerapp.outputs.customersServiceContainerAppIdentity
+    acaVetsServicePrincipalId: azurecontainerapp.outputs.vetsServiceContainerAppNameContainerAppIdentity
+    acaVisitsServicePrincipalId: azurecontainerapp.outputs.visitsServiceContainerAppIdentity
     kvName: kvName
     kvRGName: kvRGName
     kvRoleType: 'KeyVaultSecretsUser'
@@ -266,9 +254,6 @@ module roleAssignments './modules/aca/roleAssignments.bicep' = {
     networkRoleType: 'Owner'
     */
   }
-  dependsOn: [
-    azurecontainerapp
-  ]  
 }
 
 
@@ -286,15 +271,15 @@ var appsObject = {
   apps: [
     {
     appName: 'customers-service'
-    appIdentity: CustomersServiceContainerApp.identity.principalId
+    appIdentity: azurecontainerapp.outputs.customersServiceContainerAppIdentity
     }
     {
     appName: 'vets-service'
-    appIdentity: VetsServiceContainerApp.identity.principalId
+    appIdentity: azurecontainerapp.outputs.vetsServiceContainerAppNameContainerAppIdentity
     }
     {
     appName: 'visits-service'
-    appIdentity: VisitsServiceContainerApp.identity.principalId
+    appIdentity: azurecontainerapp.outputs.visitsServiceContainerAppIdentity
     }
   ]
 }
@@ -302,7 +287,7 @@ var appsObject = {
 var accessPoliciesObject = {
   accessPolicies: [
     {
-      objectId: CustomersServiceContainerApp.identity.principalId
+      objectId: azurecontainerapp.outputs.customersServiceContainerAppIdentity
       tenantId: tenantId
       permissions: {
         secrets: [
@@ -312,7 +297,7 @@ var accessPoliciesObject = {
       }
     }
     {
-      objectId: VetsServiceContainerApp.identity.principalId
+      objectId: azurecontainerapp.outputs.vetsServiceContainerAppNameContainerAppIdentity
       tenantId: tenantId
       permissions: {
         secrets: [
@@ -322,7 +307,7 @@ var accessPoliciesObject = {
       }
     }
     {
-      objectId: VisitsServiceContainerApp.identity.principalId
+      objectId:  azurecontainerapp.outputs.visitsServiceContainerAppIdentity
       tenantId: tenantId
       permissions: {
         secrets: [
