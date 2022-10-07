@@ -349,7 +349,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }            
           ]
           resources: {
-            cpu: json(containerResourcesCpu)
+            cpu: any(containerResourcesCpu)
             memory: containerResourcesMemory
           }
           /*
@@ -512,7 +512,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }            
           ]
           resources: {
-            cpu: json(containerResourcesCpu)
+            cpu: any(containerResourcesCpu)
             memory: containerResourcesMemory
           }
         }
@@ -657,7 +657,7 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }            
           ]
           resources: {
-            cpu: json(containerResourcesCpu)
+            cpu: any(containerResourcesCpu)
             memory: containerResourcesMemory
           }
         }
@@ -803,7 +803,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
             }            
           ]
           resources: {
-            cpu: json(containerResourcesCpu)
+            cpu: any(containerResourcesCpu)
             memory: containerResourcesMemory
           }
         }
@@ -949,7 +949,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }            
           ]
           resources: {
-            cpu: json(containerResourcesCpu)
+            cpu: any(containerResourcesCpu)
             memory: containerResourcesMemory
           }
         }
@@ -1095,7 +1095,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }            
           ]
           resources: {
-            cpu: json(containerResourcesCpu)
+            cpu: any(containerResourcesCpu)
             memory: containerResourcesMemory
           }
         }
@@ -1137,284 +1137,6 @@ output visitsServiceContainerAppConfigSecrets array = VisitsServiceContainerApp.
 resource logAnalyticsWorkspace  'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' existing = {
   name: logAnalyticsWorkspaceName
 }
-
-// https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/diagnosticsettings?tabs=bicep
-resource appInsDgsAdminServer 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'dgs-${appName}-send-${adminServerContainerAppName}-logs-and-metrics-to-log-analytics'
-  scope: AdminServerContainerApp
-  properties: {
-    logAnalyticsDestinationType: 'AzureDiagnostics'
-    workspaceId: logAnalyticsWorkspace.id
-    logs: [
-      {
-        category: 'ApplicationConsole'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'SystemLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'IngressLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }    
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-    ]
-  }
-}
-
-// https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/diagnosticsettings?tabs=bicep
-resource appInsDgsApiGW 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'dgs-${appName}-send-${apiGatewayContainerAppName}-logs-and-metrics-to-log-analytics'
-  scope: ApiGatewayContainerApp
-  properties: {
-    logAnalyticsDestinationType: 'AzureDiagnostics'
-    workspaceId: logAnalyticsWorkspace.id
-    logs: [
-      {
-        category: 'ApplicationConsole'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'SystemLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'IngressLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }    
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-    ]
-  }
-}
-
-// https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/diagnosticsettings?tabs=bicep
-resource appInsDgsCfgServer 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'dgs-${appName}-send-${configServerContainerAppName}-logs-and-metrics-to-log-analytics'
-  scope: ConfigServerContainerApp
-  properties: {
-    logAnalyticsDestinationType: 'AzureDiagnostics'
-    workspaceId: logAnalyticsWorkspace.id
-    logs: [
-      {
-        category: 'ApplicationConsole'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'SystemLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'IngressLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }    
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-    ]
-  }
-}
-
-
-// https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/diagnosticsettings?tabs=bicep
-resource appInsDgsCustomersService 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'dgs-${appName}-send-${customersServiceContainerAppName}-logs-and-metrics-to-log-analytics'
-  scope: CustomersServiceContainerApp
-  properties: {
-    logAnalyticsDestinationType: 'AzureDiagnostics'
-    workspaceId: logAnalyticsWorkspace.id
-    logs: [
-      {
-        category: 'ApplicationConsole'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'SystemLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'IngressLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }    
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-    ]
-  }
-}
-
-// https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/diagnosticsettings?tabs=bicep
-resource appInsDgsVetsService 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'dgs-${appName}-send-${vetsServiceContainerAppName}-logs-and-metrics-to-log-analytics'
-  scope: VetsServiceContainerApp
-  properties: {
-    logAnalyticsDestinationType: 'AzureDiagnostics'
-    workspaceId: logAnalyticsWorkspace.id
-    logs: [
-      {
-        category: 'ApplicationConsole'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'SystemLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'IngressLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }    
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-    ]
-  }
-}
-
-// https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/diagnosticsettings?tabs=bicep
-resource appInsDgsVisistsService 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'dgs-${appName}-send-${visitsServiceContainerAppName}-logs-and-metrics-to-log-analytics'
-  scope: VisitsServiceContainerApp
-  properties: {
-    logAnalyticsDestinationType: 'AzureDiagnostics'
-    workspaceId: logAnalyticsWorkspace.id
-    logs: [
-      {
-        category: 'ApplicationConsole'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'SystemLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'IngressLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }    
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-    ]
-  }
-}
-
 
 resource githubActionSettingsCustomers 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
   name: 'aca-gha-set-customers-svc'
@@ -1566,3 +1288,284 @@ resource githubActionSettingsAdminServer 'Microsoft.App/containerApps/sourcecont
     repoUrl: ghaSettingsCfgRepoUrl
   }
 }
+
+
+/*
+ACA does not yet support diagnostic settings
+https://github.com/microsoft/azure-container-apps/issues/382
+https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/diagnosticsettings?tabs=bicep
+*/
+
+/*
+resource appInsDgsAdminServer 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'dgs-${appName}-send-${adminServerContainerAppName}-logs-and-metrics-to-log-analytics'
+  scope: AdminServerContainerApp
+  properties: {
+    logAnalyticsDestinationType: 'AzureDiagnostics'
+    workspaceId: logAnalyticsWorkspace.id
+    logs: [
+      {
+        category: 'ApplicationConsole'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'SystemLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'IngressLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }    
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+    ]
+  }
+}
+
+resource appInsDgsApiGW 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'dgs-${appName}-send-${apiGatewayContainerAppName}-logs-and-metrics-to-log-analytics'
+  scope: ApiGatewayContainerApp
+  properties: {
+    logAnalyticsDestinationType: 'AzureDiagnostics'
+    workspaceId: logAnalyticsWorkspace.id
+    logs: [
+      {
+        category: 'ApplicationConsole'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'SystemLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'IngressLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }    
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+    ]
+  }
+}
+
+resource appInsDgsCfgServer 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'dgs-${appName}-send-${configServerContainerAppName}-logs-and-metrics-to-log-analytics'
+  scope: ConfigServerContainerApp
+  properties: {
+    logAnalyticsDestinationType: 'AzureDiagnostics'
+    workspaceId: logAnalyticsWorkspace.id
+    logs: [
+      {
+        category: 'ApplicationConsole'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'SystemLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'IngressLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }    
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+    ]
+  }
+}
+
+
+resource appInsDgsCustomersService 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'dgs-${appName}-send-${customersServiceContainerAppName}-logs-and-metrics-to-log-analytics'
+  scope: CustomersServiceContainerApp
+  properties: {
+    logAnalyticsDestinationType: 'AzureDiagnostics'
+    workspaceId: logAnalyticsWorkspace.id
+    logs: [
+      {
+        category: 'ApplicationConsole'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'SystemLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'IngressLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }    
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+    ]
+  }
+}
+
+resource appInsDgsVetsService 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'dgs-${appName}-send-${vetsServiceContainerAppName}-logs-and-metrics-to-log-analytics'
+  scope: VetsServiceContainerApp
+  properties: {
+    logAnalyticsDestinationType: 'AzureDiagnostics'
+    workspaceId: logAnalyticsWorkspace.id
+    logs: [
+      {
+        category: 'ApplicationConsole'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'SystemLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'IngressLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }    
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+    ]
+  }
+}
+
+resource appInsDgsVisistsService 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'dgs-${appName}-send-${visitsServiceContainerAppName}-logs-and-metrics-to-log-analytics'
+  scope: VisitsServiceContainerApp
+  properties: {
+    logAnalyticsDestinationType: 'AzureDiagnostics'
+    workspaceId: logAnalyticsWorkspace.id
+    logs: [
+      {
+        category: 'ApplicationConsole'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'SystemLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'IngressLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }    
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+    ]
+  }
+}
+
+*/
