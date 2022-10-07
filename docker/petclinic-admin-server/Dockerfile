@@ -8,6 +8,7 @@
 # docker tag petclinic-admin-server acrpetcliaca.azurecr.io/petclinic/petclinic-admin-server
 # az acr login --name acrpetcliaca.azurecr.io -u $acr_usr -p $acr_pwd
 # docker push acrpetcliaca.azurecr.io/petclinic/petclinic-admin-server
+# docker pull acrpetcliaca.azurecr.io/petclinic/petclinic-admin-server
 # docker image ls
 # docker run -p 8080:8080 -p 8081:8081 -p 8888:8888 -p 9090:9090 petclinic-admin-server 
 # docker container ls

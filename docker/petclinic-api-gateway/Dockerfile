@@ -1,8 +1,9 @@
-# docker build --build-arg --no-cache -t "petclinic-ui" -f "./docker/petclinic-api-gateway/Dockerfile" .
-# docker tag petclinic-admin-server acrpetcliaca.azurecr.io/petclinic/petclinic-api-gateway
+# docker build --build-arg --no-cache -t "petclinic-api-gateway" -f "./docker/petclinic-api-gateway/Dockerfile" .
+# docker tag petclinic-api-gateway acrpetcliaca.azurecr.io/petclinic/petclinic-api-gateway
 # docker push acrpetcliaca.azurecr.io/petclinic/petclinic-api-gateway
+# docker pull acrpetcliaca.azurecr.io/petclinic/petclinic-api-gateway
 # docker image ls
-# docker run -p 8080:8080 -p 8081:8081 -p 8888:8888 -p 9090:9090 petclinic-ui 
+# docker run -p 8080:8080 -p 8081:8081 -p 8888:8888 -p 9090:9090 petclinic-api-gateway
 # docker container ls
 # docker ps
 # docker exec -it <container-id> /bin/sh
