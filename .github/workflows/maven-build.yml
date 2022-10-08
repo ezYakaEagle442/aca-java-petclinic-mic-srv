@@ -41,6 +41,10 @@ env:
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
 on:
   workflow_call:
+    outputs:
+      workflow_output1:
+        description: "The Maven Build job output"
+        value: ${{ jobs.maven-build.outputs.tag_id }}
 
   push:
     branches:
@@ -107,6 +111,7 @@ jobs:
         cache: maven
     
     - name: Build with Maven
+      id: mvn_build
       run: |
         pwd
         ls -al
@@ -170,6 +175,10 @@ jobs:
 
     - name: Build image and push it to ACR
       run: |
+
+          # https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs
+          echo "::set-output name=tag_id::{{.Run.ID}}"
+
           acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryUsr.value | tr -d '"')
           acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryPwd.value | tr -d '"')
 
@@ -177,20 +186,34 @@ jobs:
 
           az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
           
-          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-            -t ${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }}:{{.Run.ID}} \
-            --file "./docker/petclinic-admin-server/Dockerfile" \
-            ${{ github.workspace }}
+          echo ""
+          echo "Read https://learn.microsoft.com/en-us/azure/container-registry/container-registry-java-quickstart"
+          echo "Read https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication-managed-identity?tabs=azure-cli#example-2-access-with-a-system-assigned-identity"
+          echo ""
+          echo "/!\ Managed Identity is set on ACR ..."
+          echo "you need to: az login --identity, az acr login before calling az acr build ..."
+          echo ""
 
-          build_id=$(az acr task list-runs --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -o json --query [0].name )
-    
+          az login --identity --username $identityID
+          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g  ${{ env.RG_APP }} -t petclinic/adm-test:{{.Run.ID}} --file "./docker/petclinic-admin-server/Dockerfile" .
+
+          # https://github.com/Azure/acr-build/issues/10
+          # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
+          # GITHUB_RUN_ID: A unique number for each workflow run within a repository. This number does not change if you re-run the workflow run.
+          
+          #az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
+          #  -t ${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }}:{{.Run.ID}} \
+          #  --file "./docker/petclinic-admin-server/Dockerfile" \
+          #  ${{ github.workspace }}
+
+          build_id=$(az acr task list-runs --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -o json --query [0].name )    
           build_id=$(echo $build_id | tr -d '"')
           echo "Successfully pushed image with ID " $build_id
-          az acr task logs --registry ${{ env.AZURE_CONTAINER_REGISTRY }} --run-id $build_id
+          # az acr task logs --registry ${{ env.AZURE_CONTAINER_REGISTRY }} --run-id $build_id
 
           # verify
-          az acr repository list  ${{ env.AZURE_CONTAINER_REGISTRY }} --output table
-          az acr repository show --name ${{ env.AZURE_CONTAINER_REGISTRY }} --repository ${{ env.PROJECT_NAME }}
+          az acr repository list --name ${{ env.AZURE_CONTAINER_REGISTRY }} --output table
+          az acr repository show --name ${{ env.AZURE_CONTAINER_REGISTRY }} --repository ${{ env.REPOSITORY }}
 
 
     # https://github.com/marketplace/actions/azure-container-registry-build
@@ -279,3 +302,6 @@ jobs:
         folder: ${{ github.workspace }}
         dockerfile: ./docker/petclinic-visits-service/Dockerfile
         branch: main
+
+    outputs:
+      tag_id: ${{ steps.mvn_build.outputs.tag_id }}
