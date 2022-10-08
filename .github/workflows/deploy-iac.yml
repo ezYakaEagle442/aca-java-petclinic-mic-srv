@@ -138,7 +138,7 @@ jobs:
     # Now that GH Runner is Allowed to access KV, create the secrets
     - name: Create MYSQL-SERVER-NAME secret in Azure Key Vault
       run: |
-          az deployment group create --name aca-petclinic-kv-sec1 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+          az deployment group create --name aca-petclinic-kv-server-name -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="MYSQL-SERVER-NAME" \
@@ -148,7 +148,7 @@ jobs:
 
     - name: Create MYSQL-SERVER-FULL-NAME secret in Azure Key Vault
       run: |
-          az deployment group create --name aca-petclinic-kv-sec2 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+          az deployment group create --name aca-petclinic-kv-server-full-name -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="MYSQL-SERVER-FULL-NAME" \
@@ -158,7 +158,7 @@ jobs:
 
     - name: Create SPRING-DATASOURCE-USERNAME secret in Azure Key Vault
       run: |
-          az deployment group create --name aca-petclinic-kv-sec4 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+          az deployment group create --name aca-petclinic-kv-db-usr -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="SPRING-DATASOURCE-USERNAME" \
@@ -168,7 +168,7 @@ jobs:
 
     - name: Create SPRING-DATASOURCE-PASSWORD secret in Azure Key Vault
       run: |
-          az deployment group create --name aca-petclinic-kv-sec5 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+          az deployment group create --name aca-petclinic-kv-db-pwd -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="SPRING-DATASOURCE-PASSWORD" \
@@ -178,7 +178,7 @@ jobs:
 
     - name: Create SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT secret in Azure Key Vault
       run: |
-          az deployment group create --name aca-petclinic-kv-sec6 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+          az deployment group create --name aca-petclinic-kv-endpoint -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT" \
@@ -188,7 +188,7 @@ jobs:
 
     - name: Create SPRING-CLOUD-AZURE-TENANT-ID secret in Azure Key Vault
       run: |
-          az deployment group create --name aca-petclinic-kv-sec7 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+          az deployment group create --name aca-petclinic-kv-tenant -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="SPRING-CLOUD-AZURE-TENANT-ID" \
@@ -198,7 +198,7 @@ jobs:
 
     - name: Create SPRING-DATASOURCE-URL secret in Azure Key Vault
       run: |
-          az deployment group create --name aca-petclinic-kv-sec3 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+          az deployment group create --name aca-petclinic-kv-db-url -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="SPRING-DATASOURCE-URL" \
@@ -208,7 +208,7 @@ jobs:
 
     - name: Create SPN_ID secret in Azure Key Vault
       run: |
-          az deployment group create --name aca-petclinic-kv-sec3 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+          az deployment group create --name aca-petclinic-kv-spn-id -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="SPN_ID" \
@@ -218,7 +218,7 @@ jobs:
       
     - name: Create SPN_PWD secret in Azure Key Vault
       run: |
-          az deployment group create --name aca-petclinic-kv-sec3 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+          az deployment group create --name aca-petclinic-kv-spn-pwd -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="SPN_PWD" \
@@ -231,7 +231,7 @@ jobs:
     - name: Create VM-ADMIN-USER-NAME secret in Azure Key Vault
       if: ${{ env.DEPLOY_TO_VNET }} 
       run: |
-          az deployment group create --name aca-petclinic-kv-sec8 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+          az deployment group create --name aca-petclinic-kv-vm-usr -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="VM-ADMIN-USER-NAME" \
@@ -242,7 +242,7 @@ jobs:
     - name: Create VM-ADMIN-PASSWORD secret in Azure Key Vault
       if: ${{ env.DEPLOY_TO_VNET }}
       run: |
-          az deployment group create --name aca-petclinic-kv-sec9 -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+          az deployment group create --name aca-petclinic-kv-vm-pwd -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
             -p appName=${{ env.APP_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p secretName="VM-ADMIN-PASSWORD" \
