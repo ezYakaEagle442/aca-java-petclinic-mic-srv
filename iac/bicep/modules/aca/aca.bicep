@@ -124,26 +124,46 @@ param ghaSettingsCfgCredClientId string
 param ghaSettingsCfgCredClientSecret string
 
 @description('The GitHub Action Settings Configuration / Docker file Path for admin-server Azure Container App ')
-param ghaSettingsCfgDockerFilePathAdminServer string = '../../docker/petclinic-admin-server/Dockerfile'
+param ghaSettingsCfgDockerFilePathAdminServer string = './docker/petclinic-admin-server/Dockerfile'
 
 @description('The GitHub Action Settings Configuration / Docker file Path for discovery-server Azure Container App ')
-param ghaSettingsCfgDockerFilePathDiscoveryServer string = '../../docker/petclinic-discovery-server/Dockerfile'
+param ghaSettingsCfgDockerFilePathDiscoveryServer string = './docker/petclinic-discovery-server/Dockerfile'
 
 @description('The GitHub Action Settings Configuration / Docker file Path for api-gateway Azure Container App ')
-param ghaSettingsCfgDockerFilePathApiGateway string = '../../docker/petclinic-api-gateway/Dockerfile'
+param ghaSettingsCfgDockerFilePathApiGateway string = './docker/petclinic-api-gateway/Dockerfile'
 
 @description('The GitHub Action Settings Configuration / Docker file Path for  config-server Azure Container App ')
-param ghaSettingsCfgDockerFilePathConfigserver string = '../../docker/petclinic-config-server/Dockerfile'
+param ghaSettingsCfgDockerFilePathConfigserver string = './docker/petclinic-config-server/Dockerfile'
 
 @description('The GitHub Action Settings Configuration / Docker file Path for customers-service Azure Container App ')
-param ghaSettingsCfgDockerFilePathCustomersService string = '../../docker/petclinic-customers-service/Dockerfile'
+param ghaSettingsCfgDockerFilePathCustomersService string = './docker/petclinic-customers-service/Dockerfile'
 
 @description('The GitHub Action Settings Configuration / Docker file Path for vets-service Azure Container App ')
-param ghaSettingsCfgDockerFilePathVetsService string = '../../docker/petclinic-vets-service/Dockerfile'
+param ghaSettingsCfgDockerFilePathVetsService string = './docker/petclinic-vets-service/Dockerfile'
 
 @description('The GitHub Action Settings Configuration / Docker file Path for visits-service Azure Container App ')
-param ghaSettingsCfgDockerFilePathVisitsService string = '../../docker/petclinic-visits-service/Dockerfile'
+param ghaSettingsCfgDockerFilePathVisitsService string = './docker/petclinic-visits-service/Dockerfile'
 
+@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-admin-server:{{ github.sha }}')
+param imageNameAdminServer string
+
+@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-discovery-server:{{ github.sha }}')
+param imageNameDiscoveryServer string
+
+@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-api-gateway:{{ github.sha }}')
+param imageNameApiGateway string
+
+@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-config-server:{{ github.sha }}')
+param imageNameConfigServer string
+
+@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-customers-service:{{ github.sha }}')
+param imageNameCustomersService string
+
+@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-vets-service:{{ github.sha }}')
+param imageNameVetsService string
+
+@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-visits-service:{{ github.sha }}')
+param imageNameVisitsService string
 
 /* They seem to be more App Service focused as this interface is shared with App Service.
 https://docs.microsoft.com/en-us/javascript/api/@azure/arm-appservice/githubactioncodeconfiguration?view=azure-node-latest
@@ -230,9 +250,11 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       }
       registries: [
         {
-          passwordSecretRef: 'registrypassword'
+          // Managedidentity is enabled on ACR
           server: ghaSettingsCfgRegistryUrl
-          username: ghaSettingsCfgRegistryUserName
+          identity: 'system'
+          //username: ghaSettingsCfgRegistryUserName
+          // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
@@ -286,7 +308,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'springcloudazurekvendpoint'
             }                                 
           ]
-          image: '${acrName}/${acrRepository}/${adminServerContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: imageNameAdminServer
           name: adminServerContainerAppName
           probes: [
             {
@@ -398,12 +420,12 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   }
 }
 
-output AdminServerContainerAppIdentity string = AdminServerContainerApp.identity.principalId
-output AdminServerContainerAppOutboundIPAddresses array = AdminServerContainerApp.properties.outboundIPAddresses
-output AdminServerContainerAppLatestRevisionName string = AdminServerContainerApp.properties.latestRevisionName
-output AdminServerContainerAppLatestRevisionFqdn string = AdminServerContainerApp.properties.latestRevisionFqdn
-output AdminServerContainerAppIngressFqdn string = AdminServerContainerApp.properties.configuration.ingress.fqdn
-output AdminServerContainerAppConfigSecrets array = AdminServerContainerApp.properties.configuration.secrets
+output adminServerContainerAppIdentity string = AdminServerContainerApp.identity.principalId
+output adminServerContainerAppOutboundIPAddresses array = AdminServerContainerApp.properties.outboundIPAddresses
+output adminServerContainerAppLatestRevisionName string = AdminServerContainerApp.properties.latestRevisionName
+output adminServerContainerAppLatestRevisionFqdn string = AdminServerContainerApp.properties.latestRevisionFqdn
+output adminServerContainerAppIngressFqdn string = AdminServerContainerApp.properties.configuration.ingress.fqdn
+output adminServerContainerAppConfigSecrets array = AdminServerContainerApp.properties.configuration.secrets
 
 resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: apiGatewayContainerAppName
@@ -430,9 +452,11 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       }
       registries: [
         {
-          passwordSecretRef: 'registrypassword'
+          // Managedidentity is enabled on ACR
           server: ghaSettingsCfgRegistryUrl
-          username: ghaSettingsCfgRegistryUserName
+          identity: 'system'
+          //username: ghaSettingsCfgRegistryUserName
+          // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
@@ -479,7 +503,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'springcloudazurekvendpoint'
             }                    
           ]
-          image: '${acrName}/${acrRepository}/${apiGatewayContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: imageNameApiGateway
           name: apiGatewayContainerAppName
           probes: [
             {
@@ -575,9 +599,11 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       }
       registries: [
         {
-          passwordSecretRef: 'registrypassword'
+          // Managedidentity is enabled on ACR
           server: ghaSettingsCfgRegistryUrl
-          username: ghaSettingsCfgRegistryUserName
+          identity: 'system'
+          //username: ghaSettingsCfgRegistryUserName
+          // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
@@ -624,7 +650,7 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'springcloudazurekvendpoint'
             }
           ]
-          image: '${acrName}/${acrRepository}/${configServerContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: imageNameConfigServer
           name: configServerContainerAppName
           probes: [
             {
@@ -688,7 +714,7 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   }
 }
 
-output configServerContainerAppContainerAppIdentity string = ConfigServerContainerApp.identity.principalId
+output configServerContainerAppIdentity string = ConfigServerContainerApp.identity.principalId
 output configServerContainerAppOutboundIPAddresses array = ConfigServerContainerApp.properties.outboundIPAddresses
 output configServerContainerAppLatestRevisionName string = ConfigServerContainerApp.properties.latestRevisionName
 output configServerContainerAppLatestRevisionFqdn string = ConfigServerContainerApp.properties.latestRevisionFqdn
@@ -721,9 +747,11 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
       }
       registries: [
         {
-          passwordSecretRef: 'registrypassword'
+          // Managedidentity is enabled on ACR
           server: ghaSettingsCfgRegistryUrl
-          username: ghaSettingsCfgRegistryUserName
+          identity: 'system'
+          //username: ghaSettingsCfgRegistryUserName
+          // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
@@ -770,7 +798,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               secretRef: springCloudAzureKeyVaultEndpoint
             }
           ]
-          image: '${acrName}/${acrRepository}/${customersServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: imageNameCustomersService
           name: customersServiceContainerAppName
           probes: [
             {
@@ -867,9 +895,11 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       }
       registries: [
         {
-          passwordSecretRef: 'registrypassword'
+          // Managedidentity is enabled on ACR
           server: ghaSettingsCfgRegistryUrl
-          username: ghaSettingsCfgRegistryUserName
+          identity: 'system'
+          //username: ghaSettingsCfgRegistryUserName
+          // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
@@ -916,7 +946,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: springCloudAzureKeyVaultEndpoint
             }
           ]
-          image: '${acrName}/${acrRepository}/${vetsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: imageNameVetsService
           name: vetsServiceContainerAppName
           probes: [
             {
@@ -1013,9 +1043,11 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       }
       registries: [
         {
-          passwordSecretRef: 'registrypassword'
+          // Managedidentity is enabled on ACR
           server: ghaSettingsCfgRegistryUrl
-          username: ghaSettingsCfgRegistryUserName
+          identity: 'system'
+          //username: ghaSettingsCfgRegistryUserName
+          // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
@@ -1062,7 +1094,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: springCloudAzureKeyVaultEndpoint
             }                          
           ]
-          image: '${acrName}/${acrRepository}/${visitsServiceContainerAppName}:latest' // Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: imageNameVisitsService
           name: visitsServiceContainerAppName
           probes: [
             {
@@ -1132,440 +1164,3 @@ output visitsServiceContainerAppLatestRevisionName string = VisitsServiceContain
 output visitsServiceContainerAppLatestRevisionFqdn string = VisitsServiceContainerApp.properties.latestRevisionFqdn
 output visitsServiceContainerAppIngressFqdn string = VisitsServiceContainerApp.properties.configuration.ingress.fqdn
 output visitsServiceContainerAppConfigSecrets array = VisitsServiceContainerApp.properties.configuration.secrets
-
-
-resource logAnalyticsWorkspace  'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' existing = {
-  name: logAnalyticsWorkspaceName
-}
-
-resource githubActionSettingsCustomers 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
-  name: 'aca-gha-set-customers-svc'
-  parent: CustomersServiceContainerApp
-  properties: {
-    branch: ghaGitBranchName
-    githubActionConfiguration: {
-      azureCredentials: {
-        clientId:ghaSettingsCfgCredClientId
-        clientSecret: ghaSettingsCfgCredClientSecret
-        subscriptionId: subscriptionId
-        tenantId: tenantId
-      }
-      contextPath: ghaSettingsCfgDockerFilePathCustomersService
-      os: 'Linux'
-      registryInfo: {
-        registryPassword: ghaSettingsCfgRegistryPassword
-        registryUrl: ghaSettingsCfgRegistryUrl
-        registryUserName: ghaSettingsCfgRegistryUserName
-      }
-      publishType: ghaSettingsCfgPublishType
-    }
-    repoUrl: ghaSettingsCfgRepoUrl
-  }
-}
-
-resource githubActionSettingsVets 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
-  name: 'aca-gha-set-vets-svc'
-  parent: VetsServiceContainerApp
-  properties: {
-    branch: ghaGitBranchName
-    githubActionConfiguration: {
-      azureCredentials: {
-        clientId:ghaSettingsCfgCredClientId
-        clientSecret: ghaSettingsCfgCredClientSecret
-        subscriptionId: subscriptionId
-        tenantId: tenantId
-      }
-      contextPath: ghaSettingsCfgDockerFilePathVetsService
-      os: 'Linux'
-      registryInfo: {
-        registryPassword: ghaSettingsCfgRegistryPassword
-        registryUrl: ghaSettingsCfgRegistryUrl
-        registryUserName: ghaSettingsCfgRegistryUserName
-      }
-      publishType: ghaSettingsCfgPublishType
-    }
-    repoUrl: ghaSettingsCfgRepoUrl
-  }
-}
-
-resource githubActionSettingsVisits 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
-  name: 'aca-gha-set-visits-svc'
-  parent: VisitsServiceContainerApp
-  properties: {
-    branch: ghaGitBranchName
-    githubActionConfiguration: {
-      azureCredentials: {
-        clientId:ghaSettingsCfgCredClientId
-        clientSecret: ghaSettingsCfgCredClientSecret
-        subscriptionId: subscriptionId
-        tenantId: tenantId
-      }
-      contextPath: ghaSettingsCfgDockerFilePathVisitsService
-      os: 'Linux'
-      registryInfo: {
-        registryPassword: ghaSettingsCfgRegistryPassword
-        registryUrl: ghaSettingsCfgRegistryUrl
-        registryUserName: ghaSettingsCfgRegistryUserName
-      }
-      publishType: ghaSettingsCfgPublishType
-    }
-    repoUrl: ghaSettingsCfgRepoUrl
-  }
-}
-
-resource githubActionSettingsAPI 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
-  name: 'aca-gha-set-api-gw'
-  parent: ApiGatewayContainerApp
-  properties: {
-    branch: ghaGitBranchName
-    githubActionConfiguration: {
-      azureCredentials: {
-        clientId:ghaSettingsCfgCredClientId
-        clientSecret: ghaSettingsCfgCredClientSecret
-        subscriptionId: subscriptionId
-        tenantId: tenantId
-      }
-      contextPath: ghaSettingsCfgDockerFilePathApiGateway
-      os: 'Linux'
-      registryInfo: {
-        registryPassword: ghaSettingsCfgRegistryPassword
-        registryUrl: ghaSettingsCfgRegistryUrl
-        registryUserName: ghaSettingsCfgRegistryUserName
-      }
-      publishType: ghaSettingsCfgPublishType
-    }
-    repoUrl: ghaSettingsCfgRepoUrl
-  }
-}
-
-resource githubActionSettingsConfigServer 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
-  name: 'aca-gha-set-cfg-srv'
-  parent: ConfigServerContainerApp
-  properties: {
-    branch: ghaGitBranchName
-    githubActionConfiguration: {
-      azureCredentials: {
-        clientId:ghaSettingsCfgCredClientId
-        clientSecret: ghaSettingsCfgCredClientSecret
-        subscriptionId: subscriptionId
-        tenantId: tenantId
-      }
-      contextPath: ghaSettingsCfgDockerFilePathConfigserver
-      os: 'Linux'
-      registryInfo: {
-        registryPassword: ghaSettingsCfgRegistryPassword
-        registryUrl: ghaSettingsCfgRegistryUrl
-        registryUserName: ghaSettingsCfgRegistryUserName
-      }
-      publishType: ghaSettingsCfgPublishType
-    }
-    repoUrl: ghaSettingsCfgRepoUrl
-  }
-}
-
-
-resource githubActionSettingsAdminServer 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
-  name: 'aca-gha-set-admin-srv'
-  parent: AdminServerContainerApp
-  properties: {
-    branch: ghaGitBranchName
-    githubActionConfiguration: {
-      azureCredentials: {
-        clientId:ghaSettingsCfgCredClientId
-        clientSecret: ghaSettingsCfgCredClientSecret
-        subscriptionId: subscriptionId
-        tenantId: tenantId
-      }
-      contextPath: ghaSettingsCfgDockerFilePathAdminServer
-      os: 'Linux'
-      registryInfo: {
-        registryPassword: ghaSettingsCfgRegistryPassword
-        registryUrl: ghaSettingsCfgRegistryUrl
-        registryUserName: ghaSettingsCfgRegistryUserName
-      }
-      publishType: ghaSettingsCfgPublishType
-    }
-    repoUrl: ghaSettingsCfgRepoUrl
-  }
-}
-
-
-/*
-ACA does not yet support diagnostic settings
-https://github.com/microsoft/azure-container-apps/issues/382
-https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/diagnosticsettings?tabs=bicep
-*/
-
-/*
-resource appInsDgsAdminServer 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'dgs-${appName}-send-${adminServerContainerAppName}-logs-and-metrics-to-log-analytics'
-  scope: AdminServerContainerApp
-  properties: {
-    logAnalyticsDestinationType: 'AzureDiagnostics'
-    workspaceId: logAnalyticsWorkspace.id
-    logs: [
-      {
-        category: 'ApplicationConsole'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'SystemLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'IngressLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }    
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-    ]
-  }
-}
-
-resource appInsDgsApiGW 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'dgs-${appName}-send-${apiGatewayContainerAppName}-logs-and-metrics-to-log-analytics'
-  scope: ApiGatewayContainerApp
-  properties: {
-    logAnalyticsDestinationType: 'AzureDiagnostics'
-    workspaceId: logAnalyticsWorkspace.id
-    logs: [
-      {
-        category: 'ApplicationConsole'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'SystemLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'IngressLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }    
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-    ]
-  }
-}
-
-resource appInsDgsCfgServer 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'dgs-${appName}-send-${configServerContainerAppName}-logs-and-metrics-to-log-analytics'
-  scope: ConfigServerContainerApp
-  properties: {
-    logAnalyticsDestinationType: 'AzureDiagnostics'
-    workspaceId: logAnalyticsWorkspace.id
-    logs: [
-      {
-        category: 'ApplicationConsole'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'SystemLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'IngressLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }    
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-    ]
-  }
-}
-
-
-resource appInsDgsCustomersService 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'dgs-${appName}-send-${customersServiceContainerAppName}-logs-and-metrics-to-log-analytics'
-  scope: CustomersServiceContainerApp
-  properties: {
-    logAnalyticsDestinationType: 'AzureDiagnostics'
-    workspaceId: logAnalyticsWorkspace.id
-    logs: [
-      {
-        category: 'ApplicationConsole'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'SystemLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'IngressLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }    
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-    ]
-  }
-}
-
-resource appInsDgsVetsService 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'dgs-${appName}-send-${vetsServiceContainerAppName}-logs-and-metrics-to-log-analytics'
-  scope: VetsServiceContainerApp
-  properties: {
-    logAnalyticsDestinationType: 'AzureDiagnostics'
-    workspaceId: logAnalyticsWorkspace.id
-    logs: [
-      {
-        category: 'ApplicationConsole'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'SystemLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'IngressLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }    
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-    ]
-  }
-}
-
-resource appInsDgsVisistsService 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'dgs-${appName}-send-${visitsServiceContainerAppName}-logs-and-metrics-to-log-analytics'
-  scope: VisitsServiceContainerApp
-  properties: {
-    logAnalyticsDestinationType: 'AzureDiagnostics'
-    workspaceId: logAnalyticsWorkspace.id
-    logs: [
-      {
-        category: 'ApplicationConsole'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'SystemLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'IngressLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }    
-    ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-    ]
-  }
-}
-
-*/
