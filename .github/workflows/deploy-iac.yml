@@ -277,6 +277,12 @@ jobs:
     - name: Deploy the pre-req
       run: |
           # --debug # --what-if to test like a dry-run
+
+          echo ""
+          echo "About ACR Authentication options read https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication?source=recommendations&tabs=azure-cli#authentication-options"
+          echo "ACR adminUserEnabled option : Single account per registry, not recommended for multiple users . This registry must have the Admin User enabled, or the integration with ACA will not work from the Azure portal."
+          echo ""
+
           az deployment group create --name aca-petclinic-pre-req -f iac/bicep/pre-req.bicep -g ${{ env.RG_APP }} \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
@@ -376,6 +382,20 @@ jobs:
             -p publicNetworkAccess=enabled \
             -p kvSkuName=standard \
             -p deployToVNet=${{ env.DEPLOY_TO_VNET }}
+      shell: bash
+
+    - name: Configure Diagnostic-Settings
+      run: |
+          echo "ACA does not yet support diagnostic settings, see https://github.com/microsoft/azure-container-apps/issues/382" 
+          
+          # az deployment group create --name aca-petclinic-apps -f iac/bicep/modules/aca/diagnostic-settings.bicep -g ${{ env.RG_APP }} \
+      shell: bash
+
+    - name: Configure GitHub-Action-Settings
+      run: |   
+          echo "To be tested ..."       
+          # az deployment group create --name aca-petclinic-apps -f iac/bicep/modules/aca/gha-settings.bicep -g ${{ env.RG_APP }} \
+
       shell: bash
 
     # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
