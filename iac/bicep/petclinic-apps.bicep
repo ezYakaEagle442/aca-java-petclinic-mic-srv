@@ -160,6 +160,27 @@ param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
 @description('The Azure Container App instance name for visits-service')
 param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
 
+@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-admin-server:{{ github.sha }}')
+param imageNameAdminServer string
+
+@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-discovery-server:{{ github.sha }}')
+param imageNameDiscoveryServer string
+
+@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-api-gateway:{{ github.sha }}')
+param imageNameApiGateway string
+
+@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-config-server:{{ github.sha }}')
+param imageNameConfigServer string
+
+@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-customers-service:{{ github.sha }}')
+param imageNameCustomersService string
+
+@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-vets-service:{{ github.sha }}')
+param imageNameVetsService string
+
+@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-visits-service:{{ github.sha }}')
+param imageNameVisitsService string
+
 resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = if (deployToVNet) {
   name: vnetName
 }
@@ -235,6 +256,13 @@ module azurecontainerapp './modules/aca/aca.bicep' = {
     customersServiceContainerAppName: customersServiceContainerAppName
     vetsServiceContainerAppName: vetsServiceContainerAppName
     visitsServiceContainerAppName: visitsServiceContainerAppName
+    imageNameAdminServer: imageNameAdminServer
+    imageNameApiGateway: imageNameApiGateway
+    imageNameConfigServer: imageNameConfigServer
+    imageNameCustomersService: imageNameCustomersService
+    imageNameDiscoveryServer: imageNameDiscoveryServer
+    imageNameVetsService: imageNameVetsService
+    imageNameVisitsService: imageNameVisitsService
   }
 }
 
@@ -247,6 +275,9 @@ module roleAssignments './modules/aca/roleAssignments.bicep' = {
     acaCustomersServicePrincipalId: azurecontainerapp.outputs.customersServiceContainerAppIdentity
     acaVetsServicePrincipalId: azurecontainerapp.outputs.vetsServiceContainerAppNameContainerAppIdentity
     acaVisitsServicePrincipalId: azurecontainerapp.outputs.visitsServiceContainerAppIdentity
+    acaAdminServerPrincipalId: azurecontainerapp.outputs.adminServerContainerAppIdentity
+    acaApiGatewayPrincipalId: azurecontainerapp.outputs.apiGatewayContainerAppIdentity
+    acaConfigServerPrincipalId: azurecontainerapp.outputs.configServerContainerAppIdentity
     kvName: kvName
     kvRGName: kvRGName
     kvRoleType: 'KeyVaultSecretsUser'
