@@ -10,6 +10,11 @@ param acrName string
 param acaCustomersServicePrincipalId string
 param acaVetsServicePrincipalId string
 param acaVisitsServicePrincipalId string
+param acaApiGatewayPrincipalId string
+param acaAdminServerPrincipalId string
+param acaConfigServerPrincipalId string
+// param acaDiscoveryServerPrincipalId string
+
 
 /*
 param vnetName string
@@ -88,6 +93,40 @@ resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
     principalType: 'ServicePrincipal'
   }
 }
+
+ // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
+ resource AcrPullRoleAssignmentConfigServer 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(acr.id, acrRoleType , acaConfigServerPrincipalId)
+  scope: acr
+  properties: {
+    roleDefinitionId: role[acrRoleType]
+    principalId: acaConfigServerPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+ // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
+ resource AcrPullRoleAssignmentAdminServer 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(acr.id, acrRoleType , acaAdminServerPrincipalId)
+  scope: acr
+  properties: {
+    roleDefinitionId: role[acrRoleType]
+    principalId: acaAdminServerPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+ // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
+ resource AcrPullRoleAssignmentacaApiGateway 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(acr.id, acrRoleType , acaApiGatewayPrincipalId)
+  scope: acr
+  properties: {
+    roleDefinitionId: role[acrRoleType]
+    principalId: acaApiGatewayPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 
 
 /*
