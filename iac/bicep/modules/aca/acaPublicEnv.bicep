@@ -27,6 +27,12 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing
   name: appInsightsName
 }
 
+/*
+ACA does not yet support diagnostic settings
+container apps do no support currently diagnostic settings. Integration happen trough property on the app environment resource currently.
+https://github.com/microsoft/azure-container-apps/issues/382
+https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/diagnosticsettings?tabs=bicep
+*/
 resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' = {
   name: azureContainerAppEnvName
   location: location

@@ -146,6 +146,13 @@ module ACR './modules/aca/acr.bicep' = {
   }
 }
 
+
+/*
+ACA does not yet support diagnostic settings
+container apps do no support currently diagnostic settings. Integration happen trough property on the app environment resource currently.
+https://github.com/microsoft/azure-container-apps/issues/382
+https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/diagnosticsettings?tabs=bicep
+*/
 module defaultPublicManagedEnvironment './modules/aca/acaPublicEnv.bicep' = if (!deployToVNet) {
   name: 'aca-pub-env'
   params: {
