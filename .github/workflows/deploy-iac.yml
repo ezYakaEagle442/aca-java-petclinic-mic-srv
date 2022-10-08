@@ -368,7 +368,11 @@ jobs:
     - name: Deploy Azure Container Apps
       run: |
           echo "About to call ACA, roleAssignments and KV Module iac/bicep/petclinic-apps.bicep#284" 
-          
+
+          # https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs
+          tag_id=${{ needs.call-maven-build-workflow.outputs.tag_id }}
+          echo "Image Build tag ID:"$tag_id
+
           az deployment group create --name aca-petclinic-apps -f iac/bicep/petclinic-apps.bicep -g ${{ env.RG_APP }} \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
@@ -381,7 +385,15 @@ jobs:
             -p revisionName=${{ env.GHA_REVISION_NAME }} \
             -p publicNetworkAccess=enabled \
             -p kvSkuName=standard \
-            -p deployToVNet=${{ env.DEPLOY_TO_VNET }}
+            -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
+            -p tagName=$tag_id \
+            -p imageNameAdminServer="petclinic/petclinic-admin-server:"$tag_id \
+            -p imageNameApiGateway="petclinic/petclinic-petclinic-api-gateway:"$tag_id \
+            -p imageNameDiscoveryServer"petclinic/petclinic-admin-server:"$tag_id \
+            -p imageNameConfigServer="petclinic/petclinic-admin-server:"$tag_id \
+            -p imageNameCustomersService="petclinic/petclinic-admin-server:"$tag_id \
+            -p imageNameVetsService="petclinic/petclinic-admin-server:"$tag_id \
+            -p imageNameVisitsService="petclinic/petclinic-admin-server:"$tag_id
       shell: bash
 
     - name: Configure Diagnostic-Settings

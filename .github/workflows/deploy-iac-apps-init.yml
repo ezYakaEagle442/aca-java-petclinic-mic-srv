@@ -65,6 +65,30 @@ jobs:
             -p ghaSettingsCfgRepoUrl=${{ env.GHA_SETTINGS_CFG_REPO_URL }} \
             -p revisionName=${{ env.GHA_REVISION_NAME }} \
             -p deployToVNet=${{ env.DEPLOY_TO_VNET }}
+            -p tagName=$tag_id \
+            -p imageNameAdminServer="petclinic/petclinic-admin-server:"$tag_id \
+            -p imageNameApiGateway="petclinic/petclinic-petclinic-api-gateway:"$tag_id \
+            -p imageNameDiscoveryServer"petclinic/petclinic-admin-server:"$tag_id \
+            -p imageNameConfigServer="petclinic/petclinic-admin-server:"$tag_id \
+            -p imageNameCustomersService="petclinic/petclinic-admin-server:"$tag_id \
+            -p imageNameVetsService="petclinic/petclinic-admin-server:"$tag_id \
+            -p imageNameVisitsService="petclinic/petclinic-admin-server:"$tag_id
+
+
+      shell: bash
+
+    - name: Configure Diagnostic-Settings
+      run: |
+          echo "ACA does not yet support diagnostic settings, see https://github.com/microsoft/azure-container-apps/issues/382" 
+          
+          # az deployment group create --name aca-petclinic-apps -f iac/bicep/modules/aca/diagnostic-settings.bicep -g ${{ env.RG_APP }} \
+      shell: bash
+
+    - name: Configure GitHub-Action-Settings
+      run: |   
+          echo "To be tested ..."       
+          # az deployment group create --name aca-petclinic-apps -f iac/bicep/modules/aca/gha-settings.bicep -g ${{ env.RG_APP }} \
+
       shell: bash
 
     # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
