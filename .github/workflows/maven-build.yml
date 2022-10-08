@@ -182,7 +182,7 @@ jobs:
           acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryUsr.value | tr -d '"')
           acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryPwd.value | tr -d '"')
 
-          # az acr login --name ${{ env.REGISTRY_URL }} -u $acr_usr -p $acr_pwd
+          az acr login --name ${{ env.REGISTRY_URL }} -u $acr_usr -p $acr_pwd
 
           az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
           
@@ -194,7 +194,8 @@ jobs:
           echo "you need to: az login --identity, az acr login before calling az acr build ..."
           echo ""
 
-          az login --identity --username $identityID
+          #az login --identity --username $identityID
+          #--name ${{ env.AZURE_CONTAINER_REGISTRY }}
           az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g  ${{ env.RG_APP }} -t petclinic/adm-test:{{.Run.ID}} --file "./docker/petclinic-admin-server/Dockerfile" .
 
           # https://github.com/Azure/acr-build/issues/10
@@ -214,94 +215,6 @@ jobs:
           # verify
           az acr repository list --name ${{ env.AZURE_CONTAINER_REGISTRY }} --output table
           az acr repository show --name ${{ env.AZURE_CONTAINER_REGISTRY }} --repository ${{ env.REPOSITORY }}
-
-
-    # https://github.com/marketplace/actions/azure-container-registry-build
-    - name: admin-server ACR build
-      id: admin-server-acr-build
-      uses: azure/acr-build@v1
-      with:
-        service_principal: ${{ env.SPN_ID }} # The Service Principal credentials : must be stored in KV
-        service_principal_password: ${{ env.SPN_PWD }} # The Service Principal credentials: must be stored in KV
-        tenant: ${{ env.AZURE_TENANT_ID }} # The ACR tenant
-        registry: ${{ env.AZURE_CONTAINER_REGISTRY }} # The ACR name
-        repository: ${{ env.REPOSITORY }} # The repository on the ACR
-        image: ${{ env.ADMIN_SERVER }} # Docker image name. Default tag: The action will default to use the first 8 characters of the commit SHA if no tag is specified. Tagged with GitHub commit ID (SHA), ex: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
-        # git_access_token: ${{ secrets.git_access_token }} # The Github access token for private repositories
-        folder: ${{ github.workspace }} # Build context for Docker agent
-        dockerfile: ./docker/petclinic-admin-server/Dockerfile # Path to the Dockerfile relative to `folder`
-        branch: main # Branch to root the context off of
-
-
-    - name: config-server ACR build
-      id: config-server-acr-build
-      uses: azure/acr-build@v1
-      with:
-        service_principal: ${{ env.SPN_ID }}
-        service_principal_password: ${{ env.SPN_PWD }}
-        tenant: ${{ env.AZURE_TENANT_ID }}
-        registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
-        repository: ${{ env.REPOSITORY }}
-        image: ${{ env.CONFIG_SERVER }}
-        folder: ${{ github.workspace }}
-        dockerfile: ./docker/petclinic-config-server/Dockerfile
-        branch: main
-
-    - name: api-gateway ACR build
-      id: api-gateway-acr-build
-      uses: azure/acr-build@v1
-      with:
-        service_principal: ${{ env.SPN_ID }}
-        service_principal_password: ${{ env.SPN_PWD }}
-        tenant: ${{ env.AZURE_TENANT_ID }}
-        registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
-        repository: ${{ env.REPOSITORY }}
-        image: ${{ env.API_GATEWAY }}
-        folder: ${{ github.workspace }}
-        dockerfile: ./docker/petclinic-api-gateway/Dockerfile
-        branch: main
-
-    - name: customer-service ACR build
-      id: customer-service-acr-build
-      uses: azure/acr-build@v1
-      with:
-        service_principal: ${{ env.SPN_ID }}
-        service_principal_password: ${{ env.SPN_PWD }}
-        tenant: ${{ env.AZURE_TENANT_ID }}
-        registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
-        repository: ${{ env.REPOSITORY }}
-        image: ${{ env.CUSTOMERS_SERVICE }}
-        folder: ${{ github.workspace }}
-        dockerfile: ./docker/petclinic-customers-service/Dockerfile
-        branch: main        
-
-    - name: vets-service ACR build
-      id: vets-service-acr-build
-      uses: azure/acr-build@v1
-      with:
-        service_principal: ${{ env.SPN_ID }}
-        service_principal_password: ${{ env.SPN_PWD }}
-        tenant: ${{ env.AZURE_TENANT_ID }}
-        registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
-        repository: ${{ env.REPOSITORY }}
-        image: ${{ env.VETS_SERVICE }}
-        folder: ${{ github.workspace }}
-        dockerfile: ./docker/petclinic-vets-service/Dockerfile
-        branch: main
-
-    - name: visits-service ACR build
-      id: visits-service-acr-build
-      uses: azure/acr-build@v1
-      with:
-        service_principal: ${{ env.SPN_ID }}
-        service_principal_password: ${{ env.SPN_PWD }}
-        tenant: ${{ env.AZURE_TENANT_ID }}
-        registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
-        repository: ${{ env.REPOSITORY }}
-        image: ${{ env.VISITS_SERVICE }}
-        folder: ${{ github.workspace }}
-        dockerfile: ./docker/petclinic-visits-service/Dockerfile
-        branch: main
 
     outputs:
       tag_id: ${{ steps.mvn_build.outputs.tag_id }}
