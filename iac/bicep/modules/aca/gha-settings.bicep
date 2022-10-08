@@ -67,25 +67,25 @@ param ghaSettingsCfgDockerFilePathVetsService string = './docker/petclinic-vets-
 param ghaSettingsCfgDockerFilePathVisitsService string = './docker/petclinic-visits-service/Dockerfile'
 
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-admin-server:{{ github.sha }}')
-param ImageNameAdminServer string
+param imageNameAdminServer string
 
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-discovery-server:{{ github.sha }}')
-param ImageNameDiscoveryServer string
+param imageNameDiscoveryServer string
 
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-api-gateway:{{ github.sha }}')
-param ImageNameApiGateway string
+param imageNameApiGateway string
 
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-config-server:{{ github.sha }}')
-param ImageNameConfigServer string
+param imageNameConfigServer string
 
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-customers-service:{{ github.sha }}')
-param ImageNameCustomersService string
+param imageNameCustomersService string
 
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-vets-service:{{ github.sha }}')
-param ImageNameVetsService string
+param imageNameVetsService string
 
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-visits-service:{{ github.sha }}')
-param ImageNameVisitsService string
+param imageNameVisitsService string
 
 /* They seem to be more App Service focused as this interface is shared with App Service.
 https://docs.microsoft.com/en-us/javascript/api/@azure/arm-appservice/githubactioncodeconfiguration?view=azure-node-latest
@@ -161,7 +161,7 @@ resource githubActionSettingsCustomers 'Microsoft.App/containerApps/sourcecontro
         tenantId: tenantId
       }
       contextPath: ghaSettingsCfgDockerFilePathCustomersService
-      image: ImageNameCustomersService
+      image: imageNameCustomersService
       os: 'Linux'
       registryInfo: {
         registryPassword: ghaSettingsCfgRegistryPassword
@@ -187,7 +187,7 @@ resource githubActionSettingsVets 'Microsoft.App/containerApps/sourcecontrols@20
         tenantId: tenantId
       }
       contextPath: ghaSettingsCfgDockerFilePathVetsService
-      image: ImageNameVetsService
+      image: imageNameVetsService
       os: 'Linux'
       registryInfo: {
         registryPassword: ghaSettingsCfgRegistryPassword
@@ -213,7 +213,7 @@ resource githubActionSettingsVisits 'Microsoft.App/containerApps/sourcecontrols@
         tenantId: tenantId
       }
       contextPath: ghaSettingsCfgDockerFilePathVisitsService
-      image: ImageNameVisitsService
+      image: imageNameVisitsService
       os: 'Linux'
       registryInfo: {
         registryPassword: ghaSettingsCfgRegistryPassword
@@ -239,7 +239,7 @@ resource githubActionSettingsAPI 'Microsoft.App/containerApps/sourcecontrols@202
         tenantId: tenantId
       }
       contextPath: ghaSettingsCfgDockerFilePathApiGateway
-      image: ImageNameApiGateway
+      image: imageNameApiGateway
       os: 'Linux'
       registryInfo: {
         registryPassword: ghaSettingsCfgRegistryPassword
@@ -265,7 +265,7 @@ resource githubActionSettingsConfigServer 'Microsoft.App/containerApps/sourcecon
         tenantId: tenantId
       }
       contextPath: ghaSettingsCfgDockerFilePathConfigserver
-      image: ImageNameConfigServer
+      image: imageNameConfigServer
       os: 'Linux'
       registryInfo: {
         registryPassword: ghaSettingsCfgRegistryPassword
@@ -292,7 +292,7 @@ resource githubActionSettingsAdminServer 'Microsoft.App/containerApps/sourcecont
         tenantId: tenantId
       }
       contextPath: ghaSettingsCfgDockerFilePathAdminServer // Dockerfile location
-      image: ImageNameAdminServer
+      image: imageNameAdminServer
       os: 'Linux'
       registryInfo: {
         // Managedidentity is enabled on ACR
