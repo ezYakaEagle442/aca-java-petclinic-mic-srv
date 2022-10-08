@@ -101,6 +101,8 @@ jobs:
 
     - name: Download Admin-Server GH Package
       run: |
+        # to be tested : try to get https://maven.pkg.github.com/ezYakaEagle442/aca-java-petclinic-mic-srv/org/springframework/samples/petclinic/admin/aca-spring-petclinic-admin-server-2.6.6.jar
+
         curl ${{ env.ADMIN_SERVER_API_URL }} -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json"
         PKG_VER_ID=$(curl ${{ env.ADMIN_SERVER_API_URL }} -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json"  | jq .id)
         PKG_HTML_URL=$(curl ${{ env.ADMIN_SERVER_API_URL }} -u username:${{ env.GHA_PAT }} -H "Accept: application/vnd.github.v3+json" | jq -r .html_url)
@@ -161,7 +163,6 @@ jobs:
         query: |
           query packages($owner:String!,$repo:String!) {
             repository(owner:${{ env.OWNER }},name:${{ env.REPO }}) {
-              # /!\ '_' dash char. NOT supported in org.springframework.samples.petclinic.admin.${{ env.PRJ_PREFIX }}-${{ env.ADMIN_SERVER }}
               packages(first: 10, packageType: MAVEN, names: "org.springframework.samples.petclinic.admin.aca-spring-petclinic-admin-server") {
                 edges {
                   node {

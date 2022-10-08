@@ -4,6 +4,15 @@
 
 # Multi-Stage pipeline: 
 
+# /!\ ACR is set with Managed Identity: https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication-managed-identity?tabs=azure-cli
+# az identity create -g rg-iac-aca-petclinic-mic-srv  --name myTestIdentity
+# identitySpnID=$(az identity show  -g rg-iac-aca-petclinic-mic-srv --name myTestIdentity --query principalId --output tsv)
+# identityResourceID=$(az identity show  -g rg-iac-aca-petclinic-mic-srv --name myTestIdentity --query id --output tsv)
+# acrID=$(az acr show -g rg-iac-aca-petclinic-mic-srv --name acrpetcliaca --query id --output tsv)
+# az role assignment create --assignee $identitySpnID --scope $acrID --role acrpull
+# az login --identity --username $identityResourceID 
+# az acr login --name acrpetcliaca
+
 # docker build --build-arg --no-cache -t "petclinic-admin-server" -f "./docker/petclinic-admin-server/Dockerfile" .
 # docker tag petclinic-admin-server acrpetcliaca.azurecr.io/petclinic/petclinic-admin-server
 # az acr login --name acrpetcliaca.azurecr.io -u $acr_usr -p $acr_pwd

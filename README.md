@@ -293,12 +293,12 @@ Quick local test just to verify that the jar files can be run (the routing will 
 
 ```sh
 mvn package -DskipTests
-java -jar spring-petclinic-config-server\target\spring-petclinic-config-server-2.6.6.jar --server.port=8888
-java -jar spring-petclinic-admin-server\target\spring-petclinic-admin-server-2.6.6.jar --server.port=9090
-java -jar spring-petclinic-visits-service\target\spring-petclinic-visits-service-2.6.6.jar --server.port=8082 # --spring.profiles.active=docker
-java -jar spring-petclinic-vets-service\target\spring-petclinic-vets-service-2.6.6.jar --server.port=8083
-java -jar spring-petclinic-customers-service\target\spring-petclinic-customers-service-2.6.6.jar --server.port=8084
-java -jar spring-petclinic-api-gateway\target\spring-petclinic-api-gateway-2.6.6.jar --server.port=8085
+java -jar spring-petclinic-config-server\target\aca-spring-petclinic-config-server-2.6.6.jar --server.port=8888
+java -jar spring-petclinic-admin-server\target\aca-spring-petclinic-admin-server-2.6.6.jar --server.port=9090
+java -jar spring-petclinic-visits-service\target\aca-spring-petclinic-visits-service-2.6.6.jar --server.port=8082 # --spring.profiles.active=docker
+java -jar spring-petclinic-vets-service\target\aca-spring-petclinic-vets-service-2.6.6.jar --server.port=8083
+java -jar spring-petclinic-customers-service\target\aca-spring-petclinic-customers-service-2.6.6.jar --server.port=8084
+java -jar spring-petclinic-api-gateway\target\aca-spring-petclinic-api-gateway-2.6.6.jar --server.port=8085
 ```
 
 Note: tip to verify the dependencies

@@ -6,13 +6,13 @@ name: Deploy ACA Apps with Azure Bicep
 env:
   APP_NAME: petcliaca
   LOCATION: westeurope
-  RG_KV: rg-iac-kv777 # RG where to deploy KV
+  RG_KV: rg-iac-kv42 # RG where to deploy KV
   RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
   
   ACA_ENV_NAME: aca-env-pub # ACA Environment name. Ex 'aca-env-pub' or 'aca-env-corp' when deployed to your VNet
   DEPLOY_TO_VNET: false
 
-  KV_NAME: kv-petcliaca442 # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
+  KV_NAME: kv-petcliaca42 # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
   SET_KV_ACCESS_POLICIES: false # let it to false
 
   AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.

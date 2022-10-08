@@ -6,13 +6,13 @@ name: Deploy IaC with Azure Bicep
 env:
   APP_NAME: petcliaca
   LOCATION: westeurope
-  RG_KV: rg-iac-kv777 # RG where to deploy KV
+  RG_KV: rg-iac-kv42 # RG where to deploy KV
   RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
   
   ACA_ENV_NAME: aca-env-pub # ACA Environment name. Ex 'aca-env-pub' or 'aca-env-corp' when deployed to your VNet
   DEPLOY_TO_VNET: false
 
-  KV_NAME: kv-petcliaca442 # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
+  KV_NAME: kv-petcliaca42 # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
   SET_KV_ACCESS_POLICIES: false # let it to false
 
   AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
@@ -21,10 +21,7 @@ env:
   # GitHub Actions settings
   GHA_SETTINGS_CFG_REGISTRY_URL: acrpetcliaca.azurecr.io
   GHA_SETTINGS_CFG_REPO_URL: https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv
-  GHA_SETTINGS_CFG_CRD_CLIENT_ID: ${{ secrets.SPN_ID }}
-  GHA_SETTINGS_CFG_CRD_CLIENT_SECRET: ${{ secrets.SPN_PWD }}
   GHA_REVISION_NAME: aca-poc-101
-
 
   # https://github.com/Azure/actions-workflow-samples/blob/master/assets/create-secrets-for-GitHub-workflows.md#consume-secrets-in-your-workflow
   # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-secrets
@@ -43,6 +40,10 @@ env:
   SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
   SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT: ${{ secrets.SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT }}
   SPRING_CLOUD_AZURE_TENANT_ID: ${{ secrets.SPRING_CLOUD_AZURE_TENANT_ID }}
+
+  GHA_SETTINGS_CFG_CRD_CLIENT_ID: ${{ secrets.SPN_ID }}
+  GHA_SETTINGS_CFG_CRD_CLIENT_SECRET: ${{ secrets.SPN_PWD }}
+
   VM_ADMIN_USER_NAME: ${{ secrets.VM_ADMIN_USER_NAME }}
   VM_ADMIN_PASSWORD: ${{ secrets.VM_ADMIN_PASSWORD }}
 
