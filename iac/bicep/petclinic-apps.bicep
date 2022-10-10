@@ -352,6 +352,8 @@ var accessPoliciesObject = {
   ]
 }
 
+// create accessPolicies https://docs.microsoft.com/en-us/azure/templates/microsoft.keyvault/vaults/accesspolicies?tabs=bicep
+// When enableRbacAuthorization is true in KV, the key vault will use RBAC for authorization of data actions, and the access policies specified in vault properties will be ignored
 module KeyVaultAccessPolicies './modules/kv/kv_policies.bicep'= {
   name: 'KeyVaultAccessPolicies'
   scope: resourceGroup(kvRGName)
