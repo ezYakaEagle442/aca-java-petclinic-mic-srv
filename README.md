@@ -38,7 +38,7 @@ About how to build the container image, read :
 Read :
 - [https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts](https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts)
 - [https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven](https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven)
-
+- [Overview of federated identity credentials in Azure Active Directory](https://learn.microsoft.com/en-us/graph/api/resources/federatedidentitycredentials-overview?view=graph-rest-1.0)
 
 You have to specify all [KV secrets](./iac/bicep/modules/kv/kv_sec_key.bicep#L25) that will be then created in the GitHub Action [Azure Infra services deployment workflow](./.github/workflows/deploy-iac.yml#L140) :
 - MYSQL-SERVER-NAME
@@ -117,6 +117,9 @@ az ad sp create-for-rbac --name $SPN_APP_NAME
 }
 ```
 
+Troubleshoot:
+If you hit _["Error: : No subscriptions found for ***."](https://learn.microsoft.com/en-us/answers/questions/738782/no-subscription-found-for-function-during-azure-cl.html)_ , this is related to an IAM privilege in the subscription.
+
 ```sh
 #SPN_ID=$(az ad sp list --all --query "[?appDisplayName=='${SPN_APP_NAME}'].{appId:appId}" --output tsv)
 SPN_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME}'].{id:appId}" --output tsv)
@@ -147,18 +150,22 @@ You can test your connection with CLI :
 az login --service-principal -u $SPN_ID -p SPN_PWD --tenant $TENANT_ID
 ```
 
+
+
 Add SUBSCRIPTION_ID, TENANT_ID, SPN_ID and SPN_PWD as secrets to your GH repo secrets / Actions secrets / Repository secrets
 
-<span style="color:red">**Be aware that at this stage KV is not created yet, it must exist first to set-policy**</span>
-Then, follow the here under step to add access policy for the Service Principal.
+<span style="color:red">**Be aware that at this stage KV is not created yet, it must exist first to set-policy**
+[enableRbacAuthorization is true in KV](./iac/bicep/modules/kv/kv.bicep#L61), the key vault will use RBAC for authorization of data actions, and the [access policies specified in vault properties](https://docs.microsoft.com/en-us/azure/templates/microsoft.keyvault/vaults/accesspolicies?tabs=bicep) will be ignored</span>
+
+If enableRbacAuthorization was set to false, you would have to follow the here under step to add access policy for the Service Principal.
 ```sh
-KV_NAME="kv-petcliaca442"
+KV_NAME="kv-petcliaca42"
 az keyvault set-policy -n $KV_NAME --secret-permissions get list --spn $SPN_ID
 ```
 
 Finally Create a GH [PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) "PKG_PAT" that can be use to [publish ACA Revisions with GHA](https://learn.microsoft.com/en-us/azure/container-apps/github-actions-cli?tabs=bash#authentication), [publish packages](./.github/workflows/maven-build.yml#L101) and [delete packages](./.github/workflows/delete-all-artifacts.yml#)
 
-<span style="color:red">**Your GitHub personal access token needs to have the workflow scope selected. You need at least delete:packages and read:packages scopes to delete a package. You need contents: read and packages: write permissions to publish and download artifacts**
+<span style="color:red">**Your GitHub personal access token needs to have the workflow scope selected. You need at least delete:packages and read:packages scopes to delete a package. You need contents: read and packages: write permissions to publish and download artifacts**</span>
 
 ## Pipelines
 
@@ -167,6 +174,66 @@ See GitHub Actions :
 - [Maven Build workflow](./.github/workflows/maven-build.yml)
 - [Java Apps Deploy workflow](./.github/workflows/deploy-apps.yml)
 - [Delete ALL the Azure Infra services workflow, except KeyVault](./.github/workflows/delete-rg.yml)
+
+
+<span style="color:red">****</span>
+
+Workflow Design
+```
+├── Deploy the Azure Infra services workflow ./.github/workflows/deploy-iac.yml
+│   ├── Authorize local IP to access the Azure Key Vault ./.github/workflows/deploy-iac.yml#L133
+│   ├── Create the secrets ./.github/workflows/deploy-iac.yml#L140
+│   ├── Disable local IP access to the Key Vault ./.github/workflows/deploy-iac.yml#L252
+│   ├── Deploy the pre-req ./.github/workflows/deploy-iac.yml#L285
+│   ├── Create REGISTRY-USR & REGISTRY-PWD secrets in Azure Key Vault ./.github/workflows/deploy-iac.yml#L313
+│   ├── Call Maven Build ./.github/workflows/deploy-iac.yml#L356
+│       ├── Maven Build ./.github/workflows/maven-build.yml#L118
+│       ├── Publish the Maven package ./.github/workflows/maven-build.yml#L141
+│       ├── Check all Jar artifacts ./.github/workflows/maven-build.yml#L152
+│       ├── Build image and push it to ACR ./.github/workflows/maven-build.yml#L176
+│   ├── Deploy Azure Container Apps ./.github/workflows/deploy-iac.yml#L375
+│   ├── Configure Diagnostic-Settings ./.github/workflows/deploy-iac.yml#L398
+│   ├── Configure GitHub-Action-Settings ./.github/workflows/deploy-iac.yml#405
+```
+
+You need to set your own param values in :
+- [Azure Infra services deployment workflow](./.github/workflows/deploy-iac.yml#L13)
+```sh
+env:
+  APP_NAME: petcliaca
+  LOCATION: westeurope
+  RG_KV: rg-iac-kv42 # RG where to deploy KV
+  RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
+  ACA_ENV_NAME: aca-env-pub # ACA Environment name. Ex 'aca-env-pub' or 'aca-env-corp' when deployed to your VNet
+  KV_NAME: kv-petcliaca42 # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
+  
+  AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
+  REPOSITORY: petclinic                  # set this to your ACR repository
+
+  # GitHub Actions settings
+  GHA_SETTINGS_CFG_REGISTRY_URL: acrpetcliaca.azurecr.io
+  GHA_SETTINGS_CFG_REPO_URL: https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv
+  
+  # https://learn.microsoft.com/en-us/azure/key-vault/secrets/secrets-best-practices#secrets-rotation
+  # Because secrets are sensitive to leakage or exposure, it's important to rotate them often, at least every 60 days. 
+  # Expiry date in seconds since 1970-01-01T00:00:00Z. Ex: 1672444800 ==> 31/12/2022'
+  SECRET_EXPIRY_DATE: 1672444800
+```
+
+- [Maven Build workflow](./.github/workflows/maven-build.yml)
+```sh
+  AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
+  REGISTRY_URL: acrpetcliaca.azurecr.io  # set this to the URL of your registry
+  REPOSITORY: petclinic                  # set this to your ACR repository
+  PROJECT_NAME: petclinic                # set this to your project's name
+  KV_NAME: kv-petcliaca42               # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
+  
+  RG_KV: rg-iac-kv42 # RG where to deploy KV
+  RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
+```
+
+Once you commit, then push your code update to your repo, it will trigger a Maven build which you need to can CANCELL from https://github.com/USERNAME/aca-java-petclinic-mic-srv/actions/workflows/maven-build.yml the firs time you trigger the workflow
+
 
 Note: the GH Hosted Runner / [Ubuntu latest image has already Azure CLI installed](https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md#cli-tools)
 
@@ -182,9 +249,27 @@ see the [ACA doc](https://learn.microsoft.com/en-us/azure/container-apps/firewal
 By default the Azure Container Apps [Environment](https://learn.microsoft.com/en-us/azure/container-apps/networking) is deployed as external resources and are available for public requests, i.e not deployed to a VNet. 
 (External environments are deployed with a virtual IP on an external, public facing IP address.)
 
-- [Bicep ](./iac/bicep/modules/aca/acaPublicEnv.bicep#L30)
+- [Bicep ](./iac/bicep/modules/aca/acaPublicEnv.bicep#L36)
 ```code
 param deployToVNet bool = false
+```
+
+
+```
+├── Create RG
+│
+├── Create KV ./iac/bicep/modules/kv/kv.bicep
+│   ├── Create KV ./iac/bicep/modules/kv/kv.bicep#L46
+├── Create pre-requisites ./iac/bicep/pre-req.bicep
+│   ├── Create logAnalyticsWorkspace ./iac/bicep/pre-req.bicep#L102
+│   ├── Create appInsights ./iac/bicep/pre-req.bicep#L119
+│   ├── Call ACR Module ./iac/bicep/pre-req.bicep#L138
+│   ├── Call ACA Module defaultPublicManagedEnvironment ./iac/bicep/pre-req.bicep#L156
+│   ├── Call MySQL Module ./iac/bicep/pre-req.bicep#L173
+├── Run the Main ./iac/bicep/petclinic-apps.bicep
+│   ├── Call ACA Module ./iac/bicep/modules/aca/aca.bicep#215
+│   ├── Call roleAssignments Module ./iac/bicep/petclinic-apps.bicep#270
+│   └── Call KV Access Policies ./iac/bicep/petclinic-apps.bicep#357
 ```
 
 - [Azure Infra services deployment workflow](./.github/workflows/deploy-iac.yml#L13)
@@ -193,29 +278,6 @@ DEPLOY_TO_VNET: false
 ```
 
 To Deploy the Apps into your VNet, see [Deployment to VNet section](#deployment-to-vnet)
-
-
-```
-├── Create RG
-│
-├── Create [KV](./iac/bicep/modules/kv/kv.bicep)
-│   ├── Create [KV](./iac/bicep/modules/kv/kv.bicep#L46)
-├── Create [pre-requisites](./iac/bicep/pre-req.bicep)
-│   ├── Create [logAnalyticsWorkspace](./iac/bicep/pre-req.bicep#L102)
-│   ├── Create [appInsights](./iac/bicep/pre-req.bicep#L118)
-│   ├── Call [ACR Module](./iac/bicep/pre-req.bicep#L138)
-│   ├── Call [ACA Module defaultPublicManagedEnvironment](./iac/bicep/pre-req.bicep#L149)
-│   ├── Call [MySQL Module](./iac/bicep/pre-req.bicep#L166)
-└── If deployToVNet=true
-│   ├── Call [VNet Module](./iac/bicep/pre-req-deploy-to-vnet.bicep#L150)
-│   ├── Call [ACA Module corpManagedEnvironment](./iac/bicep/pre-req-deploy-to-vnet#L171)
-│   ├── Call [DNS Private-Zone Module](./iac/bicep/pre-req-deploy-to-vnet.bicep#L212)
-│   ├── Call [ClientVM Module](./iac/bicep/pre-req-deploy-to-vnet.bicep#L224)
-├── Run the [Main](./iac/bicep/petclinic-apps.bicep)
-│   ├── Call [ACA Module](./iac/bicep/modules/aca/aca.bicep#186)
-│   ├── Call [roleAssignments Module](./iac/bicep/petclinic-apps.bicep#282)
-│   └── Call [KV Access Policies](./iac/bicep/petclinic-apps.bicep#367)
-```
 
 <span style="color:red">**Be aware that the MySQL DB is NOT deployed in a VNet but network FireWall Rules are Set. So ensure to allow ACA Outbound IP addresses or check the option "Allow public access from any Azure service within Azure to this server" in the Azure Portal / your MySQL DB / Networking / Firewall rules. 
 enableRbacAuthorization is set to true in KV (Preview feature), the key vault will use RBAC for authorization of data actions, and the access policies specified in vault properties will be ignored**</span>
@@ -232,8 +294,7 @@ Read :
 - [https://github.com/Azure/azure-sdk-for-java/issues/28310](https://github.com/Azure/azure-sdk-for-java/issues/28310)
 - [Maven Project parent pom.xml](pom.xml#L168)
 
-The Config-server uses the config declared on the repo at [https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml](https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml) and need a Service Principal to be able to read secrets from KeyVault. This is implemented using Azure Managed Identities (MI) from the [main.bicep](./iac/bicep/aca/main.bicep#L394), calling the [KV Module](./iac/bicep/kv/kv.bicep#L113) with SET_KV_ACCESS_POLICIES to TRUE and providing the Applications MI set in the 
-[accessPoliciesObject](./iac/bicep/aca/main.bicep#L334) once the Container Apps have been created.
+The Config-server uses the config declared on the repo at [https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml](https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml) and need a Service Principal to be able to read secrets from KeyVault.
 
 ## Deployment to VNet
 
@@ -243,14 +304,38 @@ You can your Apps into your own VNet when creating the Azure Container Apps Envi
 ```code
 param deployToVNet bool = true
 ```
-[Azure Infra services deployment workflow](./.github/workflows/deploy-iac-to-vnet.yml#L13)
+[Azure Infra services deployment workflow](./.github/workflows/deploy-iac-to-vnet.yml#L16)
 ```code
 DEPLOY_TO_VNET: true
 ```
 
+
+
+```
+├── Create RG
+│
+├── Create KV ./iac/bicep/modules/kv/kv.bicep
+│   ├── Create KV ./iac/bicep/modules/kv/kv.bicep#L46
+├── Create pre-requisites ./iac/bicep/pre-req-deploy-to-vnet
+│   ├── Create logAnalyticsWorkspace ./iac/bicep/pre-req.bicep#L102
+│   ├── Create appInsights ./iac/bicep/pre-req.bicep#L119
+│   ├── Call ACR Module ./iac/bicep/pre-req.bicep#L138
+│   ├── Call ACA Module defaultPublicManagedEnvironment ./iac/bicep/pre-req.bicep#L156
+│   ├── Call VNet Module ./iac/bicep/pre-req-deploy-to-vnet.bicep#L150
+│   ├── Call ACA Module corpManagedEnvironment ./iac/bicep/pre-req-deploy-to-vnet#L171
+│   ├── Call MySQL Module ./iac/bicep/pre-req-deploy-to-vnet.bicep#L196
+│   ├── Call DNS Private-Zone Module ./iac/bicep/pre-req-deploy-to-vnet.bicep#L212
+│   ├── Call ClientVM Module ./iac/bicep/pre-req-deploy-to-vnet.bicep#L224
+├── Run the Main ./iac/bicep/petclinic-apps.bicep
+│   ├── Call ACA Module ./iac/bicep/modules/aca/aca.bicep#215
+│   ├── Call roleAssignments Module ./iac/bicep/petclinic-apps.bicep#270
+│   └── Call KV Access Policies ./iac/bicep/petclinic-apps.bicep#357
+```
+
+
 ### DNS Management
 
-When configuring Azure Container Apps Environment to your VNet, a Private-DNS Zone is created during the [Bicep pre-req deployment](./iac/bicep/pre-req.bicep#L190), see [./iac/bicep/modules/aca/dns.bicep](./iac/bicep/modules/aca/dns.bicep#L34)
+When configuring Azure Container Apps Environment to your VNet, a Private-DNS Zone is created during the [Bicep pre-req deployment](./iac/bicep/pre-req-deploy-to-vnet.bicep#L212), see [./iac/bicep/modules/aca/dns.bicep](./iac/bicep/modules/aca/dns.bicep#L34)
 
 /!\ IMPORTANT: Set location to 'global' instead of '${location}'. This is because Azure DNS is a global service. 
 Otherwise you will hit this error:
@@ -266,7 +351,7 @@ resource acaPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
 }
 ```
 ### Client VM
-When configuring Azure Container Apps Environment to your VNet, a JumpOff client VM is created during the [Bicep pre-req deployment](./iac/bicep/pre-req.bicep#L219), see [./iac/bicep/aca/client-vm.bicep](./iac/bicep/modules/aca/client-vm.bicep#L129)
+When configuring Azure Container Apps Environment to your VNet, a JumpOff client VM is created during the [Bicep pre-req deployment](./iac/bicep/pre-req-deploy-to-vnet.bicep#L224), see [./iac/bicep/aca/client-vm.bicep](./iac/bicep/modules/aca/client-vm.bicep#L129)
 
 ## App Container syntax
 
@@ -321,6 +406,28 @@ If everything goes well, you can access the following services at given location
 
 
 The `main` branch uses an MS openjdk/jdk:11-mariner Docker base.
+
+```sh
+#acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryUsr.value | tr -d '"')
+#acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryPwd.value | tr -d '"')
+#az acr login --name ${{ env.REGISTRY_URL }} -u $acr_usr -p $acr_pwd
+
+set -euo pipefail
+access_token=$(az account get-access-token --query accessToken -o tsv)
+
+refresh_token=$(curl https://${{ env.AZURE_CONTAINER_REGISTRY }}/oauth2/exchange -v -d "grant_type=access_token&service=${{ secrets.REGISTRY_SERVER }}&access_token=$access_token" | jq -r .refresh_token)
+
+refresh_token=$(curl https://acrpetcliaca.azurecr.io/oauth2/exchange -v -d "grant_type=access_token&service=acrpetcliaca.azurecr.io&access_token=$access_token" | jq -r .refresh_token)
+
+
+docker build --build-arg --no-cache -t "petclinic-admin-server" -f "./docker/petclinic-admin-server/Dockerfile" .
+docker tag petclinic-admin-server acrpetcliaca.azurecr.io/petclinic/petclinic-admin-server
+az acr login --name acrpetcliaca.azurecr.io -u $acr_usr -p $acr_pwd
+az acr build --registry acrpetcliaca -g  rg-iac-aca-petclinic-mic-srv  -t petclinic/adm-test:test --file "./docker/petclinic-admin-server/Dockerfile" .
+docker push acrpetcliaca.azurecr.io/petclinic/petclinic-admin-server
+docker pull acrpetcliaca.azurecr.io/petclinic/petclinic-admin-server
+docker image ls
+```
 
 
 # Understanding the Spring Petclinic application
