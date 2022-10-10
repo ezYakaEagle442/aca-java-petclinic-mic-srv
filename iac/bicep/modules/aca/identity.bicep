@@ -21,22 +21,22 @@ param tags object = {
 @description('The admin-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param adminServerAppIdentityName string = 'id-aca-petclinic-admin-server-dev-westeurope-101'
 
-@description('The XXX Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+@description('The config-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param configServerAppIdentityName string = 'id-aca-petclinic-config-server-dev-westeurope-101'
 
-@description('The XXX Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+@description('The discovery-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param discoveryServerAppIdentityName string = 'id-aca-petclinic-discovery-server-dev-westeurope-101'
 
-@description('The XXX Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+@description('The api-gateway Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param apiGatewayAppIdentityName string = 'id-aca-petclinic-api-gateway-dev-westeurope-101'
 
-@description('The XXX Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+@description('The customers-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param customersServiceAppIdentityName string = 'id-aca-petclinic-customers-service-dev-westeurope-101'
 
-@description('The XXX Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+@description('The vets-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param vetsServiceAppIdentityName string = 'id-aca-petclinic-vets-service-dev-westeurope-101'
 
-@description('The XXX Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+@description('The visits-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param visitsServiceAppIdentityName string = 'id-aca-petclinic-visits-service-dev-westeurope-101'
 
 ///////////////////////////////////
