@@ -1,3 +1,4 @@
+// https://learn.microsoft.com/en-us/graph/api/resources/federatedidentitycredentials-overview?view=graph-rest-1.0
 // https://github.com/cwe1ss/msa-template/blob/main/infrastructure/platform/github-identity.bicep
 
 targetScope = 'subscription'
