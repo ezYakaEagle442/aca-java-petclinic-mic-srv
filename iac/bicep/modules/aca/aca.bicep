@@ -205,6 +205,17 @@ resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' e
   name: azureContainerAppEnvName
 }
 
+
+/*
+@description('The admin-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+param adminServerAppIdentityName string = 'id-aca-petclinic-admin-server-dev-westeurope-101'
+
+resource adminServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview'existing = {
+  name: adminServerAppIdentityName
+}
+var adminServerAppIdentityResourceId = adminServerIdentity.id
+*/
+
 // https://learn.microsoft.com/en-us/azure/templates/microsoft.app/containerapps?pivots=deployment-language-bicep
 resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: adminServerContainerAppName
@@ -212,7 +223,11 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   identity: {
     // https://docs.microsoft.com/en-us/azure/container-apps/managed-identity?tabs=portal%2Cjava#configure-managed-identities
     type: 'SystemAssigned'
-    //userAssignedIdentities: {}
+    /*
+    userAssignedIdentities: {
+      '${adminServerAppIdentityResourceId}': {}
+    }
+    */
   }
   properties: {
     managedEnvironmentId: corpManagedEnvironment.id 
@@ -252,7 +267,9 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         {
           // Managedidentity is enabled on ACR
           server: ghaSettingsCfgRegistryUrl
+          // https://learn.microsoft.com/en-us/azure/container-apps/containers#managed-identity-with-azure-container-registry
           identity: 'system'
+          //identity: '${adminServerAppIdentityResourceId}'
           //username: ghaSettingsCfgRegistryUserName
           // passwordSecretRef: 'registrypassword'
         }
