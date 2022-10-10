@@ -48,39 +48,46 @@ resource adminServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2
   location: location
   tags: tags
 }
+output adminServerIdentityId string = adminServerIdentity.id
 
 resource configServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
   name: configServerAppIdentityName
   location: location
   tags: tags
 }
+output configServerIdentityId string = configServerIdentity.id
 
 resource discoveryServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
   name: discoveryServerAppIdentityName
   location: location
   tags: tags
 }
+output discoveryServerIdentityId string = discoveryServerIdentity.id
 
 resource apiGatewayIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
   name: apiGatewayAppIdentityName
   location: location
   tags: tags
 }
+output apiGatewayIdentityId string = apiGatewayIdentity.id
 
 resource customersServicedentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
   name: customersServiceAppIdentityName
   location: location
   tags: tags
 }
+output customersServicedentityId string = customersServicedentity.id
 
 resource vetsServiceAppIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
   name: vetsServiceAppIdentityName
   location: location
   tags: tags
 }
+output vetsServiceAppIdentityId string = vetsServiceAppIdentity.id
 
 resource visitsServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
   name: visitsServiceAppIdentityName
   location: location
   tags: tags
 }
+output visitsServiceIdentityId string = visitsServiceIdentity.id
