@@ -86,10 +86,10 @@ RUN ls -al /tmp/app
 # https://github.com/Azure/azure-cli/issues/20413
 # https://github.com/Azure/acr-build/issues/10
 COPY --from=builder ${APP_INSIGHTS_AGENT_JAR_FILE_PATH} .
-COPY --from=builder /tmp/app/dependencies/ .
-COPY --from=builder /tmp/app/snapshot-dependencies/ .
-COPY --from=builder /tmp/app/spring-boot-loader/ .
-COPY --from=builder /tmp/app/application/ .
+COPY --from=builder /tmp/app/dependencies .
+COPY --from=builder /tmp/app/snapshot-dependencies .
+COPY --from=builder /tmp/app/spring-boot-loader .
+COPY --from=builder /tmp/app/application .
 # COPY --from=builder /tmp/app/target/*.jar app.jar
 # COPY target/*.jar app.jar
 # RUN touch /app.jar
