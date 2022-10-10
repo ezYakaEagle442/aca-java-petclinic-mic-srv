@@ -50,7 +50,7 @@ env:
 on:
   workflow_call:
     outputs:
-      workflow_output1:
+      tag_id:
         description: "The Maven Build job output"
         value: ${{ jobs.maven-build.outputs.tag_id }}
 
