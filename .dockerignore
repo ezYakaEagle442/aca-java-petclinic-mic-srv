@@ -1,0 +1,9 @@
+# https://docs.docker.com/engine/reference/builder/#dockerignore-file
+.github/*
+.vscode/*
+.doc/*
+.iac/*
+.prv/*
+.scripts/*
+*/src*
+*/target/classes*
