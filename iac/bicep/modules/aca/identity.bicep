@@ -76,7 +76,7 @@ resource customersServicedentity 'Microsoft.ManagedIdentity/userAssignedIdentiti
   location: location
   tags: tags
 }
-output customersServicedentityId string = customersServicedentity.id
+output customersServiceIdentityId string = customersServicedentity.id
 
 resource vetsServiceAppIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
   name: vetsServiceAppIdentityName
