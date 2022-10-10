@@ -415,10 +415,11 @@ The `main` branch uses an MS openjdk/jdk:11-mariner Docker base.
 set -euo pipefail
 access_token=$(az account get-access-token --query accessToken -o tsv)
 
-refresh_token=$(curl https://${{ env.AZURE_CONTAINER_REGISTRY }}/oauth2/exchange -v -d "grant_type=access_token&service=${{ secrets.REGISTRY_SERVER }}&access_token=$access_token" | jq -r .refresh_token)
+refresh_token=$(curl https://${{ env.REGISTRY_URL }}/oauth2/exchange -v -d "grant_type=access_token&service=${{ env.REGISTRY_URL }}&access_token=$access_token" | jq -r .refresh_token)
 
 refresh_token=$(curl https://acrpetcliaca.azurecr.io/oauth2/exchange -v -d "grant_type=access_token&service=acrpetcliaca.azurecr.io&access_token=$access_token" | jq -r .refresh_token)
 
+# docker login ${{ env.REGISTRY_URL }} -u 00000000-0000-0000-0000-000000000000 --password-stdin <<< "$refresh_token"
 
 docker build --build-arg --no-cache -t "petclinic-admin-server" -f "./docker/petclinic-admin-server/Dockerfile" .
 docker tag petclinic-admin-server acrpetcliaca.azurecr.io/petclinic/petclinic-admin-server
@@ -429,6 +430,8 @@ docker pull acrpetcliaca.azurecr.io/petclinic/petclinic-admin-server
 docker image ls
 ```
 
+Note: the Docker files must be named Dockerfile
+See [https://github.com/Azure/azure-cli-extensions/issues/5041](https://github.com/Azure/azure-cli-extensions/issues/5041)
 
 # Understanding the Spring Petclinic application
 
