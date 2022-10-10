@@ -28,10 +28,16 @@ WORKDIR /tmp/app
 ENV APPI_VERSION="3.4.1"
 ENV APP_INSIGHTS_AGENT_JAR_FILE_PATH="/tmp/app/applicationinsights-agent-${APPI_VERSION}.jar"
 ENV SPRING_PROFILES_ACTIVE = "docker,mysql"
-COPY --from=builder ${APP_INSIGHTS_AGENT_JAR_FILE_PATH} ./
+# https://github.com/Azure/azure-cli/issues/20413
+# https://github.com/Azure/acr-build/issues/10
+# https://stackoverflow.com/questions/51115856/docker-failed-to-export-image-failed-to-create-image-failed-to-get-layer
+# https://github.com/moby/moby/issues/37965
+COPY --from=builder ${APP_INSIGHTS_AGENT_JAR_FILE_PATH}/ ./
 COPY --from=builder /tmp/app/dependencies/ ./
 COPY --from=builder /tmp/app/snapshot-dependencies/ ./
+RUN true
 COPY --from=builder /tmp/app/spring-boot-loader/ ./
+RUN true
 COPY --from=builder /tmp/app/application/ ./
 EXPOSE 80 8080 8081 8082 8083 8084 8888 9090
 
