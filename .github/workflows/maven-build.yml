@@ -25,6 +25,14 @@ env:
   CONFIG_SERVER: config-server
   DISCOVERY_SERVER: discovery-server
 
+  DOCKERFILE_PATH_ADMIN_SERVER: ./docker/petclinic-admin-server/Dockerfile
+  DOCKERFILE_PATH_DISCOVERY_SERVER: ./docker/petclinic-discovery-server/Dockerfile
+  DOCKERFILE_PATH_API_GATEWAY: ./docker/petclinic-api-gateway/Dockerfile
+  DOCKERFILE_PATH_CONFIG_SERVER: ./docker/petclinic-config-server/Dockerfile
+  DOCKERFILE_PATH_CUSTOMERS_SERVICE: ./docker/petclinic-customers-service/Dockerfile
+  DOCKERFILE_PATH_VETS_SERVICE: ./docker/petclinic-vets-service/Dockerfile
+  DOCKERFILE_PATH_VISITS_SERVICE: ./docker/petclinic-visits-service/Dockerfile
+
   # ==== Versions ====
   DEPLOYMENT_VERSION: 2.6.6
   AZ_CLI_VERSION: 2.40.0
@@ -187,11 +195,11 @@ jobs:
           refresh_token=$(curl https://${{ env.REGISTRY_URL }}/oauth2/exchange -v -d "grant_type=access_token&service=${{ env.REGISTRY_URL }}&access_token=$access_token" | jq -r .refresh_token)
           docker login ${{ env.REGISTRY_URL }} -u 00000000-0000-0000-0000-000000000000 --password-stdin <<< "$refresh_token"
 
-          acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryUsr.value | tr -d '"')
-          acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryPwd.value | tr -d '"')
+          #acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryUsr.value | tr -d '"')
+          #acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryPwd.value | tr -d '"')
           # az acr login --name ${{ env.REGISTRY_URL }} -u $acr_usr -p $acr_pwd
           
-          az acr login --name ${{ env.REGISTRY_URL }} --expose-token
+          # az acr login --name ${{ env.REGISTRY_URL }} --expose-token
 
           az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
           
@@ -204,26 +212,41 @@ jobs:
           echo ""
 
           #az login --identity --username $identityID
-          #--name ${{ env.AZURE_CONTAINER_REGISTRY }}
-          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g  ${{ env.RG_APP }} -t petclinic/adm-test:{{.Run.ID}} --file "./docker/petclinic-admin-server/Dockerfile" .
 
           # https://github.com/Azure/acr-build/issues/10
           # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
           # GITHUB_RUN_ID: A unique number for each workflow run within a repository. This number does not change if you re-run the workflow run.
+          # az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g  ${{ env.RG_APP }} -t petclinic/adm-test:{{.Run.ID}} --file "./docker/petclinic-admin-server/Dockerfile" .
           
-          #az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-          #  -t ${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }}:{{.Run.ID}} \
-          #  --file "./docker/petclinic-admin-server/Dockerfile" \
-          #  ${{ github.workspace }}
+          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
+            -t ${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }}:{{.Run.ID}} \
+            --file ${{ env.DOCKERFILE_PATH_ADMIN_SERVER }} \
+            ${{ github.workspace }}
 
-          build_id=$(az acr task list-runs --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -o json --query [0].name )    
-          build_id=$(echo $build_id | tr -d '"')
-          echo "Successfully pushed image with ID " $build_id
-          # az acr task logs --registry ${{ env.AZURE_CONTAINER_REGISTRY }} --run-id $build_id
+          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
+            -t ${{ env.REPOSITORY }}/${{ env.CONFIG_SERVER }}:{{.Run.ID}} \
+            --file ${{ env.DOCKERFILE_PATH_CONFIG_SERVER }} \
+            ${{ github.workspace }}
 
-          # verify
-          az acr repository list --name ${{ env.AZURE_CONTAINER_REGISTRY }} --output table
-          az acr repository show --name ${{ env.AZURE_CONTAINER_REGISTRY }} --repository ${{ env.REPOSITORY }}
+          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
+            -t ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:{{.Run.ID}} \
+            --file ${{ env.DOCKERFILE_PATH_API_GATEWAY }} \
+            ${{ github.workspace }}
+
+          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
+            -t ${{ env.REPOSITORY }}/${{ env.CUSTOMERS_SERVICE }}:{{.Run.ID}} \
+            --file ${{ env.DOCKERFILE_PATH_CUSTOMERS_SERVICE }} \
+            ${{ github.workspace }}
+
+          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
+            -t ${{ env.REPOSITORY }}/${{ env.VETS_SERVICE }}:{{.Run.ID}} \
+            --file ${{ env.DOCKERFILE_PATH_VETS_SERVICE }} \
+            ${{ github.workspace }}
+
+          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
+            -t ${{ env.REPOSITORY }}/${{ env.VISITS_SERVICE }}:{{.Run.ID}} \
+            --file ${{ env.DOCKERFILE_PATH_VISITS_SERVICE }} \
+            ${{ github.workspace }}
 
     outputs:
       tag_id: ${{ steps.mvn_build.outputs.tag_id }}
