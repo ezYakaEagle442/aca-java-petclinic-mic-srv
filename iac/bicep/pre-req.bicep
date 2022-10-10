@@ -185,3 +185,10 @@ module mysqlPub './modules/mysql/mysql.bicep' = {
     azureContainerAppsOutboundPubIP: defaultPublicManagedEnvironment.outputs.corpManagedEnvironmentStaticIp
   }
 }
+
+module identities './modules/aca/identity.bicep' = {
+  name: 'aca-identities'
+  params: {
+    location: location
+  }
+}
