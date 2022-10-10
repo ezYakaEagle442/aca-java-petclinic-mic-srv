@@ -16,6 +16,7 @@
 # docker build --build-arg --no-cache -t "petclinic-admin-server" -f "./docker/petclinic-admin-server/Dockerfile" .
 # docker tag petclinic-admin-server acrpetcliaca.azurecr.io/petclinic/petclinic-admin-server
 # az acr login --name acrpetcliaca.azurecr.io -u $acr_usr -p $acr_pwd
+# az acr build --registry acrpetcliaca -g  rg-iac-aca-petclinic-mic-srv  -t petclinic/adm-test:{{.Run.ID}} --file "./docker/petclinic-admin-server/Dockerfile" .
 # docker push acrpetcliaca.azurecr.io/petclinic/petclinic-admin-server
 # docker pull acrpetcliaca.azurecr.io/petclinic/petclinic-admin-server
 # docker image ls
@@ -82,11 +83,13 @@ ENV SPRING_PROFILES_ACTIVE="docker,mysql"
 
 RUN ls -al /tmp/app
 
-COPY --from=builder ${APP_INSIGHTS_AGENT_JAR_FILE_PATH} ./
-COPY --from=builder /tmp/app/dependencies/ ./
-COPY --from=builder /tmp/app/snapshot-dependencies/ ./
-COPY --from=builder /tmp/app/spring-boot-loader/ ./
-COPY --from=builder /tmp/app/application/ ./
+# https://github.com/Azure/azure-cli/issues/20413
+# https://github.com/Azure/acr-build/issues/10
+COPY --from=builder ${APP_INSIGHTS_AGENT_JAR_FILE_PATH} .
+COPY --from=builder /tmp/app/dependencies/ .
+COPY --from=builder /tmp/app/snapshot-dependencies/ .
+COPY --from=builder /tmp/app/spring-boot-loader/ .
+COPY --from=builder /tmp/app/application/ .
 # COPY --from=builder /tmp/app/target/*.jar app.jar
 # COPY target/*.jar app.jar
 # RUN touch /app.jar
