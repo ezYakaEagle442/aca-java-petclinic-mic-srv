@@ -213,7 +213,6 @@ param adminServerAppIdentityName string = 'id-aca-petclinic-admin-server-dev-wes
 resource adminServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview'existing = {
   name: adminServerAppIdentityName
 }
-var adminServerAppIdentityResourceId = adminServerIdentity.id
 */
 
 // https://learn.microsoft.com/en-us/azure/templates/microsoft.app/containerapps?pivots=deployment-language-bicep
@@ -225,7 +224,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
     type: 'SystemAssigned'
     /*
     userAssignedIdentities: {
-      '${adminServerAppIdentityResourceId}': {}
+      '${adminServerIdentity.id}': {}
     }
     */
   }
@@ -269,7 +268,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           server: ghaSettingsCfgRegistryUrl
           // https://learn.microsoft.com/en-us/azure/container-apps/containers#managed-identity-with-azure-container-registry
           identity: 'system'
-          //identity: '${adminServerAppIdentityResourceId}'
+          //identity: adminServerIdentity.id
           //username: ghaSettingsCfgRegistryUserName
           // passwordSecretRef: 'registrypassword'
         }
