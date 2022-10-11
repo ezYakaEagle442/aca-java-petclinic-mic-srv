@@ -14,8 +14,9 @@ on:
 jobs:
   called-workflow:
     runs-on: ubuntu-latest
+    outputs:
+      tag_id: ${{ steps.test.outputs.tag_id }}
     steps:
-
     - name: test
       run: |
           # https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs
@@ -38,6 +39,3 @@ jobs:
           echo "::set-output name=tag_id::$tag_id"  # mismatch with ACR {{.Run.ID}}. {{.Run.ID}} would be different for each az acr build 
           
       shell: bash
-  
-    outputs:
-      tag_id: ${{ steps.test.outputs.tag_id }}
