@@ -10,12 +10,12 @@ on:
     outputs:
       $tagid:
         description: "The Maven Build job output"
-        value: ${{ jobs.called-workflow.outputs.$tagid }}
+        value: ${{ jobs.called-workflow.outputs.tagid }}
 jobs:
   called-workflow:
     runs-on: ubuntu-latest
     outputs:
-      $tagid: ${{ steps.test.outputs.$tagid }}
+      tagid: ${{ steps.test.outputs.tagid }}
     steps:
     - name: test
       run: |
@@ -38,7 +38,7 @@ jobs:
 
           $tagid=$SHORT_SHA
           echo "$tagid="$tagid
-          echo "::set-output name=$tagid::$tagid"  # mismatch with ACR {{.Run.ID}}. {{.Run.ID}} would be different for each az acr build 
+          echo "::set-output name=tagid::$tagid"  # mismatch with ACR {{.Run.ID}}. {{.Run.ID}} would be different for each az acr build 
       shell: bash
 
   check:
@@ -47,6 +47,6 @@ jobs:
     steps:
     - name: trace
       run: |
-          $tagid=${{ needs.called-workflow.outputs.$tagid }}
+          $tagid=${{ needs.called-workflow.outputs.tagid }}
           echo "Image Build tag ID:"$tagid
       shell: bash
