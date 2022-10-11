@@ -377,12 +377,13 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v3.0.2 # https://github.com/actions/checkout
-      
+
     - name: Deploy Azure Container Apps
       run: |
-          echo "About to call ACA, roleAssignments and KV Module iac/bicep/petclinic-apps.bicep#284" 
+          echo "About to call ACA, roleAssignments and KV Module iac/bicep/petclinic-apps.bicep#270" 
 
           # https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs
+          echo "Checking tag_id output ... : " ${{ needs.call-maven-build-workflow.outputs.tag_id }}
           tag_id=${{ needs.call-maven-build-workflow.outputs.tag_id }}
           echo "Image Build tag ID:"$tag_id
 
