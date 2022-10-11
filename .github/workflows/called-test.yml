@@ -31,7 +31,7 @@ jobs:
           
           echo "tag_id="$tag_id
           SHORT_SHA=`echo $GITHUB_SHA | cut -c1-8`
-          c
+          echo "SHORT_SHA cut="$SHORT_SHA
 
           # echo "SHORT_SHA=`echo $GITHUB_SHA::7`" >> $GITHUB_ENV # https://tldp.org/LDP/abs/html/parameter-substitution.html
           # echo "SHORT_SHA param substitution="${{ env.SHORT_SHA }}
