@@ -60,7 +60,7 @@ Secret Name	| Secret Value example
 -------------:|:-------:
 MYSQL_SERVER_NAME | petclinic777
 MYSQL_SERVER_FULL_NAME | petclinic777.mysql.database.azure.com
-SPRING_DATASOURCE_URL | jdbc:mysql://petcliaca.mysql.database.azure.com:3306/petclinic?useSSL=true\&requireSSL=true\&enabledTLSProtocols=TLSv1.2\&verifyServerCertificate=true
+SPRING_DATASOURCE_URL | jdbc:mysql://petcliaca777.mysql.database.azure.com:3306/petclinic?useSSL=true\&requireSSL=true\&enabledTLSProtocols=TLSv1.2\&verifyServerCertificate=true
 SPRING_DATASOURCE_USERNAME | dolphin_adm
 SPRING_DATASOURCE_PASSWORD | PUT YOUR PASSWORD HERE
 SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT | https://kv-petclinic777.vault.azure.net/
