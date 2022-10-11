@@ -16,8 +16,9 @@ param acrRepository string = 'petclinic'
 @description('The Azure Container App Environment name')
 param azureContainerAppEnvName string = 'aca-env-${appName}'
 
-@description('The Log Analytics workspace name used by Azure Container App instance')
-param logAnalyticsWorkspaceName string = 'log-${appName}'
+
+@description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
+param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.1.jar'
 
 // Spring Cloud for Azure params required to get secrets from Key Vault.
 // https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#basic-usage-3
@@ -87,62 +88,20 @@ param containerResourcesCpu string = '0.5'
 @description('The container Resources Memory. The total CPU and memory allocations requested for all the containers in a container app must add up to one of the following combinations. See https://learn.microsoft.com/en-us/azure/container-apps/containers#configuration')
 param containerResourcesMemory string = '1.0Gi'
 
-
-
-@description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
-param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.1.jar'
-
 @secure()
 @description('The Application Insights Intrumention Key. see https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string')
 param appInsightsInstrumentationKey string
 
-@description('The GitHub Action Settings / Repo URL')
-param ghaSettingsCfgRepoUrl string = 'https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv'
+@description('The Container Registry Username')
+param registryUsr string
 
 @secure()
-@description('The GitHub Action Settings Configuration / Registry User Name')
-param ghaSettingsCfgRegistryUserName string
+@description('The Container Registry Password')
+param registryPassword string
 
-@secure()
-@description('The GitHub Action Settings Configuration / Registry Password')
-param ghaSettingsCfgRegistryPassword string
+@description('The Container Registry URL')
+param registryUrl string
 
-@description('The GitHub Action Settings Configuration / Registry URL')
-param ghaSettingsCfgRegistryUrl string
-
-param revisionName string = 'poc-aca-101'
-
-@description('The GitHub branch name')
-param ghaGitBranchName string = 'main'
-
-@secure()
-@description('The GitHub Action Settings Configuration / Azure Credentials / Client Id')
-param ghaSettingsCfgCredClientId string
-
-@secure()
-@description('The GitHub Action Settings Configuration / Azure Credentials / Client Secret')
-param ghaSettingsCfgCredClientSecret string
-
-@description('The GitHub Action Settings Configuration / Docker file Path for admin-server Azure Container App ')
-param ghaSettingsCfgDockerFilePathAdminServer string = './docker/petclinic-admin-server/Dockerfile'
-
-@description('The GitHub Action Settings Configuration / Docker file Path for discovery-server Azure Container App ')
-param ghaSettingsCfgDockerFilePathDiscoveryServer string = './docker/petclinic-discovery-server/Dockerfile'
-
-@description('The GitHub Action Settings Configuration / Docker file Path for api-gateway Azure Container App ')
-param ghaSettingsCfgDockerFilePathApiGateway string = './docker/petclinic-api-gateway/Dockerfile'
-
-@description('The GitHub Action Settings Configuration / Docker file Path for  config-server Azure Container App ')
-param ghaSettingsCfgDockerFilePathConfigserver string = './docker/petclinic-config-server/Dockerfile'
-
-@description('The GitHub Action Settings Configuration / Docker file Path for customers-service Azure Container App ')
-param ghaSettingsCfgDockerFilePathCustomersService string = './docker/petclinic-customers-service/Dockerfile'
-
-@description('The GitHub Action Settings Configuration / Docker file Path for vets-service Azure Container App ')
-param ghaSettingsCfgDockerFilePathVetsService string = './docker/petclinic-vets-service/Dockerfile'
-
-@description('The GitHub Action Settings Configuration / Docker file Path for visits-service Azure Container App ')
-param ghaSettingsCfgDockerFilePathVisitsService string = './docker/petclinic-visits-service/Dockerfile'
 
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-admin-server:{{ github.sha }}')
 param imageNameAdminServer string
@@ -165,19 +124,6 @@ param imageNameVetsService string
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-visits-service:{{ github.sha }}')
 param imageNameVisitsService string
 
-/* They seem to be more App Service focused as this interface is shared with App Service.
-https://docs.microsoft.com/en-us/javascript/api/@azure/arm-appservice/githubactioncodeconfiguration?view=azure-node-latest
-runtimeStack: ghaSettingsCfgRuntimeStack
-runtimeVersion: ghaSettingsCfgRuntimeVersion
-*/
-@description('The GitHub Action Settings Configuration / Publish Type')
-param ghaSettingsCfgPublishType string = 'Image'
-
-@description('The GitHub Action Settings Configuration / Runtime Stack')
-param ghaSettingsCfgRuntimeStack string = 'JAVA'
-
-@description('The GitHub Action Settings Configuration / Runtime Version')
-param ghaSettingsCfgRuntimeVersion string = '11-java11'
 
 @description('The Azure Container App instance name for admin-server')
 param adminServerContainerAppName string = 'aca-${appName}-admin-server'
@@ -265,18 +211,18 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       registries: [
         {
           // Managedidentity is enabled on ACR
-          server: ghaSettingsCfgRegistryUrl
+          server: registryUrl
           // https://learn.microsoft.com/en-us/azure/container-apps/containers#managed-identity-with-azure-container-registry
           identity: 'system'
           //identity: adminServerIdentity.id
-          //username: ghaSettingsCfgRegistryUserName
+          //username: registryUsr
           // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
         {
           name: 'registrypassword'
-          value: ghaSettingsCfgRegistryPassword
+          value: registryPassword
         }
         {
           name: 'appinscon'
@@ -469,16 +415,16 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       registries: [
         {
           // Managedidentity is enabled on ACR
-          server: ghaSettingsCfgRegistryUrl
+          server: registryUrl
           identity: 'system'
-          //username: ghaSettingsCfgRegistryUserName
+          //username: registryUsr
           // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
         {
           name: 'registrypassword'
-          value: ghaSettingsCfgRegistryPassword
+          value: registryPassword
         }
         {
           name: 'appinscon'
@@ -616,16 +562,16 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       registries: [
         {
           // Managedidentity is enabled on ACR
-          server: ghaSettingsCfgRegistryUrl
+          server: registryUrl
           identity: 'system'
-          //username: ghaSettingsCfgRegistryUserName
+          //username: registryUsr
           // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
         {
           name: 'registrypassword'
-          value: ghaSettingsCfgRegistryPassword
+          value: registryPassword
         }
         {
           name: 'appinscon'
@@ -764,16 +710,16 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
       registries: [
         {
           // Managedidentity is enabled on ACR
-          server: ghaSettingsCfgRegistryUrl
+          server: registryUrl
           identity: 'system'
-          //username: ghaSettingsCfgRegistryUserName
+          //username: registryUsr
           // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
         {
           name: 'registrypassword'
-          value: ghaSettingsCfgRegistryPassword
+          value: registryPassword
         }
         {
           name: 'appinscon'
@@ -912,16 +858,16 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       registries: [
         {
           // Managedidentity is enabled on ACR
-          server: ghaSettingsCfgRegistryUrl
+          server: registryUrl
           identity: 'system'
-          //username: ghaSettingsCfgRegistryUserName
+          //username: registryUsr
           // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
         {
           name: 'registrypassword'
-          value: ghaSettingsCfgRegistryPassword
+          value: registryPassword
         }
         {
           name: 'appinscon'
@@ -1060,16 +1006,16 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       registries: [
         {
           // Managedidentity is enabled on ACR
-          server: ghaSettingsCfgRegistryUrl
+          server: registryUrl
           identity: 'system'
-          //username: ghaSettingsCfgRegistryUserName
+          //username: registryUsr
           // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
         {
           name: 'registrypassword'
-          value: ghaSettingsCfgRegistryPassword
+          value: registryPassword
         }
         {
           name: 'appinscon'

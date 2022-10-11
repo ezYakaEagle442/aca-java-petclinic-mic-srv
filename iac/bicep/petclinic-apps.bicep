@@ -64,81 +64,6 @@ param deployToVNet bool = false
 
 param vnetName string = 'vnet-aca'
 
-@description('The GitHub Action Settings / git Revision')
-param revisionName string = 'poc-aca-101'
-
-@description('The GitHub Action Settings / Repo URL')
-param ghaSettingsCfgRepoUrl string = 'https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv'
-
-@description('The GitHub branch name')
-param ghaGitBranchName string = 'main'
-/*
-@secure()
-@description('The GitHub Action Settings Configuration / Azure Credentials / Client Id')
-param ghaSettingsCfgCredClientId string
-
-@secure()
-@description('The GitHub Action Settings Configuration / Azure Credentials / Client Secret')
-param ghaSettingsCfgCredClientSecret string
-*/
-
-@description('The GitHub Action Settings Configuration / Docker file Path for admin-server Azure Container App ')
-param ghaSettingsCfgDockerFilePathAdminServer string = './docker/petclinic-admin-server/Dockerfile'
-
-@description('The GitHub Action Settings Configuration / Docker file Path for discovery-server Azure Container App ')
-param ghaSettingsCfgDockerFilePathDiscoveryServer string = './docker/petclinic-discovery-server/Dockerfile'
-
-@description('The GitHub Action Settings Configuration / Docker file Path for api-gateway Azure Container App ')
-param ghaSettingsCfgDockerFilePathApiGateway string = './docker/petclinic-api-gateway/Dockerfile'
-
-@description('The GitHub Action Settings Configuration / Docker file Path for  config-server Azure Container App ')
-param ghaSettingsCfgDockerFilePathConfigserver string = './docker/petclinic-config-server/Dockerfile'
-
-@description('The GitHub Action Settings Configuration / Docker file Path for customers-service Azure Container App ')
-param ghaSettingsCfgDockerFilePathCustomersService string = './docker/petclinic-customers-service/Dockerfile'
-
-@description('The GitHub Action Settings Configuration / Docker file Path for vets-service Azure Container App ')
-param ghaSettingsCfgDockerFilePathVetsService string = './docker/petclinic-vets-service/Dockerfile'
-
-@description('The GitHub Action Settings Configuration / Docker file Path for visits-service Azure Container App ')
-param ghaSettingsCfgDockerFilePathVisitsService string = './docker/petclinic-visits-service/Dockerfile'
-
-@description('The GitHub Action Settings Configuration / Publish Type')
-param ghaSettingsCfgPublishType string = 'Image'
-
-/* They seem to be more App Service focused as this interface is shared with App Service.
-      https://docs.microsoft.com/en-us/javascript/api/@azure/arm-appservice/githubactioncodeconfiguration?view=azure-node-latest
-az webapp list-runtimes –-linux [
-[
-  "DOTNETCORE:6.0",
-  "DOTNETCORE:3.1",
-  "NODE:16-lts",
-  "NODE:14-lts",
-  "PYTHON:3.9",
-  "PYTHON:3.8",
-  "PYTHON:3.7",
-  "PHP:8.0",
-  "PHP:7.4",
-  "RUBY:2.7",
-  "JAVA:11-java11",
-  "JAVA:8-jre8",
-  "JBOSSEAP:7-java11",
-  "JBOSSEAP:7-java8",
-  "TOMCAT:10.0-java11",
-  "TOMCAT:10.0-jre8",
-  "TOMCAT:9.0-java11",
-  "TOMCAT:9.0-jre8",
-  "TOMCAT:8.5-java11",
-  "TOMCAT:8.5-jre8"
-]
-*/
-@description('The GitHub Action Settings Configuration / Runtime Stack')
-param ghaSettingsCfgRegistryRuntimeStack string = 'JAVA'
-
-@description('The GitHub Action Settings Configuration / Runtime Version')
-param ghaSettingsCfgRegistryRuntimeVersion string = '11-java11'
-
-
 @description('The Azure Container App instance name for admin-server')
 param adminServerContainerAppName string = 'aca-${appName}-admin-server'
 
@@ -221,32 +146,18 @@ module azurecontainerapp './modules/aca/aca.bicep' = {
     acrName: acrName
     acrRepository:acrRepository
     azureContainerAppEnvName: azureContainerAppEnvName
-    logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
     appInsightsInstrumentationKey: appInsights.properties.ConnectionString
     applicationInsightsAgentJarFilePath: applicationInsightsAgentJarFilePath
     springCloudAzureKeyVaultEndpoint: kv.getSecret('SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT')
     springCloudAzureTenantId: kv.getSecret('SPRING-CLOUD-AZURE-TENANT-ID')
-    revisionName: revisionName
-    ghaGitBranchName: ghaGitBranchName
     springDataSourceUrl: kv.getSecret('SPRING-DATASOURCE-URL')
     springDataSourceUsr: kv.getSecret('SPRING-DATASOURCE-USERNAME')
     springDataSourcePwd: kv.getSecret('SPRING-DATASOURCE-PASSWORD')
     tenantId: tenantId
     subscriptionId: subscriptionId
-    ghaSettingsCfgCredClientId: kv.getSecret('SPN-ID') // ghaSettingsCfgCredClientId
-    ghaSettingsCfgCredClientSecret: kv.getSecret('SPN-PWD') // ghaSettingsCfgCredClientSecret
-    ghaSettingsCfgRegistryUserName: ACR.listCredentials().username
-    ghaSettingsCfgRegistryPassword: ACR.listCredentials().passwords[0].value
-    ghaSettingsCfgRegistryUrl: ACR.properties.loginServer
-    ghaSettingsCfgDockerFilePathAdminServer: ghaSettingsCfgDockerFilePathAdminServer
-    ghaSettingsCfgDockerFilePathApiGateway: ghaSettingsCfgDockerFilePathApiGateway
-    ghaSettingsCfgDockerFilePathConfigserver: ghaSettingsCfgDockerFilePathConfigserver
-    ghaSettingsCfgDockerFilePathCustomersService: ghaSettingsCfgDockerFilePathCustomersService
-    ghaSettingsCfgDockerFilePathVetsService: ghaSettingsCfgDockerFilePathVetsService
-    ghaSettingsCfgDockerFilePathDiscoveryServer: ghaSettingsCfgDockerFilePathDiscoveryServer
-    ghaSettingsCfgDockerFilePathVisitsService: ghaSettingsCfgDockerFilePathVisitsService
-    ghaSettingsCfgRepoUrl: ghaSettingsCfgRepoUrl
-    ghaSettingsCfgPublishType: ghaSettingsCfgPublishType
+    registryUrl: ACR.properties.loginServer
+    registryUsr: ACR.listCredentials().username //ACR.properties.adminUserEnabled ? ACR.properties.adminUsername : ''
+    registryPassword: ACR.listCredentials().passwords[0].value
     // ghaSettingsCfgRuntimeStack: ghaSettingsCfgRuntimeStack
     // ghaSettingsCfgRuntimeVersion: ghaSettingsCfgRuntimeVersion
     adminServerContainerAppName: adminServerContainerAppName
