@@ -34,9 +34,9 @@ jobs:
           # echo "SHORT_SHA=`echo $GITHUB_SHA::7`" >> $GITHUB_ENV # https://tldp.org/LDP/abs/html/parameter-substitution.html
           # echo "SHORT_SHA param substitution="${{ env.SHORT_SHA }}
 
-          tagid="hardcore harcoded"
+          tagid="hardcore hardcoded"
           echo "tagid="$tagid
-          echo "::set-output name=tagid::$tagid"
+          echo "::set-output name=tagid::inlinehardcoded"
       shell: bash
 
   check:
