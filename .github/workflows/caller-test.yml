@@ -28,16 +28,3 @@ jobs:
           tagid=${{ needs.call-workflow.outputs.tagid }}
           echo "Image Build tag ID:"$tagid
       shell: bash
-
-  post-called-workflow:
-    needs: called-workflow
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read    
-    steps:
-    - name: verify
-      run: |
-          echo "Checking tagid output ... : " ${{ needs.called-workflow.outputs.tagid }}
-          tagid=${{ needs.called-workflow.outputs.tagid }}
-          echo "Image Build tag ID:"$tagid
-      shell: bash
