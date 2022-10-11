@@ -1,14 +1,11 @@
 name: Called Test Workflow
-
 env:
   APP_NAME: petcliaca
-
 on:
   workflow_dispatch:
-
   workflow_call:
     outputs:
-      $tagid:
+      tagid:
         description: "The Maven Build job output"
         value: ${{ jobs.called-workflow.outputs.tagid }}
 jobs:
@@ -23,21 +20,21 @@ jobs:
           # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
           # GITHUB_SHA: The commit SHA that triggered the workflow
           # GITHUB_RUN_ID: A unique number for each workflow run within a repository. This number does not change if you re-run the workflow run.
-          $tagid=$GITHUB_SHA
+          tagid=$GITHUB_SHA
           echo "GITHUB_RUN_ID="$GITHUB_RUN_ID
           echo "GITHUB_SHA="$GITHUB_SHA
           echo "run_id="${{ github.run_id }}
           echo "github.sha="${{ github.sha }}
           
-          echo "$tagid="$tagid
+          echo "tagid="$tagid
           SHORT_SHA=`echo $GITHUB_SHA | cut -c1-8`
           echo "SHORT_SHA="$SHORT_SHA
 
           # echo "SHORT_SHA=`echo $GITHUB_SHA::7`" >> $GITHUB_ENV # https://tldp.org/LDP/abs/html/parameter-substitution.html
           # echo "SHORT_SHA param substitution="${{ env.SHORT_SHA }}
 
-          $tagid=$SHORT_SHA
-          echo "$tagid="$tagid
+          tagid=$SHORT_SHA
+          echo "tagid="$tagid
           echo "::set-output name=tagid::$tagid"  # mismatch with ACR {{.Run.ID}}. {{.Run.ID}} would be different for each az acr build 
       shell: bash
 
@@ -47,6 +44,6 @@ jobs:
     steps:
     - name: trace
       run: |
-          $tagid=${{ needs.called-workflow.outputs.tagid }}
+          tagid=${{ needs.called-workflow.outputs.tagid }}
           echo "Image Build tag ID:"$tagid
       shell: bash
