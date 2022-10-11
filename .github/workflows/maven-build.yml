@@ -68,8 +68,11 @@ jobs:
     permissions: 
       contents: read
       packages: write    
-    steps:
 
+    outputs:
+      tag_id: ${{ steps.acr_build.outputs.tag_id }}
+
+    steps:
     # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
     # /!\ IMPORTANT:  The step that creates or updates the environment variable does not have access to the new value, but all subsequent steps in a job will have access.
     - name: Set Base environment variables
@@ -182,13 +185,28 @@ jobs:
         creds: ${{ env.credentials }}
 
     - name: Build image and push it to ACR
+      id: acr_build      
       run: |
 
           # https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs
-          echo "::set-output name=tag_id::${{ env.GITHUB_RUN_ID }}"  
-          echo "GH Run ID="${{ env.GITHUB_RUN_ID }}
-          echo "tag_id="$tag_id
+          # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
+          # GITHUB_SHA: The commit SHA that triggered the workflow
+          # GITHUB_RUN_ID: A unique number for each workflow run within a repository. This number does not change if you re-run the workflow run.
+          # mismatch with ACR {{.Run.ID}}. {{.Run.ID}} would be different for each az acr build 
+          tag_id=$GITHUB_SHA
+          echo "GITHUB_RUN_ID="$GITHUB_RUN_ID
+          echo "GITHUB_SHA="$GITHUB_SHA
+          echo "run_id="${{ github.run_id }}
+          echo "github.sha="${{ github.sha }}
           
+          echo "tag_id="$tag_id
+          SHORT_SHA=`echo $GITHUB_SHA | cut -c1-8`
+          echo "SHORT_SHA="$SHORT_SHA
+
+          tag_id=$SHORT_SHA
+          echo "tag_id="$tag_id
+          echo "::set-output name=tag_id::$tag_id"
+
           # https://github.com/cwe1ss/msa-template/blob/main/.github/workflows/_service-build.yml
           set -euo pipefail
           access_token=$(az account get-access-token --query accessToken -o tsv)
@@ -215,38 +233,33 @@ jobs:
 
           # https://github.com/Azure/acr-build/issues/10
           # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
-          # GITHUB_RUN_ID: A unique number for each workflow run within a repository. This number does not change if you re-run the workflow run.
-          # az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g  ${{ env.RG_APP }} -t petclinic/adm-test:{{.Run.ID}} --file "./docker/petclinic-admin-server/Dockerfile" .
-          
+          # {{.Run.ID}} would be different for each az acr build , not the best to simplify Image Tag
           az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-            -t ${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }}:{{.Run.ID}} \
+            -t ${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }}:$tag_id \
             --file ${{ env.DOCKERFILE_PATH_ADMIN_SERVER }} \
             ${{ github.workspace }}
 
           az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-            -t ${{ env.REPOSITORY }}/${{ env.CONFIG_SERVER }}:{{.Run.ID}} \
+            -t ${{ env.REPOSITORY }}/${{ env.CONFIG_SERVER }}:$tag_id \
             --file ${{ env.DOCKERFILE_PATH_CONFIG_SERVER }} \
             ${{ github.workspace }}
 
           az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-            -t ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:{{.Run.ID}} \
+            -t ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id \
             --file ${{ env.DOCKERFILE_PATH_API_GATEWAY }} \
             ${{ github.workspace }}
 
           az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-            -t ${{ env.REPOSITORY }}/${{ env.CUSTOMERS_SERVICE }}:{{.Run.ID}} \
+            -t ${{ env.REPOSITORY }}/${{ env.CUSTOMERS_SERVICE }}:$tag_id \
             --file ${{ env.DOCKERFILE_PATH_CUSTOMERS_SERVICE }} \
             ${{ github.workspace }}
 
           az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-            -t ${{ env.REPOSITORY }}/${{ env.VETS_SERVICE }}:{{.Run.ID}} \
+            -t ${{ env.REPOSITORY }}/${{ env.VETS_SERVICE }}:$tag_id \
             --file ${{ env.DOCKERFILE_PATH_VETS_SERVICE }} \
             ${{ github.workspace }}
 
           az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-            -t ${{ env.REPOSITORY }}/${{ env.VISITS_SERVICE }}:{{.Run.ID}} \
+            -t ${{ env.REPOSITORY }}/${{ env.VISITS_SERVICE }}:$tag_id \
             --file ${{ env.DOCKERFILE_PATH_VISITS_SERVICE }} \
             ${{ github.workspace }}
-
-    outputs:
-      tag_id: ${{ steps.mvn_build.outputs.tag_id }}
