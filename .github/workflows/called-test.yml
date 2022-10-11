@@ -33,9 +33,9 @@ jobs:
           # echo "SHORT_SHA=`echo $GITHUB_SHA::7`" >> $GITHUB_ENV # https://tldp.org/LDP/abs/html/parameter-substitution.html
           # echo "SHORT_SHA param substitution="${{ env.SHORT_SHA }}
 
-          tagid=$SHORT_SHA
+          tagid="hardcore harcoded"
           echo "tagid="$tagid
-          echo "::set-output name=tagid::$tagid"  # mismatch with ACR {{.Run.ID}}. {{.Run.ID}} would be different for each az acr build 
+          echo "::set-output name=tagid::$tagid"
       shell: bash
 
   check:
