@@ -22,7 +22,7 @@ jobs:
     steps:
     - name: Test
       run: |
-          echo "Checking tag_id output ... : " ${{ needs.call-workflow.outputs.tag_id }}
-          tag_id=${{ needs.call-workflow.outputs.tag_id }}
-          echo "Image Build tag ID:"$tag_id
+          echo "Checking tagid output ... : " ${{ needs.call-workflow.outputs.tagid }}
+          tagid=${{ needs.call-workflow.outputs.tagid }}
+          echo "Image Build tag ID:"$tagid
       shell: bash
