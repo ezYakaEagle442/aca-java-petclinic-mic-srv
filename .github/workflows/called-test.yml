@@ -6,6 +6,11 @@ env:
 on:
   workflow_dispatch:
 
+  workflow_call:
+    outputs:
+      tag_id:
+        description: "The Maven Build job output"
+        value: ${{ jobs.maven-build.outputs.tag_id }}
 jobs:
   called-workflow:
     runs-on: ubuntu-latest
