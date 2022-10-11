@@ -20,11 +20,10 @@ jobs:
     needs: call-workflow
     runs-on: ubuntu-latest
     steps:
-
     - name: Test
       run: |
-          echo "Checking tag_id output ... : " ${{ needs.call-workflow:.outputs.tag_id }}
-          tag_id=${{ needs.call-workflow:.outputs.tag_id }}
+          echo "Checking tag_id output ... : " ${{ needs.call-workflow.outputs.tag_id }}
+          tag_id=${{ needs.call-workflow.outputs.tag_id }}
           echo "Image Build tag ID:"$tag_id
       shell: bash
 

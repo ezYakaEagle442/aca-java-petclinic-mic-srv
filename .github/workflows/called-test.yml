@@ -10,7 +10,7 @@ on:
     outputs:
       tag_id:
         description: "The Maven Build job output"
-        value: ${{ jobs.maven-build.outputs.tag_id }}
+        value: ${{ jobs.called-workflow.outputs.tag_id }}
 jobs:
   called-workflow:
     runs-on: ubuntu-latest
