@@ -185,8 +185,8 @@ jobs:
       run: |
 
           # https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs
-          echo "::set-output name=tag_id::{{.Run.ID}}"
-          echo "Run.ID="{{.Run.ID}}
+          echo "::set-output name=tag_id::${{ env.GITHUB_RUN_ID }}"  
+          echo "GH Run ID="${{ env.GITHUB_RUN_ID }}
           echo "tag_id="$tag_id
           
           # https://github.com/cwe1ss/msa-template/blob/main/.github/workflows/_service-build.yml
