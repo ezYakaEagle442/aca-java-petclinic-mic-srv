@@ -16,11 +16,13 @@ jobs:
     secrets: inherit # pass all secrets
       # envPAT: ${{ secrets.envPAT }} # pass just this secret
 
-  deploy-apps:
+  post-call:
     needs: call-workflow
     runs-on: ubuntu-latest
+    permissions:
+      contents: read    
     steps:
-    - name: Test
+    - name: verify
       run: |
           echo "Checking tagid output ... : " ${{ needs.call-workflow.outputs.tagid }}
           tagid=${{ needs.call-workflow.outputs.tagid }}
