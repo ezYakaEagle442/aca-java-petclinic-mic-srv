@@ -3,6 +3,7 @@ env:
   APP_NAME: petcliaca
 on:
   workflow_dispatch:
+  
   workflow_call:
     outputs:
       tagid:
@@ -12,9 +13,9 @@ jobs:
   called-workflow:
     runs-on: ubuntu-latest
     outputs:
-      tagid: ${{ steps.test.outputs.tagid }}
+      tagid: ${{ steps.set-tag-id.outputs.tagid }}
     steps:
-    - name: test
+    - name: set-tag-id
       run: |
           # https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs
           # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
@@ -44,6 +45,9 @@ jobs:
     steps:
     - name: trace
       run: |
+          echo ***
+          echo ${{ needs.called-workflow.outputs.tagid }}
+          echo ***
           tagid=${{ needs.called-workflow.outputs.tagid }}
           echo "Image Build tag ID:"$tagid
       shell: bash
