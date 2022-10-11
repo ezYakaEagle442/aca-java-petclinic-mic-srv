@@ -31,10 +31,10 @@ jobs:
           
           echo "tag_id="$tag_id
           echo "SHORT_SHA=`echo $GITHUB_SHA | cut -c1-8`" >> $GITHUB_ENV
-          echo "SHORT_SHA cut="${{ env.GITHUB_SHA }}
+          echo "SHORT_SHA cut="${{ env.SHORT_SHA }}
 
           echo "SHORT_SHA=`echo $GITHUB_SHA::7`" >> $GITHUB_ENV
-          echo "SHORT_SHA param substitution="${{ env.GITHUB_SHA }} # https://tldp.org/LDP/abs/html/parameter-substitution.html
+          echo "SHORT_SHA param substitution="${{ env.SHORT_SHA }} # https://tldp.org/LDP/abs/html/parameter-substitution.html
 
           echo "::set-output name=tag_id::$tag_id"  # mismatch with ACR {{.Run.ID}}. {{.Run.ID}} would be different for each az acr build 
           
