@@ -374,6 +374,10 @@ jobs:
     needs: call-maven-build-workflow
     runs-on: ubuntu-latest
     steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3.0.2 # https://github.com/actions/checkout
+      
     - name: Deploy Azure Container Apps
       run: |
           echo "About to call ACA, roleAssignments and KV Module iac/bicep/petclinic-apps.bicep#284" 
