@@ -1,0 +1,39 @@
+name: Caller Test Workflow
+
+env:
+  APP_NAME: petcliaca
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  # https://docs.github.com/en/actions/using-workflows/reusing-workflows#calling-a-reusable-workflow
+  # invalid value workflow reference: references to workflows must be prefixed with format 'owner/repository/' or './' for local workflows
+  call-workflow:
+    name: Trigger Maven
+    uses: ./.github/workflows/called-test.yml # .github/workflows/maven-build.yml@main ==> references to workflows must be prefixed with format 'owner/repository/' or './' for local workflows
+    secrets: inherit # pass all secrets
+      # envPAT: ${{ secrets.envPAT }} # pass just this secret
+
+  deploy-apps:
+    needs: call-workflow
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Test
+      run: |
+          echo "Checking tag_id output ... : " ${{ needs.call-workflow:.outputs.tag_id }}
+          tag_id=${{ needs.call-workflow:.outputs.tag_id }}
+          echo "Image Build tag ID:"$tag_id
+      shell: bash
+
+    # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
+    # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#hardening-for-self-hosted-runners
+    # if the runner is self-hosted which is not github provided it is recommended to manually logout at the end of the workflow as shown below.
+    - name: Azure Logout security hardening
+      run: |
+          az logout
+          az cache purge
+          az account clear
+      shell: bash
