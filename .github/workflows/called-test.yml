@@ -13,9 +13,10 @@ jobs:
   called-workflow:
     runs-on: ubuntu-latest
     outputs:
-      tagid: ${{ steps.set-tag-id.outputs.tagid }}
+      tagid: ${{ steps.setval.outputs.tagid }}
     steps:
     - name: set-tag-id
+      id: setval
       run: |
           # https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs
           # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
