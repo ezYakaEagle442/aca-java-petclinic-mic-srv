@@ -16,7 +16,7 @@ jobs:
     secrets: inherit # pass all secrets
       # envPAT: ${{ secrets.envPAT }} # pass just this secret
 
-  post-call:
+  post-call-workflow:
     needs: call-workflow
     runs-on: ubuntu-latest
     permissions:
@@ -26,5 +26,18 @@ jobs:
       run: |
           echo "Checking tagid output ... : " ${{ needs.call-workflow.outputs.tagid }}
           tagid=${{ needs.call-workflow.outputs.tagid }}
+          echo "Image Build tag ID:"$tagid
+      shell: bash
+
+  post-called-workflow:
+    needs: called-workflow
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read    
+    steps:
+    - name: verify
+      run: |
+          echo "Checking tagid output ... : " ${{ needs.called-workflow.outputs.tagid }}
+          tagid=${{ needs.called-workflow.outputs.tagid }}
           echo "Image Build tag ID:"$tagid
       shell: bash
