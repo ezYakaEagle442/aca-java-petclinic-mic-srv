@@ -26,26 +26,13 @@ jobs:
           tag_id=$GITHUB_SHA
           echo "GITHUB_RUN_ID="$GITHUB_RUN_ID
           echo "GITHUB_SHA="$GITHUB_SHA
-          echo "GITHUB_RUN_ID="${{ github.run.id }}
+          echo "run_id="${{ github.run_id }}
           echo "github.sha="${{ github.sha }}
           
           echo "tag_id="$tag_id
-          echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+          echo "SHORT_SHA=`echo GITHUB_SHA | cut -c1-8`" >> $GITHUB_ENV
           echo "SHORT_SHA cut="$SHORT_SHA
 
-          echo "SHORT_SHA=`echo ${GITHUB_SHA::7}`" >> $GITHUB_ENV
+          echo "SHORT_SHA=`echo GITHUB_SHA::7`" >> $GITHUB_ENV
           echo "SHORT_SHA param substitution="$SHORT_SHA # https://tldp.org/LDP/abs/html/parameter-substitution.html
       shell: bash
-
-    # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
-    # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#hardening-for-self-hosted-runners
-    # if the runner is self-hosted which is not github provided it is recommended to manually logout at the end of the workflow as shown below.
-    - name: Azure Logout security hardening
-      run: |
-          az logout
-          az cache purge
-          az account clear
-      shell: bash
-  
-    outputs:
-      tag_id: ${{ steps.test.outputs.tag_id }}

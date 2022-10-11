@@ -26,13 +26,3 @@ jobs:
           tag_id=${{ needs.call-workflow.outputs.tag_id }}
           echo "Image Build tag ID:"$tag_id
       shell: bash
-
-    # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
-    # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#hardening-for-self-hosted-runners
-    # if the runner is self-hosted which is not github provided it is recommended to manually logout at the end of the workflow as shown below.
-    - name: Azure Logout security hardening
-      run: |
-          az logout
-          az cache purge
-          az account clear
-      shell: bash
