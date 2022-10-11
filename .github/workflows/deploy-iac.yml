@@ -375,6 +375,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+    - name: Login with GHA Runner SP
+      uses: azure/login@v1.4.6 # fails https://github.com/marketplace/actions/azure-login
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }} # ${{ env.credentials }}
+        
     - name: Checkout
       uses: actions/checkout@v3.0.2 # https://github.com/actions/checkout
 
