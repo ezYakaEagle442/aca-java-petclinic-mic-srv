@@ -22,7 +22,6 @@ jobs:
           # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
           # GITHUB_SHA: The commit SHA that triggered the workflow
           # GITHUB_RUN_ID: A unique number for each workflow run within a repository. This number does not change if you re-run the workflow run.
-          echo "::set-output name=tag_id::$GITHUB_SHA"  #m mismatch with ACR {{.Run.ID}}. {{.Run.ID}} would be different for each az acr build 
           tag_id=$GITHUB_SHA
           echo "GITHUB_RUN_ID="$GITHUB_RUN_ID
           echo "GITHUB_SHA="$GITHUB_SHA
@@ -31,10 +30,13 @@ jobs:
           
           echo "tag_id="$tag_id
           echo "SHORT_SHA=`echo $GITHUB_SHA | cut -c1-8`" >> $GITHUB_ENV
-          echo "SHORT_SHA cut="$SHORT_SHA
+          echo "SHORT_SHA cut="${{ env.GITHUB_SHA }}
 
           echo "SHORT_SHA=`echo $GITHUB_SHA::7`" >> $GITHUB_ENV
-          echo "SHORT_SHA param substitution="$SHORT_SHA # https://tldp.org/LDP/abs/html/parameter-substitution.html
+          echo "SHORT_SHA param substitution="${{ env.GITHUB_SHA }} # https://tldp.org/LDP/abs/html/parameter-substitution.html
+
+          echo "::set-output name=tag_id::$tag_id"  # mismatch with ACR {{.Run.ID}}. {{.Run.ID}} would be different for each az acr build 
+          
       shell: bash
   
     outputs:
