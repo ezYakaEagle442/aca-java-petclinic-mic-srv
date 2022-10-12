@@ -13,14 +13,8 @@ env:
   SET_KV_ACCESS_POLICIES: false # let it to false
 
   AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
+  REGISTRY_URL: acrpetcliaca.azurecr.io  # set this to the URL of your registry
   REPOSITORY: petclinic                  # set this to your ACR repository
-
-  # GitHub Actions settings
-  GHA_SETTINGS_CFG_REGISTRY_URL: acrpetcliaca.azurecr.io
-  GHA_SETTINGS_CFG_REPO_URL: https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv
-  #GHA_SETTINGS_CFG_CRD_CLIENT_ID: ${{ secrets.GHA_SETTINGS_CFG_CRD_CLIENT_ID }}
-  #GHA_SETTINGS_CFG_CRD_CLIENT_SECRET: ${{ secrets.GHA_SETTINGS_CFG_CRD_CLIENT_SECRET }}
-  GHA_REVISION_NAME: aca-poc-101
 
   credentials: ${{ secrets.AZURE_CREDENTIALS }}
   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
