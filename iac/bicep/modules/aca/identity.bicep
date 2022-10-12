@@ -49,6 +49,7 @@ resource adminServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2
   tags: tags
 }
 output adminServerIdentityId string = adminServerIdentity.id
+output adminServerPrincipalId string = adminServerIdentity.properties.principalId
 
 resource configServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
   name: configServerAppIdentityName
@@ -56,6 +57,7 @@ resource configServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@
   tags: tags
 }
 output configServerIdentityId string = configServerIdentity.id
+output configServerPrincipalId string = configServerIdentity.properties.principalId
 
 resource discoveryServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
   name: discoveryServerAppIdentityName
@@ -63,6 +65,7 @@ resource discoveryServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentiti
   tags: tags
 }
 output discoveryServerIdentityId string = discoveryServerIdentity.id
+output discoveryServerPrincipalId string = discoveryServerIdentity.properties.principalId
 
 resource apiGatewayIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
   name: apiGatewayAppIdentityName
@@ -70,6 +73,7 @@ resource apiGatewayIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@20
   tags: tags
 }
 output apiGatewayIdentityId string = apiGatewayIdentity.id
+output apiGatewayPrincipalId string = apiGatewayIdentity.properties.principalId
 
 resource customersServicedentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
   name: customersServiceAppIdentityName
@@ -77,6 +81,7 @@ resource customersServicedentity 'Microsoft.ManagedIdentity/userAssignedIdentiti
   tags: tags
 }
 output customersServiceIdentityId string = customersServicedentity.id
+output customersServicePrincipalId string = customersServicedentity.properties.principalId
 
 resource vetsServiceAppIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
   name: vetsServiceAppIdentityName
@@ -84,6 +89,7 @@ resource vetsServiceAppIdentity 'Microsoft.ManagedIdentity/userAssignedIdentitie
   tags: tags
 }
 output vetsServiceAppIdentityId string = vetsServiceAppIdentity.id
+output vetsServicePrincipalId string = vetsServiceAppIdentity.properties.principalId
 
 resource visitsServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
   name: visitsServiceAppIdentityName
@@ -91,3 +97,4 @@ resource visitsServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities
   tags: tags
 }
 output visitsServiceIdentityId string = visitsServiceIdentity.id
+output visitsServicePrincipalId string = visitsServiceIdentity.properties.principalId
