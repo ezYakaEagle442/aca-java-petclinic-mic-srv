@@ -195,22 +195,21 @@ module identities './modules/aca/identity.bicep' = {
 
 
 // https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scope-extension-resources
-/*
+
 module roleAssignments './modules/aca/roleAssignments.bicep' = {
   name: 'role-assignments'
   params: {
     acrName: acrName
     acrRoleType: 'AcrPull'
-    acaCustomersServicePrincipalId: identities.outputs.customersServiceIdentityId
-    acaVetsServicePrincipalId: identities.outputs.vetsServiceAppIdentityId
-    acaVisitsServicePrincipalId: identities.outputs.visitsServiceIdentityId
-    acaAdminServerPrincipalId: identities.outputs.adminServerIdentityId
-    acaApiGatewayPrincipalId: identities.outputs.apiGatewayIdentityId
-    acaConfigServerPrincipalId: identities.outputs.configServerIdentityId
-    //acaDiscoveryServerPrincipalId: identities.outputs.discoveryServerIdentityId
+    acaCustomersServicePrincipalId: identities.outputs.customersServicePrincipalId
+    acaVetsServicePrincipalId: identities.outputs.vetsServicePrincipalId
+    acaVisitsServicePrincipalId: identities.outputs.visitsServicePrincipalId
+    acaAdminServerPrincipalId: identities.outputs.adminServerPrincipalId
+    acaApiGatewayPrincipalId: identities.outputs.apiGatewayPrincipalId
+    acaConfigServerPrincipalId: identities.outputs.configServerPrincipalId
+    //acaDiscoveryServerPrincipalId: identities.outputs.discoveryServerPrincipalId
     kvName: kvName
     kvRGName: kvRGName
     kvRoleType: 'KeyVaultSecretsUser'
   }
 }
-*/
