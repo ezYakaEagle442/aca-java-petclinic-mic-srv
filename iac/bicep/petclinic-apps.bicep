@@ -156,8 +156,8 @@ module azurecontainerapp './modules/aca/aca-user-id.bicep' = {
     tenantId: tenantId
     subscriptionId: subscriptionId
     registryUrl: ACR.properties.loginServer
-    registryUsr: ACR.listCredentials().username //ACR.properties.adminUserEnabled ? ACR.properties.adminUsername : ''
-    registryPassword: ACR.listCredentials().passwords[0].value
+    //registryUsr: ACR.listCredentials().username
+    //registryPassword: ACR.listCredentials().passwords[0].value
     // ghaSettingsCfgRuntimeStack: ghaSettingsCfgRuntimeStack
     // ghaSettingsCfgRuntimeVersion: ghaSettingsCfgRuntimeVersion
     adminServerContainerAppName: adminServerContainerAppName
