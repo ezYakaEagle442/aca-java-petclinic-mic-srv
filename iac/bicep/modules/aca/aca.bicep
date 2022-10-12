@@ -576,11 +576,11 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           value: appInsightsInstrumentationKey
         }
         {
-          name: 'SPRING_CLOUD_AZURE_TENANT_ID'
+          name: 'springcloudazuretenantid'
           value: springCloudAzureTenantId
         } 
         {
-          name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
+          name: 'springcloudazurekvendpoint'
           value: springCloudAzureKeyVaultEndpoint
         }        
       ]
@@ -749,12 +749,12 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
             }
             {
               name: 'SPRING_CLOUD_AZURE_TENANT_ID'
-              secretRef: springCloudAzureTenantId
-            } 
+              secretRef: 'springcloudazuretenantid'
+            }   
             {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
-              secretRef: springCloudAzureKeyVaultEndpoint
-            }
+              secretRef: 'springcloudazurekvendpoint'
+            } 
           ]
           image: imageNameCustomersService
           name: customersServiceContainerAppName
@@ -1041,11 +1041,11 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }
             {
               name: 'SPRING_CLOUD_AZURE_TENANT_ID'
-              secretRef: springCloudAzureTenantId
-            } 
+              secretRef: 'springcloudazuretenantid'
+            }   
             {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
-              secretRef: springCloudAzureKeyVaultEndpoint
+              secretRef: 'springcloudazurekvendpoint'
             }                          
           ]
           image: imageNameVisitsService
