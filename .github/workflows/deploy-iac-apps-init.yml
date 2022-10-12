@@ -65,7 +65,7 @@ jobs:
 
           az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
           
-          az deployment group create --name aca-petclinic-apps -f iac/bicep/petclinic-apps.bicep -g ${{ env.RG_APP }} --debug \
+          az deployment group create --name aca-petclinic-apps -f iac/bicep/petclinic-apps.bicep -g ${{ env.RG_APP }} \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
             -p acrName=${{ env.AZURE_CONTAINER_REGISTRY }} \
