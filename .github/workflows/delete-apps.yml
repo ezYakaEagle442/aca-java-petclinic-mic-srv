@@ -29,7 +29,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  delete-rg:
+  delete-apps:
     runs-on: ubuntu-latest
 
     steps:
