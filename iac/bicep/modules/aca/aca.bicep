@@ -92,13 +92,14 @@ param containerResourcesMemory string = '1.0Gi'
 @description('The Application Insights Intrumention Key. see https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string')
 param appInsightsInstrumentationKey string
 
+/*
 @description('The Container Registry Username')
 param registryUsr string
 
 @secure()
 @description('The Container Registry Password')
 param registryPassword string
-
+*/
 @description('The Container Registry URL')
 param registryUrl string
 
@@ -147,17 +148,58 @@ param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
 @description('The Azure Container App instance name for visits-service')
 param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
 
+@description('The admin-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+param adminServerAppIdentityName string = 'id-aca-petclinic-admin-server-dev-westeurope-101'
+
+@description('The config-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+param configServerAppIdentityName string = 'id-aca-petclinic-config-server-dev-westeurope-101'
+
+@description('The api-gateway Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+param apiGatewayAppIdentityName string = 'id-aca-petclinic-api-gateway-dev-westeurope-101'
+
+@description('The customers-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+param customersServiceAppIdentityName string = 'id-aca-petclinic-customers-service-dev-westeurope-101'
+
+@description('The vets-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+param vetsServiceAppIdentityName string = 'id-aca-petclinic-vets-service-dev-westeurope-101'
+
+@description('The visits-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+param visitsServiceAppIdentityName string = 'id-aca-petclinic-visits-service-dev-westeurope-101'
+
+@description('The discovery-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+param discoveryServerAppIdentityName string = 'id-aca-petclinic-discovery-server-dev-westeurope-101'
+
 resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' existing = {
   name: azureContainerAppEnvName
 }
 
 
-/*
-@description('The admin-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param adminServerAppIdentityName string = 'id-aca-petclinic-admin-server-dev-westeurope-101'
+resource configServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
+  name: configServerAppIdentityName
+}
+
+resource apiGatewayIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
+  name: apiGatewayAppIdentityName
+}
+
+resource customersServicedentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
+  name: customersServiceAppIdentityName
+}
+
+resource vetsServiceAppIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
+  name: vetsServiceAppIdentityName
+}
+
+resource visitsServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
+  name: visitsServiceAppIdentityName
+}
 
 resource adminServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview'existing = {
   name: adminServerAppIdentityName
+}
+/*
+resource discoveryServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
+  name: discoveryServerAppIdentityName
 }
 */
 
@@ -167,12 +209,10 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   location: location
   identity: {
     // https://docs.microsoft.com/en-us/azure/container-apps/managed-identity?tabs=portal%2Cjava#configure-managed-identities
-    type: 'SystemAssigned'
-    /*
+    type: 'UserAssigned'
     userAssignedIdentities: {
       '${adminServerIdentity.id}': {}
     }
-    */
   }
   properties: {
     managedEnvironmentId: corpManagedEnvironment.id 
@@ -213,17 +253,12 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           // Managedidentity is enabled on ACR
           server: registryUrl
           // https://learn.microsoft.com/en-us/azure/container-apps/containers#managed-identity-with-azure-container-registry
-          identity: 'system'
-          //identity: adminServerIdentity.id
+          identity: adminServerIdentity.id
           //username: registryUsr
           // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
-        {
-          name: 'registrypassword'
-          value: registryPassword
-        }
         {
           name: 'appinscon'
           value: appInsightsInstrumentationKey
@@ -393,7 +428,10 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: apiGatewayContainerAppName
   location: location
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${apiGatewayIdentity.id}': {}
+    }    
   }
   properties: {
     managedEnvironmentId: corpManagedEnvironment.id 
@@ -416,16 +454,12 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         {
           // Managedidentity is enabled on ACR
           server: registryUrl
-          identity: 'system'
+          identity: apiGatewayIdentity.id
           //username: registryUsr
           // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
-        {
-          name: 'registrypassword'
-          value: registryPassword
-        }
         {
           name: 'appinscon'
           value: appInsightsInstrumentationKey
@@ -538,7 +572,10 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: configServerContainerAppName
   location: location
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${configServerIdentity.id}': {}
+    }    
   }
   properties: {
     managedEnvironmentId: corpManagedEnvironment.id 
@@ -561,16 +598,12 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         {
           // Managedidentity is enabled on ACR
           server: registryUrl
-          identity: 'system'
+          identity: configServerIdentity.id
           //username: registryUsr
           // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
-        {
-          name: 'registrypassword'
-          value: registryPassword
-        }
         {
           name: 'appinscon'
           value: appInsightsInstrumentationKey
@@ -684,7 +717,10 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
   name: customersServiceContainerAppName
   location: location
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${customersServicedentity.id}': {}
+    }    
   }
   properties: {
     managedEnvironmentId: corpManagedEnvironment.id
@@ -707,16 +743,12 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
         {
           // Managedidentity is enabled on ACR
           server: registryUrl
-          identity: 'system'
+          identity: customersServicedentity.id
           //username: registryUsr
           // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
-        {
-          name: 'registrypassword'
-          value: registryPassword
-        }
         {
           name: 'appinscon'
           value: appInsightsInstrumentationKey
@@ -830,7 +862,10 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: vetsServiceContainerAppName
   location: location
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${vetsServiceAppIdentity.id}': {}
+    }    
   }
   properties: {
     managedEnvironmentId: corpManagedEnvironment.id
@@ -853,16 +888,12 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         {
           // Managedidentity is enabled on ACR
           server: registryUrl
-          identity: 'system'
+          identity: vetsServiceAppIdentity.id
           //username: registryUsr
           // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
-        {
-          name: 'registrypassword'
-          value: registryPassword
-        }
         {
           name: 'appinscon'
           value: appInsightsInstrumentationKey
@@ -895,12 +926,12 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }
             {
               name: 'SPRING_CLOUD_AZURE_TENANT_ID'
-              secretRef: springCloudAzureTenantId
-            } 
+              secretRef: 'springcloudazuretenantid'
+            }   
             {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
-              secretRef: springCloudAzureKeyVaultEndpoint
-            }
+              secretRef: 'springcloudazurekvendpoint'
+            } 
           ]
           image: imageNameVetsService
           name: vetsServiceContainerAppName
@@ -976,7 +1007,10 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: visitsServiceContainerAppName
   location: location
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${visitsServiceIdentity.id}': {}
+    }    
   }
   properties: {
     managedEnvironmentId: corpManagedEnvironment.id 
@@ -999,16 +1033,13 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         {
           // Managedidentity is enabled on ACR
           server: registryUrl
-          identity: 'system'
+          identity: visitsServiceIdentity.id
           //username: registryUsr
           // passwordSecretRef: 'registrypassword'
         }
       ]
       secrets: [
-        {
-          name: 'registrypassword'
-          value: registryPassword
-        }
+        // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
         {
           name: 'appinscon'
           value: appInsightsInstrumentationKey
@@ -1016,7 +1047,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         {
           name: 'springcloudazuretenantid'
           value: springCloudAzureTenantId
-        } 
+        }
         {
           name: 'springcloudazurekvendpoint'
           value: springCloudAzureKeyVaultEndpoint
@@ -1046,7 +1077,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
               secretRef: 'springcloudazurekvendpoint'
-            }                          
+            }                         
           ]
           image: imageNameVisitsService
           name: visitsServiceContainerAppName
