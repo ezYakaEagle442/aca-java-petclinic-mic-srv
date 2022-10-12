@@ -33,7 +33,7 @@ env:
 
 on:
   workflow_dispatch:
-    inputs:
+    inputs: # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_dispatchinputs
       tag_id:
         description: the Image Tag ID
         required: true
@@ -55,9 +55,22 @@ jobs:
     - name: Deploy Azure Container Apps
       run: |
           echo "About to call ACA, roleAssignments and KV Module iac/bicep/petclinic-apps.bicep#284" 
-          
+          tag_id=${{ inputs.tag_id }} 
           echo "Image Build tag ID:"$tag_id
 
+          set -euo pipefail
+          access_token=$(az account get-access-token --query accessToken -o tsv)
+          refresh_token=$(curl https://${{ env.REGISTRY_URL }}/oauth2/exchange -v -d "grant_type=access_token&service=${{ env.REGISTRY_URL }}&access_token=$access_token" | jq -r .refresh_token)
+          docker login ${{ env.REGISTRY_URL }} -u 00000000-0000-0000-0000-000000000000 --password-stdin <<< "$refresh_token"
+
+          acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryUsr.value | tr -d '"')
+          acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryPwd.value | tr -d '"')
+          az acr login --name ${{ env.REGISTRY_URL }} -u $acr_usr -p $acr_pwd
+          
+          # az acr login --name ${{ env.REGISTRY_URL }} --expose-token
+
+          az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
+          
           az deployment group create --name aca-petclinic-apps -f iac/bicep/petclinic-apps.bicep -g ${{ env.RG_APP }} --debug \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
