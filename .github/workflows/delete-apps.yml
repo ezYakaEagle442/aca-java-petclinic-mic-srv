@@ -5,14 +5,16 @@ env:
   LOCATION: westeurope
   RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to delete the ACA Apps
 
-  ADMIN_SERVER: aca-petclinic-admin-server
-  CONFIG_SERVER: aca-petclinic-config-server
-  DISCOVERY_SERVER: aca-petclinic-discovery-server
+  APP_NAME: petcliaca
+  
+  ADMIN_SERVER: aca-petcliaca-admin-server # 'aca-${appName}-admin-server' ==> aca-petcliaca-admin-server
+  CONFIG_SERVER: aca-petcliaca-config-server
+  DISCOVERY_SERVER: aca-petcliaca-discovery-server
 
-  API_GATEWAY: aca-petclinic-api-gateway
-  CUSTOMERS_SERVICE: aca-petclinic-customers-service
-  VETS_SERVICE: aca-petclinic-vets-service
-  VISITS_SERVICE: aca-petclinic-visits-service
+  API_GATEWAY: aca-petcliaca-api-gateway
+  CUSTOMERS_SERVICE: aca-petcliaca-customers-service
+  VETS_SERVICE: aca-petcliaca-vets-service
+  VISITS_SERVICE: aca-petcliaca-visits-service
 
   # https://github.com/Azure/actions-workflow-samples/blob/master/assets/create-secrets-for-GitHub-workflows.md#consume-secrets-in-your-workflow
   # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-secrets
@@ -43,6 +45,15 @@ jobs:
         azcliversion: ${{ env.AZ_CLI_VERSION }}
         inlineScript: |
           az config set extension.use_dynamic_install=yes_without_prompt
+          
+          az containerapp list -g ${{ env.RG_APP }}
+
+          for app in $(az containerapp list -g  ${{ env.RG_APP }} | jq -r '.[].name')
+          do
+            echo "About to delete App " $app
+            # az containerapp delete --name $app -g ${{ env.RG_APP }} --yes
+          done
+
           az containerapp delete --name ${{ env.ADMIN_SERVER }} -g ${{ env.RG_APP }} --yes
           az containerapp delete --name ${{ env.VISITS_SERVICE }} -g ${{ env.RG_APP }} --yes
           az containerapp delete --name ${{ env.VETS_SERVICE }} -g ${{ env.RG_APP }} --yes
