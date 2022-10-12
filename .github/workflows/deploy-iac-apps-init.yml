@@ -1,6 +1,3 @@
-# This workflow will deploy all the Azure services, including ACA, ACA Env., ACR, KV & secrets, MYSQL (eventually with a Firewall rule to allow your workstation IP)
-# eventually if DEPLOY_TO_VNET is set to true : also VNet, ACA Env. deployed to VNet, private DNS-Zone, client VM deployed to the VNet
-
 name: Deploy ACA Apps with Azure Bicep
 
 env:
@@ -36,6 +33,11 @@ env:
 
 on:
   workflow_dispatch:
+    inputs:
+      tag_id:
+        description: the Image Tag ID
+        required: true
+        type: string
 
 jobs:
   deploy-apps:
@@ -54,6 +56,8 @@ jobs:
       run: |
           echo "About to call ACA, roleAssignments and KV Module iac/bicep/petclinic-apps.bicep#284" 
           
+          echo "Image Build tag ID:"$tag_id
+
           az deployment group create --name aca-petclinic-apps -f iac/bicep/petclinic-apps.bicep -g ${{ env.RG_APP }} --debug \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
@@ -62,17 +66,15 @@ jobs:
             -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p kvRGName=${{ env.RG_KV }} \
-            -p ghaSettingsCfgRepoUrl=${{ env.GHA_SETTINGS_CFG_REPO_URL }} \
-            -p revisionName=${{ env.GHA_REVISION_NAME }} \
-            -p deployToVNet=${{ env.DEPLOY_TO_VNET }}
-            -p tagName=$tag_id \
-            -p imageNameAdminServer="petclinic/petclinic-admin-server:"$tag_id \
-            -p imageNameApiGateway="petclinic/petclinic-petclinic-api-gateway:"$tag_id \
-            -p imageNameDiscoveryServer"petclinic/petclinic-admin-server:"$tag_id \
-            -p imageNameConfigServer="petclinic/petclinic-admin-server:"$tag_id \
-            -p imageNameCustomersService="petclinic/petclinic-admin-server:"$tag_id \
-            -p imageNameVetsService="petclinic/petclinic-admin-server:"$tag_id \
-            -p imageNameVisitsService="petclinic/petclinic-admin-server:"$tag_id
+            -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
+            -p imageNameAdminServer=${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }}":"$tag_id \
+            -p imageNameApiGateway=${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}":"$tag_id \
+            -p imageNameDiscoveryServer=${{ env.REPOSITORY }}/${{ env.DISCOVERY_SERVER }}":"$tag_id \
+            -p imageNameConfigServer=${{ env.REPOSITORY }}/${{ env.CONFIG_SERVER }}":"$tag_id \
+            -p imageNameCustomersService=${{ env.REPOSITORY }}/${{ env.CUSTOMERS_SERVICE }}":"$tag_id \
+            -p imageNameVetsService=${{ env.REPOSITORY }}/${{ env.VETS_SERVICE }}":"$tag_id \
+            -p imageNameVisitsService=${{ env.REPOSITORY }}/${{ env.VISITS_SERVICE }}":"$tag_id
+
 
 
       shell: bash
