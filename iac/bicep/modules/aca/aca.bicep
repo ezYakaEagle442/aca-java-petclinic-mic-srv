@@ -298,7 +298,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
                 port: int
               }
               */
-              terminationGracePeriodSeconds: 60
+              
               timeoutSeconds: 3
               type: 'Liveness'
             }
@@ -327,7 +327,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
                 port: int
               }
               */
-              terminationGracePeriodSeconds: 60
+              
               timeoutSeconds: 3
               type: 'Readiness'
             }            
@@ -362,7 +362,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               ]
               */
               metadata: {
-                concurrentRequests: 10
+                concurrentRequests: '10'
               }
             }
             name: 'http-scale'
@@ -478,7 +478,6 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               initialDelaySeconds: 30
               periodSeconds: 60
               successThreshold: 1
-              terminationGracePeriodSeconds: 60
               timeoutSeconds: 3
               type: 'Liveness'
             }
@@ -492,7 +491,6 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               initialDelaySeconds: 30
               periodSeconds: 60
               successThreshold: 1
-              terminationGracePeriodSeconds: 60
               timeoutSeconds: 3
               type: 'Readiness'
             }            
@@ -518,7 +516,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               ]
               */
               metadata: {
-                concurrentRequests: 10
+                concurrentRequests: '10'
               }
             }
             name: 'http-scale'
@@ -624,8 +622,7 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 1
-              terminationGracePeriodSeconds: 60
+              successThreshold: 1              
               timeoutSeconds: 3
               type: 'Liveness'
             }
@@ -639,7 +636,6 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               initialDelaySeconds: 30
               periodSeconds: 60
               successThreshold: 1
-              terminationGracePeriodSeconds: 60
               timeoutSeconds: 3
               type: 'Readiness'
             }            
@@ -665,7 +661,7 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               ]
               */
               metadata: {
-                concurrentRequests: 10
+                concurrentRequests: '10'
               }
             }
             name: 'http-scale'
@@ -772,8 +768,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 1
-              terminationGracePeriodSeconds: 60
+              successThreshold: 1              
               timeoutSeconds: 3
               type: 'Liveness'
             }
@@ -786,8 +781,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 1
-              terminationGracePeriodSeconds: 60
+              successThreshold: 1              
               timeoutSeconds: 3
               type: 'Readiness'
             }            
@@ -813,7 +807,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               ]
               */
               metadata: {
-                concurrentRequests: 10
+                concurrentRequests: '10'
               }
             }
             name: 'http-scale'
@@ -920,8 +914,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 1
-              terminationGracePeriodSeconds: 60
+              successThreshold: 1              
               timeoutSeconds: 3
               type: 'Liveness'
             }
@@ -934,8 +927,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 1
-              terminationGracePeriodSeconds: 60
+              successThreshold: 1              
               timeoutSeconds: 3
               type: 'Readiness'
             }            
@@ -961,7 +953,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               ]
               */
               metadata: {
-                concurrentRequests: 10
+                concurrentRequests: '10'
               }
             }
             name: 'http-scale'
@@ -1068,8 +1060,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 1
-              terminationGracePeriodSeconds: 60
+              successThreshold: 1              
               timeoutSeconds: 3
               type: 'Liveness'
             }
@@ -1082,8 +1073,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 1
-              terminationGracePeriodSeconds: 60
+              successThreshold: 1              
               timeoutSeconds: 3
               type: 'Readiness'
             }            
@@ -1109,7 +1099,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               ]
               */
               metadata: {
-                concurrentRequests: 10
+                concurrentRequests: '10'
               }
             }
             name: 'http-scale'
