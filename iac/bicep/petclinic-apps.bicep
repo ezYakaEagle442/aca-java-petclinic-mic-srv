@@ -137,7 +137,7 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
 // For example: Save spring-datasource-url in Azure Key Vault. In your application, you can still use spring.datasource.url to retrieve property value.
 
 // https://learn.microsoft.com/en-us/azure/templates/microsoft.app/containerapps?pivots=deployment-language-bicep
-module azurecontainerapp './modules/aca/aca.bicep' = {
+module azurecontainerapp './modules/aca/aca-user-id.bicep' = {
   name: 'azurecontainerapp'
   // scope: resourceGroup(rg.name)
   params: {
@@ -178,28 +178,28 @@ module azurecontainerapp './modules/aca/aca.bicep' = {
 }
 
 // https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scope-extension-resources
+/*
 module roleAssignments './modules/aca/roleAssignments.bicep' = {
   name: 'role-assignments'
   params: {
     acrName: acrName
     acrRoleType: 'AcrPull'
+    acaAdminServerPrincipalId: azurecontainerapp.outputs.adminServerContainerAppIdentity
     acaCustomersServicePrincipalId: azurecontainerapp.outputs.customersServiceContainerAppIdentity
     acaVetsServicePrincipalId: azurecontainerapp.outputs.vetsServiceContainerAppNameContainerAppIdentity
     acaVisitsServicePrincipalId: azurecontainerapp.outputs.visitsServiceContainerAppIdentity
-    acaAdminServerPrincipalId: azurecontainerapp.outputs.adminServerContainerAppIdentity
     acaApiGatewayPrincipalId: azurecontainerapp.outputs.apiGatewayContainerAppIdentity
     acaConfigServerPrincipalId: azurecontainerapp.outputs.configServerContainerAppIdentity
     kvName: kvName
     kvRGName: kvRGName
     kvRoleType: 'KeyVaultSecretsUser'
-    /*
-    vnetName: vnetName
-    subnetName: infrastructureSubnetName
-    networkRoleType: 'Owner'
-    */
+    //vnetName: vnetName
+    //subnetName: infrastructureSubnetName
+    //networkRoleType: 'Owner'
+    //
   }
 }
-
+*/
 
 // https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/key-vault-parameter?tabs=azure-cli
 /*
@@ -211,6 +211,7 @@ If you created the key vault, you're the owner and have the permission.
 
 
 // Specifies all Apps Identities {"appName":"","appIdentity":""} wrapped into an object.')
+/*
 var appsObject = { 
   apps: [
     {
@@ -275,3 +276,4 @@ module KeyVaultAccessPolicies './modules/kv/kv_policies.bicep'= {
     accessPoliciesObject: accessPoliciesObject
   } 
 }
+*/
