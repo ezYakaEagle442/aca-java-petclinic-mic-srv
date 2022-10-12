@@ -92,13 +92,14 @@ param containerResourcesMemory string = '1.0Gi'
 @description('The Application Insights Intrumention Key. see https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string')
 param appInsightsInstrumentationKey string
 
+/*
 @description('The Container Registry Username')
 param registryUsr string
 
 @secure()
 @description('The Container Registry Password')
 param registryPassword string
-
+*/
 @description('The Container Registry URL')
 param registryUrl string
 
@@ -258,10 +259,6 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         }
       ]
       secrets: [
-        {
-          name: 'registrypassword'
-          value: registryPassword
-        }
         {
           name: 'appinscon'
           value: appInsightsInstrumentationKey
@@ -464,10 +461,6 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       ]
       secrets: [
         {
-          name: 'registrypassword'
-          value: registryPassword
-        }
-        {
           name: 'appinscon'
           value: appInsightsInstrumentationKey
         }
@@ -612,19 +605,15 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       ]
       secrets: [
         {
-          name: 'registrypassword'
-          value: registryPassword
-        }
-        {
           name: 'appinscon'
           value: appInsightsInstrumentationKey
         }
         {
-          name: 'SPRING_CLOUD_AZURE_TENANT_ID'
+          name: 'springcloudazuretenantid'
           value: springCloudAzureTenantId
         } 
         {
-          name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
+          name: 'springcloudazurekvendpoint'
           value: springCloudAzureKeyVaultEndpoint
         }        
       ]
@@ -761,10 +750,6 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
       ]
       secrets: [
         {
-          name: 'registrypassword'
-          value: registryPassword
-        }
-        {
           name: 'appinscon'
           value: appInsightsInstrumentationKey
         }
@@ -796,12 +781,12 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
             }
             {
               name: 'SPRING_CLOUD_AZURE_TENANT_ID'
-              secretRef: springCloudAzureTenantId
-            } 
+              secretRef: 'springcloudazuretenantid'
+            }   
             {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
-              secretRef: springCloudAzureKeyVaultEndpoint
-            }
+              secretRef: 'springcloudazurekvendpoint'
+            } 
           ]
           image: imageNameCustomersService
           name: customersServiceContainerAppName
@@ -910,10 +895,6 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       ]
       secrets: [
         {
-          name: 'registrypassword'
-          value: registryPassword
-        }
-        {
           name: 'appinscon'
           value: appInsightsInstrumentationKey
         }
@@ -945,12 +926,12 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }
             {
               name: 'SPRING_CLOUD_AZURE_TENANT_ID'
-              secretRef: springCloudAzureTenantId
-            } 
+              secretRef: 'springcloudazuretenantid'
+            }   
             {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
-              secretRef: springCloudAzureKeyVaultEndpoint
-            }
+              secretRef: 'springcloudazurekvendpoint'
+            } 
           ]
           image: imageNameVetsService
           name: vetsServiceContainerAppName
@@ -1058,10 +1039,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         }
       ]
       secrets: [
-        {
-          name: 'registrypassword'
-          value: registryPassword
-        }
+        // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
         {
           name: 'appinscon'
           value: appInsightsInstrumentationKey
@@ -1069,7 +1047,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         {
           name: 'springcloudazuretenantid'
           value: springCloudAzureTenantId
-        } 
+        }
         {
           name: 'springcloudazurekvendpoint'
           value: springCloudAzureKeyVaultEndpoint
@@ -1094,12 +1072,12 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }
             {
               name: 'SPRING_CLOUD_AZURE_TENANT_ID'
-              secretRef: springCloudAzureTenantId
-            } 
+              secretRef: 'springcloudazuretenantid'
+            }   
             {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
-              secretRef: springCloudAzureKeyVaultEndpoint
-            }                          
+              secretRef: 'springcloudazurekvendpoint'
+            }                         
           ]
           image: imageNameVisitsService
           name: visitsServiceContainerAppName

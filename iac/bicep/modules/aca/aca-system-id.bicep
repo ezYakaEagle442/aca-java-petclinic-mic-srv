@@ -571,18 +571,19 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           name: 'registrypassword'
           value: registryPassword
         }
+        // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
         {
           name: 'appinscon'
           value: appInsightsInstrumentationKey
         }
         {
-          name: 'SPRING_CLOUD_AZURE_TENANT_ID'
+          name: 'springcloudazuretenantid'
           value: springCloudAzureTenantId
-        } 
+        }
         {
-          name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
+          name: 'springcloudazurekvendpoint'
           value: springCloudAzureKeyVaultEndpoint
-        }        
+        }       
       ]
     }
     template: {
@@ -754,7 +755,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
             {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
               secretRef: springCloudAzureKeyVaultEndpoint
-            }
+            } 
           ]
           image: imageNameCustomersService
           name: customersServiceContainerAppName
@@ -895,12 +896,12 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }
             {
               name: 'SPRING_CLOUD_AZURE_TENANT_ID'
-              secretRef: springCloudAzureTenantId
-            } 
+              secretRef: 'springcloudazuretenantid'
+            }   
             {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
-              secretRef: springCloudAzureKeyVaultEndpoint
-            }
+              secretRef: 'springcloudazurekvendpoint'
+            } 
           ]
           image: imageNameVetsService
           name: vetsServiceContainerAppName
@@ -1041,12 +1042,12 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             }
             {
               name: 'SPRING_CLOUD_AZURE_TENANT_ID'
-              secretRef: springCloudAzureTenantId
-            } 
+              secretRef: 'springcloudazuretenantid'
+            }   
             {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
-              secretRef: springCloudAzureKeyVaultEndpoint
-            }                          
+              secretRef: 'springcloudazurekvendpoint'
+            }                         
           ]
           image: imageNameVisitsService
           name: visitsServiceContainerAppName
