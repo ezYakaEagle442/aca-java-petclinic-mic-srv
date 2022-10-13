@@ -76,9 +76,11 @@ param ubuntuOSVersion string = 'minimal-22_04-lts'
 @description('The VM Admin user name')
 param adminUsername string = 'adm_run'
 
+/*
 @secure()
 @description('The VM password length must be between 12 and 123.')
 param adminPassword string = 'changeIT'
+*/
 
 param nsgName string = 'nsg-aca-${appName}-app-client'
 param nsgRuleName string = 'Allow SSH from local dev station'
