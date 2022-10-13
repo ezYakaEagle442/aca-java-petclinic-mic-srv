@@ -11,6 +11,10 @@ env:
 
   ADM_USR_NAME: adm_run
   SSH_KEY_NAME: gha-runner
+  LINUX_VM_NAME: vm-linux-gha-run-acapetcli
+
+  # ==== Identities ====
+  ADMIN_SERVER_IDENTITY: id-aca-petclinic-admin-server-dev-westeurope-101
 
   # ==== Versions ====
   AZ_CLI_VERSION: 2.40.0
@@ -68,9 +72,10 @@ jobs:
           az deployment group create --name aca-gh-self-hosted-runner -f iac/bicep/gh/gh-self-hosted-runner.bicep -g ${{ env.RG_APP }} \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
+            -p linuxVMName=${{ env.LINUX_VM_NAME }}
             -p adminUsername=${{ env.ADM_USR_NAME }} \
-            -p adminPasswordOrKey=$pub_key \ 
-            -p authenticationType=sshPublicKey
+            -p authenticationType=sshPublicKey \
+            -p adminPasswordOrKey=$pub_key
 
           echo "::set-output name=sshCommand::$sshCommand"
           echo "::set-output name=vmIpAddress::$IP"
@@ -86,6 +91,8 @@ jobs:
     - name: Setup Runner
       id: setup_runner      
       run: |
+          echo "Assigning Identity " ${{ env.ADMIN_SERVER_IDENTITY }} " to VM " ${{ env.LINUX_VM_NAME }}
+          az vm identity assign --name ${{ env.LINUX_VM_NAME }} --identities ${{ env.ADMIN_SERVER_IDENTITY }} -g ${{ env.RG_APP }}
 
           vmIpAddress=${{ needs.deploy-vm.outputs.vmIpAddress }}
           sshCommand=${{ needs.deploy-vm.outputs.sshCommand }}
