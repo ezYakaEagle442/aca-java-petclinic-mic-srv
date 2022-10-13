@@ -140,8 +140,9 @@ resource pip 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
   }  
 }
 output pipId string = pip.id
+output hostname string = pip.properties.dnsSettings.fqdn
 output pipGUID string = pip.properties.resourceGuid
-output pipAddress string = pip.properties.ipAddress
+// output pipAddress string = pip.properties.ipAddress
 
 resource NSG 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
   name: nsgName
@@ -178,6 +179,10 @@ resource NSG 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
     ]
   }
 }
+output nsgId string = NSG.id
+output nsgNicName string = NSG.properties.networkInterfaces[0].name
+output nsgsecurityRule0 string = NSG.properties.securityRules[0].name
+output nsgsecurityRule1 string = NSG.properties.securityRules[1].name
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.network/networkinterfaces?tabs=bicep
 resource NIC1 'Microsoft.Network/networkInterfaces@2021-08-01' = {
@@ -205,6 +210,9 @@ resource NIC1 'Microsoft.Network/networkInterfaces@2021-08-01' = {
     }
   }
 }
+
+output nicId string = NIC1.id
+output nicPublicIPAddressId string = NIC1.properties.ipConfigurations[0].properties.publicIPAddress.id
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.compute/virtualmachines?tabs=bicep
 resource linuxVM 'Microsoft.Compute/virtualMachines@2022-03-01' = {
@@ -245,8 +253,6 @@ resource linuxVM 'Microsoft.Compute/virtualMachines@2022-03-01' = {
 }
 
 output adminUsername string = adminUsername
-output hostname string = pip.properties.dnsSettings.fqdn
-output IP string = pip.properties.ipAddress
 output sshCommand string = 'ssh ${adminUsername}@${pip.properties.dnsSettings.fqdn}'
 
 
