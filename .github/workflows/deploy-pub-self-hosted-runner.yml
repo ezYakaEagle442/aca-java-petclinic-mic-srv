@@ -125,9 +125,8 @@ jobs:
           sshCommand=${{ steps.deploy-vm.outputs.sshCommand }}
           vmIpAddress=${{ steps.deploy-vm.outputs.vmIpAddress }}
           
-          echo "sshCommand" $sshCommand
-          # echo "vmIpAddress" $vmIpAddress
-
+          echo "sshCommand= " $sshCommand
+          echo "vmIpAddress= " $vmIpAddress
 
           pub_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}.pub`
           prv_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}`
