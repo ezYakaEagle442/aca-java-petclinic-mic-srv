@@ -76,6 +76,18 @@ jobs:
           echo "pub_key" $pub_key
           echo "ghRunnerIP " $LOCAL_IP
           
+          echo "ls /home/runner/.ssh/"${{ env.SSH_KEY_NAME }}
+          ls /home/runner/.ssh/${{ env.SSH_KEY_NAME }}
+          cat /home/runner/.ssh/${{ env.SSH_KEY_NAME }}.pub
+          echo ""
+          
+          # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idsteps
+          # Each step runs in its own process in the runner environment and has access to the workspace and filesystem. Because steps run in their own process, changes to environment variables are not preserved between steps
+
+          # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#using-a-github-hosted-runner
+          # When the job begins, GitHub automatically provisions a new VM for that job. 
+          # All steps in the job execute on the VM, allowing the steps in that job to share information using the runner's filesystem.
+
           az deployment group create --name vnet-aca -f iac/bicep/modules/aca/vnet.bicep -g ${{ env.RG_APP }} \
 
           az deployment group create --name aca-gh-self-hosted-runner -f iac/bicep/modules/gh/gh-self-hosted-runner.bicep -g ${{ env.RG_APP }} \
@@ -146,7 +158,7 @@ jobs:
           # eval `ssh-agent -s`
           # ssh-add
           # sshpass -p foo ssh username@host.example.com
-          $sshCommand -i ~/.ssh/${{ env.SSH_KEY_NAME }}
+          $sshCommand -i /home/runner/.ssh/${{ env.SSH_KEY_NAME }}
 
           echo " /home/"${{ env.ADM_USR_NAME }}
           ls /home/${{ env.ADM_USR_NAME }}
