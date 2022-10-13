@@ -55,13 +55,14 @@ param publisher string = 'Canonical'
 
 @allowed([
   'UbuntuServer'
-  '001-com-ubuntu-minimal-jammy'
+  '0001-com-ubuntu-minimal-jammy'
   '0001-com-ubuntu-server-jammy'
+  '0001-com-ubuntu-pro-jammy'
   '0001-com-ubuntu-server-focal'
   '0001-com-ubuntu-minimal-bionic'
   '0001-com-ubuntu-pro-bionic'
 ])
-param offer string =  '001-com-ubuntu-minimal-jammy'
+param offer string =  '0001-com-ubuntu-minimal-jammy'
 
 @description('The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version.')
 @allowed([
@@ -277,7 +278,7 @@ resource nsgrule 'Microsoft.Network/networkSecurityGroups/securityRules@2021-08-
 # az vm image list-offers --publisher Canonical --location $location --output table
 # az vm image list --publisher Canonical --offer UbuntuServer --location $location --output table --all
 # az vm image list --publisher Canonical --offer 0001-com-ubuntu-server-focal --location northeurope --output table --all
-# az vm image list --publisher Canonical --offer 001-com-ubuntu-minimal-jammy --location northeurope --output table --all
+# az vm image list --publisher Canonical --offer 0001-com-ubuntu-pro-jammy --location northeurope --output table --all
 
 # az vm image list-publishers --location $location --output table | grep -i RedHat
 # az vm image list-offers --publisher RedHat --location $location --output table
