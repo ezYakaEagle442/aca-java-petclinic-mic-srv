@@ -158,7 +158,7 @@ resource NSG 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
           direction: 'Inbound'
           sourceAddressPrefix: nsgRuleSourceAddressPrefix // Need to Allow access from local workstation
           sourcePortRange: '*'
-          destinationAddressPrefix: pip.properties.ipAddress // 'VirtualNetwork' pip.properties.ipAddress
+          destinationAddressPrefix: '*' // 'VirtualNetwork'
           destinationPortRange: '22'
         }
       }  
@@ -170,7 +170,7 @@ resource NSG 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
           sourcePortRange: '*'
           destinationPortRange: '22'
           sourceAddressPrefix: ghRunnerIP // // Need to Allow the GH Runner IP
-          destinationAddressPrefix: pip.properties.ipAddress // 'VirtualNetwork' 
+          destinationAddressPrefix: '*' // 'VirtualNetwork' 
           access: 'Allow'
           priority: 142
           direction: 'Inbound'
