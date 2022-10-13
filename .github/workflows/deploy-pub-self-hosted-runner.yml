@@ -88,9 +88,14 @@ jobs:
             -p nsgRuleSourceAddressPrefix="$LOCAL_IP" \
             -p adminPasswordOrKey="$pub_key" \
             -p autoShutdownNotificationEmail=${{ inputs.email }} 
-            
+
+          sshCommand=$(az deployment group show -n aca-gh-self-hosted-runner -g ${{ env.RG_APP }} --query properties.outputs.sshCommand.value | tr -d '"')
+          vmIpAddress=$(az deployment group show -n aca-gh-self-hosted-runner -g ${{ env.RG_APP }} --query properties.outputs.vmIpAddress.value | tr -d '"')
+
           echo "::set-output name=sshCommand::$sshCommand"
-          echo "::set-output name=vmIpAddress::$IP"
+          echo "::set-output name=vmIpAddress::$vmIpAddress"
+
+          echo "VM Deployed"
 
     - name: Setup Runner
       id: setup_runner      
