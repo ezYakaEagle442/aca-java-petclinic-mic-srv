@@ -180,7 +180,6 @@ resource NSG 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
   }
 }
 output nsgId string = NSG.id
-output nsgNicName string = NSG.properties.networkInterfaces[0].name
 output nsgsecurityRule0 string = NSG.properties.securityRules[0].name
 output nsgsecurityRule1 string = NSG.properties.securityRules[1].name
 
@@ -212,7 +211,7 @@ resource NIC1 'Microsoft.Network/networkInterfaces@2021-08-01' = {
 }
 
 output nicId string = NIC1.id
-output nicPublicIPAddressId string = NIC1.properties.ipConfigurations[0].properties.publicIPAddress.id
+// output nicPublicIPAddressId string = NIC1.properties.ipConfigurations[0].properties.publicIPAddress.id
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.compute/virtualmachines?tabs=bicep
 resource linuxVM 'Microsoft.Compute/virtualMachines@2022-03-01' = {
