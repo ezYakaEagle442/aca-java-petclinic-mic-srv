@@ -64,8 +64,7 @@ jobs:
     - name: Deploy VM
       id: deploy_VM      
       run: |
-          
-          ssh-keygen -t rsa -b 4096 -N ${{ env.SSH_PASSPHRASE }} -f ~/.ssh/${{ env.SSH_KEY_NAME }} -C "youremail@groland.grd"'
+          ssh-keygen -t rsa -b 4096 -N ${{ env.SSH_PASSPHRASE }} -f ~/.ssh/${{ env.SSH_KEY_NAME }} -C "youremail@groland.grd"
           pub_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}.pub`
           prv_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}`
 
