@@ -8,7 +8,7 @@ param vnetCidr string = '10.42.0.0/21' // /16 minimum ? soon /27 see https://git
 
 @description('Resource ID of a subnet for infrastructure components. This subnet must be in the same VNET as the subnet defined in runtimeSubnetId. Must not overlap with any other provided IP ranges.')
 param infrastructureSubnetName string = 'snet-infra' // used for the AKS nodes
-param infrastructureSubnetCidr string = '10.42.1.0/23' // The CIDR prefix must be smaller than or equal to 23
+param infrastructureSubnetCidr string = '10.42.0.0/23' // The CIDR prefix must be smaller than or equal to 23
 
 // https://docs.microsoft.com/en-us/azure/spring-cloud/how-to-deploy-in-azure-virtual-network?tabs=azure-portal#virtual-network-requirements
 var infrastructureSubnet = {
