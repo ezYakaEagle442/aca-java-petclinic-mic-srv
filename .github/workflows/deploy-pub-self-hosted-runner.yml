@@ -86,7 +86,7 @@ jobs:
             -p authenticationType="sshPublicKey" \
             -p ghRunnerIP="$LOCAL_IP" \
             -p nsgRuleSourceAddressPrefix="$LOCAL_IP" \
-            -p adminPasswordOrKey="$pub_key"
+            -p adminPasswordOrKey="$pub_key" \
             -p autoShutdownNotificationEmail=${{ inputs.email }} 
             
           echo "::set-output name=sshCommand::$sshCommand"
