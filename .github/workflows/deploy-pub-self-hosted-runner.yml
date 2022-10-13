@@ -92,8 +92,13 @@ jobs:
           sshCommand=$(az deployment group show -n aca-gh-self-hosted-runner -g ${{ env.RG_APP }} --query properties.outputs.sshCommand.value | tr -d '"')
           vmIpAddress=$(az deployment group show -n aca-gh-self-hosted-runner -g ${{ env.RG_APP }} --query properties.outputs.vmIpAddress.value | tr -d '"')
 
-          echo "::set-output name=sshCommand::$sshCommand"
+          # echo "::set-output name=sshCommand::$sshCommand"
           # echo "::set-output name=vmIpAddress::$vmIpAddress"
+
+          # https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+          # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
+          # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
+          echo "{sshCommand}={$sshCommand}" >> $GITHUB_OUTPUT
 
           echo "VM Deployed"
 
@@ -103,11 +108,12 @@ jobs:
           echo "Assigning Identity " ${{ env.ADMIN_SERVER_IDENTITY }} " to VM " ${{ env.LINUX_VM_NAME }}
           az vm identity assign --name ${{ env.LINUX_VM_NAME }} --identities ${{ env.ADMIN_SERVER_IDENTITY }} -g ${{ env.RG_APP }}
 
-          vmIpAddress=${{ needs.deploy-vm.outputs.vmIpAddress }}
           sshCommand=${{ needs.deploy-vm.outputs.sshCommand }}
-
-          echo "vmIpAddress" $vmIpAddress
+          # vmIpAddress=${{ needs.deploy-vm.outputs.vmIpAddress }}
+          
           echo "sshCommand" $sshCommand
+          # echo "vmIpAddress" $vmIpAddress
+
 
           pub_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}.pub`
           prv_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}`
