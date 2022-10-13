@@ -75,13 +75,13 @@ jobs:
             -p kvName=${{ env.KV_NAME }} \
             -p kvRGName=${{ env.RG_KV }} \
             -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
-            -p imageNameAdminServer=${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }}:$tag_id \
-            -p imageNameApiGateway=${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id \
-            -p imageNameDiscoveryServer=${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.DISCOVERY_SERVER }}:$tag_id \
-            -p imageNameConfigServer=${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.CONFIG_SERVER }}:$tag_id \
-            -p imageNameCustomersService=${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.CUSTOMERS_SERVICE }}:$tag_id \
-            -p imageNameVetsService=${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.VETS_SERVICE }}:$tag_id \
-            -p imageNameVisitsService=${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.VISITS_SERVICE }}:$tag_id
+            -p imageNameAdminServer="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }}:$tag_id" \
+            -p imageNameApiGateway="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id" \
+            -p imageNameDiscoveryServer="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.DISCOVERY_SERVER }}:$tag_id" \
+            -p imageNameConfigServer="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.CONFIG_SERVER }}:$tag_id" \
+            -p imageNameCustomersService="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.CUSTOMERS_SERVICE }}:$tag_id" \
+            -p imageNameVetsService="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.VETS_SERVICE }}:$tag_id" \
+            -p imageNameVisitsService="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.VISITS_SERVICE }}:$tag_id"
 
 
 
