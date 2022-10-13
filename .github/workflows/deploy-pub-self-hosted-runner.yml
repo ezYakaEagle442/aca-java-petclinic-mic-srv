@@ -48,7 +48,7 @@ jobs:
 
     outputs:
       sshCommand: ${{ steps.deploy_VM.outputs.sshCommand }}
-      # vmIpAddress: ${{ steps.deploy_VM.outputs.vmIpAddress }}
+      vmIpAddress: ${{ steps.deploy_VM.outputs.vmIpAddress }}
 
     steps:
     # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
@@ -67,7 +67,7 @@ jobs:
         creds: ${{ env.credentials }}
 
     - name: Deploy VM
-      id: deploy_VM      
+      id: deploy-vm      
       run: |
           ssh-keygen -t rsa -b 4096 -f ~/.ssh/${{ env.SSH_KEY_NAME }} -C ${{ env.SSH_KEY_EMAIL }} -N '' # -N '' for empty passphrase # -N ${{ env.SSH_PASSPHRASE }}
           pub_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}.pub`
@@ -90,7 +90,17 @@ jobs:
             -p autoShutdownNotificationEmail=${{ inputs.email }} 
 
           sshCommand=$(az deployment group show -n aca-gh-self-hosted-runner -g ${{ env.RG_APP }} --query properties.outputs.sshCommand.value | tr -d '"')
-          vmIpAddress=$(az deployment group show -n aca-gh-self-hosted-runner -g ${{ env.RG_APP }} --query properties.outputs.vmIpAddress.value | tr -d '"')
+          pipId=$(az deployment group show -n aca-gh-self-hosted-runner -g ${{ env.RG_APP }} --query properties.outputs.pipId.value | tr -d '"')
+          hostname=$(az deployment group show -n aca-gh-self-hosted-runner -g ${{ env.RG_APP }} --query properties.outputs.hostname.value | tr -d '"')
+          pipGUID=$(az deployment group show -n aca-gh-self-hosted-runner -g ${{ env.RG_APP }} --query properties.outputs.pipGUID.value | tr -d '"')
+
+          echo "hostname" $hostname
+          echo "sshCommand" $sshCommand
+          echo "pipId" $pipId
+          echo "pipGUID" $pipGUID
+
+          vmIpAddress=$(az network public-ip show --id $pipId -g  ${{ env.RG_APP }} | jq .ipAddress)
+          echo "vmIpAddress " $vmIpAddress
 
           # echo "::set-output name=sshCommand::$sshCommand"
           # echo "::set-output name=vmIpAddress::$vmIpAddress"
@@ -98,7 +108,11 @@ jobs:
           # https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
           # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
           # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
-          echo "{sshCommand}={$sshCommand}" >> $GITHUB_OUTPUT
+          echo "hostname=$hostname" >> $GITHUB_OUTPUT
+          echo "sshCommand=$sshCommand" >> $GITHUB_OUTPUT
+          echo "pipId=$pipId" >> $GITHUB_OUTPUT
+          echo "pipGUID=$pipGUID" >> $GITHUB_OUTPUT
+          echo "vmIpAddress=$vmIpAddress" >> $GITHUB_OUTPUT
 
           echo "VM Deployed"
 
@@ -108,8 +122,8 @@ jobs:
           echo "Assigning Identity " ${{ env.ADMIN_SERVER_IDENTITY }} " to VM " ${{ env.LINUX_VM_NAME }}
           az vm identity assign --name ${{ env.LINUX_VM_NAME }} --identities ${{ env.ADMIN_SERVER_IDENTITY }} -g ${{ env.RG_APP }}
 
-          sshCommand=${{ needs.deploy-vm.outputs.sshCommand }}
-          # vmIpAddress=${{ needs.deploy-vm.outputs.vmIpAddress }}
+          sshCommand=${{ steps.deploy-vm.outputs.sshCommand }}
+          vmIpAddress=${{ steps.deploy-vm.outputs.vmIpAddress }}
           
           echo "sshCommand" $sshCommand
           # echo "vmIpAddress" $vmIpAddress
@@ -122,12 +136,13 @@ jobs:
           # echo "prv_key" $prv_key
 
           # verify .ssh/authorized_keys
-          # eval `ssh-agent -s`
-          # ssh-add
-          ssh -i ~/.ssh/${{ env.SSH_KEY_NAME }} $sshCommand # <<< ${{ env.SSH_PASSPHRASE }}
+          ls /home/${{ env.ADM_USR_NAME }}/.ssh/authorized_keys
 
           # verify .ssh/authorized_keys
-          ls /home/${{ env.ADM_USR_NAME }}/.ssh/authorized_keys
+          # eval `ssh-agent -s`
+          # ssh-add
+          # sshpass -p foo ssh username@host.example.com
+          ssh -i ~/.ssh/${{ env.SSH_KEY_NAME }} $sshCommand
 
           # Once you have successfully connected to the VM, install the DevTools
 
@@ -164,6 +179,7 @@ jobs:
           # Valid values are only '18.04' and '20.04'
           # For other versions of Ubuntu, please use the tar.gz package
           ubuntu_release=`lsb_release -rs`
+          echo "ubuntu_release: " $ubuntu_release
           wget https://packages.microsoft.com/config/ubuntu/${ubuntu_release}/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
           sudo dpkg -i packages-microsoft-prod.deb
 
@@ -215,14 +231,14 @@ jobs:
               # https://gist.github.com/didof/be97b600ba3f9d1725b8c6d1c643c745
 
               # Create a folder
-              $ mkdir actions-runner && cd actions-runner # Download the latest runner package
-              $ curl -o actions-runner-linux-x64-2.298.2.tar.gz -L https://github.com/actions/runner/releases/download/v2.298.2/actions-runner-linux-x64-2.298.2.tar.gz # Optional: Validate the hash
-              $ echo "0bfd792196ce0ec6f1c65d2a9ad00215b2926ef2c416b8d97615265194477117  actions-runner-linux-x64-2.298.2.tar.gz" | shasum -a 256 -c # Extract the installer
-              $ tar xzf ./actions-runner-linux-x64-2.298.2.tar.gz
+              mkdir actions-runner && cd actions-runner # Download the latest runner package
+              curl -o actions-runner-linux-x64-2.298.2.tar.gz -L https://github.com/actions/runner/releases/download/v2.298.2/actions-runner-linux-x64-2.298.2.tar.gz # Optional: Validate the hash
+              echo "0bfd792196ce0ec6f1c65d2a9ad00215b2926ef2c416b8d97615265194477117  actions-runner-linux-x64-2.298.2.tar.gz" | shasum -a 256 -c # Extract the installer
+              tar xzf ./actions-runner-linux-x64-2.298.2.tar.gz
 
               # Create the runner and start the configuration experience
-              $ ./config.sh --url https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv --token AKMJLR37JSUP6ZEX3CNBEXTDI7TBU# Last step, run it!
-              $ ./run.sh
+              ./config.sh --url https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv --token AKMJLR37JSUP6ZEX3CNBEXTDI7TBU # Last step, run it!
+              ./run.sh
 
               # https://docs.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service#installing-the-service
               # see the install script at https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv/settings/actions/runners/new
