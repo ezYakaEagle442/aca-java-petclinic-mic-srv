@@ -61,6 +61,7 @@ param dnsLabelPrefix string = toLower('${linuxVMName}-${uniqueString(resourceGro
 ])
 param publisher string = 'Canonical'
 
+// https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners#supported-architectures-and-operating-systems-for-self-hosted-runners
 @allowed([
   'UbuntuServer'
   '0001-com-ubuntu-minimal-jammy'
