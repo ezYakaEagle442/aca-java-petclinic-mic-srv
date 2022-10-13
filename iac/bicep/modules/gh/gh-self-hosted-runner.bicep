@@ -42,9 +42,11 @@ param authenticationType string = 'sshPublicKey'
 @secure()
 param adminPasswordOrKey string
 
+@description('emailRecipient informed before the VM shutdown')
+param autoShutdownNotificationEmail string
+
 @description('Unique DNS Name for the Public IP used to access the Virtual Machine.')
 param dnsLabelPrefix string = toLower('${linuxVMName}-${uniqueString(resourceGroup().id)}')
-
 
 @allowed([
   'Canonical'
@@ -94,8 +96,18 @@ param ghRunnerIP string
 
 param nicName string = 'nic-aca-${appName}-client-vm'
 
+// https://learn.microsoft.com/en-us/azure/automanage/automanage-linux
 var linuxConfiguration = {
+  enableVMAgentPlatformUpdates: true
+  provisionVMAgent: true
   disablePasswordAuthentication: true
+  patchSettings: {
+    assessmentMode: 'AutomaticByPlatform'
+    automaticByPlatformSettings: {
+      rebootSetting: 'IfRequired'
+    }
+    patchMode: 'AutomaticByPlatform'
+  }  
   ssh: {
     publicKeys: [
       {
@@ -214,12 +226,18 @@ output nicId string = NIC1.id
 // output nicPublicIPAddressId string = NIC1.properties.ipConfigurations[0].properties.publicIPAddress.id
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.compute/virtualmachines?tabs=bicep
-resource linuxVM 'Microsoft.Compute/virtualMachines@2022-03-01' = {
+resource linuxVM 'Microsoft.Compute/virtualMachines@2022-08-01' = {
   name: linuxVMName
   location: location
   properties: {
     hardwareProfile: {
       vmSize: vmSize
+    }
+    osProfile: {
+      computerName: linuxVMName
+      adminUsername: adminUsername
+      adminPassword: adminPasswordOrKey
+      linuxConfiguration: linuxConfiguration
     }
     storageProfile: {
       osDisk: {
@@ -242,18 +260,32 @@ resource linuxVM 'Microsoft.Compute/virtualMachines@2022-03-01' = {
         }
       ]
     }
-    osProfile: {
-      computerName: linuxVMName
-      adminUsername: adminUsername
-      adminPassword: adminPasswordOrKey
-      linuxConfiguration: ((authenticationType == 'password') ? null : linuxConfiguration)
-    }
   }
 }
 
 output adminUsername string = adminUsername
 output sshCommand string = 'ssh ${adminUsername}@${pip.properties.dnsSettings.fqdn}'
 
+// https://docs.microsoft.com/en-us/azure/templates/microsoft.devtestlab/schedules?tabs=bicep
+resource AutoShutdownSchedule 'Microsoft.DevTestLab/schedules@2018-09-15' = {
+  name: 'shutdown-computevm-${linuxVMName}'
+  location: location
+  properties: {
+    dailyRecurrence: {
+      time: '19:00'
+    }
+    notificationSettings: {
+      emailRecipient: autoShutdownNotificationEmail
+      notificationLocale: 'EN'
+      status: 'Enabled'
+      timeInMinutes: 30
+    }
+    status: 'Enabled'
+    targetResourceId: linuxVM.id
+    taskType: 'ComputeVmShutdownTask'
+    timeZoneId: 'Romance Standard Time'
+  }
+}
 
 
 /*
