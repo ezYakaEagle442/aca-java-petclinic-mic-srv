@@ -48,7 +48,7 @@ jobs:
 
     outputs:
       sshCommand: ${{ steps.deploy_VM.outputs.sshCommand }}
-      vmIpAddress: ${{ steps.deploy_VM.outputs.vmIpAddress }}
+      # vmIpAddress: ${{ steps.deploy_VM.outputs.vmIpAddress }}
 
     steps:
     # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
@@ -93,7 +93,7 @@ jobs:
           vmIpAddress=$(az deployment group show -n aca-gh-self-hosted-runner -g ${{ env.RG_APP }} --query properties.outputs.vmIpAddress.value | tr -d '"')
 
           echo "::set-output name=sshCommand::$sshCommand"
-          echo "::set-output name=vmIpAddress::$vmIpAddress"
+          # echo "::set-output name=vmIpAddress::$vmIpAddress"
 
           echo "VM Deployed"
 

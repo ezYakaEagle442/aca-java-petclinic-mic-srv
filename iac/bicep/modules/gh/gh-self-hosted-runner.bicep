@@ -156,7 +156,6 @@ resource pip 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
 output pipId string = pip.id
 output hostname string = pip.properties.dnsSettings.fqdn
 output pipGUID string = pip.properties.resourceGuid
-output pipAddress string = pip.properties.ipAddress
 
 resource NSG 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
   name: nsgName
