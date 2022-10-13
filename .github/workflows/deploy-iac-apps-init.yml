@@ -65,7 +65,23 @@ jobs:
           # docker login ${{ env.REGISTRY_URL }} --username 00000000-0000-0000-0000-000000000000 <<< $TOKEN
 
           az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
-          
+
+          imageNameAdminServer="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }}:$tag_id"
+          imageNameApiGateway="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id"
+          imageNameDiscoveryServer="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.DISCOVERY_SERVER }}:$tag_id"
+          imageNameConfigServer="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.CONFIG_SERVER }}:$tag_id"
+          imageNameCustomersService="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.CUSTOMERS_SERVICE }}:$tag_id"
+          imageNameVetsService="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.VETS_SERVICE }}:$tag_id"
+          imageNameVisitsService="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.VISITS_SERVICE }}:$tag_id"
+
+          echo "imageNameAdminServer= " $imageNameAdminServer
+          echo "imageNameApiGateway= " $imageNameApiGateway
+          echo "imageNameConfigServer= " $imageNameConfigServer
+          echo "imageNameCustomersService= " $imageNameCustomersService
+          echo "imageNameVetsService= " $imageNameVetsService
+          echo "imageNameVisitsService= " $imageNameVisitsService
+          echo "imageNameDiscoveryServer= " $imageNameDiscoveryServer
+
           az deployment group create --name aca-petclinic-apps -f iac/bicep/petclinic-apps.bicep -g ${{ env.RG_APP }} \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
@@ -75,15 +91,13 @@ jobs:
             -p kvName=${{ env.KV_NAME }} \
             -p kvRGName=${{ env.RG_KV }} \
             -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
-            -p imageNameAdminServer="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }}:$tag_id" \
-            -p imageNameApiGateway="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id" \
-            -p imageNameDiscoveryServer="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.DISCOVERY_SERVER }}:$tag_id" \
-            -p imageNameConfigServer="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.CONFIG_SERVER }}:$tag_id" \
-            -p imageNameCustomersService="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.CUSTOMERS_SERVICE }}:$tag_id" \
-            -p imageNameVetsService="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.VETS_SERVICE }}:$tag_id" \
-            -p imageNameVisitsService="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.VISITS_SERVICE }}:$tag_id"
-
-
+            -p imageNameAdminServer=$imageNameAdminServer \
+            -p imageNameApiGateway=$imageNameApiGateway \
+            -p imageNameDiscoveryServer=$imageNameDiscoveryServer \
+            -p imageNameConfigServer=$imageNameConfigServer \
+            -p imageNameCustomersService=$imageNameCustomersService \
+            -p imageNameVetsService=$imageNameVetsService \
+            -p imageNameVisitsService=$imageNameVisitsService
 
       shell: bash
 
