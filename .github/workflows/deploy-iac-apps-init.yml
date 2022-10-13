@@ -59,10 +59,10 @@ jobs:
 
           acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryUsr.value | tr -d '"')
           acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryPwd.value | tr -d '"')
-          az acr login --name ${{ env.REGISTRY_URL }} -u $acr_usr -p $acr_pwd
+          # az acr login --name ${{ env.REGISTRY_URL }} -u $acr_usr -p $acr_pwd
           
           TOKEN=$(az acr login --name  ${{ env.REGISTRY_URL }} --expose-token --output tsv --query accessToken)
-          docker login ${{ env.REGISTRY_URL }} --username 00000000-0000-0000-0000-000000000000 <<< $TOKEN
+          # docker login ${{ env.REGISTRY_URL }} --username 00000000-0000-0000-0000-000000000000 <<< $TOKEN
 
           az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
           
