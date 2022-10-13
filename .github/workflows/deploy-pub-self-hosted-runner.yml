@@ -69,7 +69,7 @@ jobs:
     - name: Deploy VM
       id: deploy_VM      
       run: |
-          ssh-keygen -t rsa -b 4096 -N ${{ env.SSH_PASSPHRASE }} -f ~/.ssh/${{ env.SSH_KEY_NAME }} -C ${{ env.SSH_KEY_EMAIL }}
+          ssh-keygen -t rsa -b 4096 -f ~/.ssh/${{ env.SSH_KEY_NAME }} -C ${{ env.SSH_KEY_EMAIL }} # -N ${{ env.SSH_PASSPHRASE }}
           pub_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}.pub`
           prv_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}`
 
@@ -113,7 +113,7 @@ jobs:
           # verify .ssh/authorized_keys
           # eval `ssh-agent -s`
           # ssh-add
-          ssh -i ~/.ssh/${{ env.SSH_KEY_NAME }} $sshCommand <<< ${{ env.SSH_PASSPHRASE }}
+          ssh -i ~/.ssh/${{ env.SSH_KEY_NAME }} $sshCommand # <<< ${{ env.SSH_PASSPHRASE }}
 
           # verify .ssh/authorized_keys
           ls /home/${{ env.ADM_USR_NAME }}/.ssh/authorized_keys
