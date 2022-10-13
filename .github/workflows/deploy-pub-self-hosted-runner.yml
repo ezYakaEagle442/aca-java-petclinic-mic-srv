@@ -122,11 +122,11 @@ jobs:
           echo "Assigning Identity " ${{ env.ADMIN_SERVER_IDENTITY }} " to VM " ${{ env.LINUX_VM_NAME }}
           az vm identity assign --name ${{ env.LINUX_VM_NAME }} --identities ${{ env.ADMIN_SERVER_IDENTITY }} -g ${{ env.RG_APP }}
 
-          sshCommand=${{ steps.deploy-vm.outputs.sshCommand }}
           vmIpAddress=${{ steps.deploy-vm.outputs.vmIpAddress }}
-          
-          echo "sshCommand= " $sshCommand
-          echo "vmIpAddress= " $vmIpAddress
+          echo "vmIpAddress= " "$vmIpAddress"
+
+          sshCommand=${{ steps.deploy-vm.outputs.sshCommand }}          
+          echo "sshCommand= " "$sshCommand"
 
           pub_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}.pub`
           prv_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}`
