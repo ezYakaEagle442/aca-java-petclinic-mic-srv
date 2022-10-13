@@ -73,9 +73,7 @@ jobs:
           echo "ghRunnerIP " $LOCAL_IP
           
           az deployment group create --name vnet-aca -f iac/bicep/modules/aca/vnet.bicep -g ${{ env.RG_APP }} \
-            -p appName=${{ env.APP_NAME }} \
-            -p location=${{ env.LOCATION }}
-                        
+
           az deployment group create --name aca-gh-self-hosted-runner -f iac/bicep/modules/gh/gh-self-hosted-runner.bicep -g ${{ env.RG_APP }} \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
