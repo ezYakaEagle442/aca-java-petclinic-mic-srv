@@ -33,7 +33,11 @@ env:
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
 on:
   workflow_dispatch:
-
+    inputs: # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_dispatchinputs
+      email:
+        description: emailRecipient to be informed before the VM shutdown
+        required: true
+        type: string
 jobs:
 
   deploy-vm:
@@ -83,7 +87,8 @@ jobs:
             -p ghRunnerIP="$LOCAL_IP" \
             -p nsgRuleSourceAddressPrefix="$LOCAL_IP" \
             -p adminPasswordOrKey="$pub_key"
-
+            -p autoShutdownNotificationEmail=${{ inputs.email }} 
+            
           echo "::set-output name=sshCommand::$sshCommand"
           echo "::set-output name=vmIpAddress::$IP"
 
