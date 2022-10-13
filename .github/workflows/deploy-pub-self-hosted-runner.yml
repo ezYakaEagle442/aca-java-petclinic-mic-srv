@@ -76,10 +76,9 @@ jobs:
             -p linuxVMName=${{ env.LINUX_VM_NAME }}
             -p adminUsername=${{ env.ADM_USR_NAME }} \
             -p authenticationType=sshPublicKey \
-            -p adminPasswordOrKey=$pub_key
-            -p ghRunnerIP=$LOCAL_IP
-            -p infrastructureSubnetID=
-            -p nsgRuleSourceAddressPrefix=
+            -p adminPasswordOrKey=$pub_key \
+            -p ghRunnerIP=$LOCAL_IP \
+            -p nsgRuleSourceAddressPrefix=$LOCAL_IP
 
           echo "::set-output name=sshCommand::$sshCommand"
           echo "::set-output name=vmIpAddress::$IP"

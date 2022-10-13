@@ -21,9 +21,6 @@ param location string = resourceGroup().location
 
 param vnetName string = 'vnet-aca'
 
-@description('Resource ID of a subnet for infrastructure components. This subnet must be in the same VNET as the subnet defined in runtimeSubnetId. Must not overlap with any other provided IP ranges.')
-param infrastructureSubnetID string
-
 @description('Linux client VM deployed to the VNet. Computer name cannot be more than 15 characters long')
 param linuxVMName string = 'vm-linuxacapetcli'
 
@@ -116,7 +113,11 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing =  {
 output vnetId string = vnet.id
 output vnetGUID string = vnet.properties.resourceGuid
 output subnetId string = vnet.properties.subnets[0].id
+
+Resource ID of a subnet for infrastructure components. This subnet must be in the same VNET as the subnet defined in runtimeSubnetId. Must not overlap with any other provided IP ranges.
+var infrastructureSubnetID = vnet.properties.subnets[0].id
 */
+
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.network/publicipaddresses?tabs=bicep#publicipaddresssku
 resource pip 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
