@@ -2,6 +2,12 @@
 // SSH Test: ssh -i ~/.ssh/$ssh_key $admin_username@$network_interface_pub_ip
 
 /*
+https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+Warning: The `set-output` command is deprecated and will be disabled soon. 
+Please upgrade to using Environment Files. For more information see: 
+*/
+
+/*
 ssh-keygen -t rsa -b 4096 -N $ssh_passphrase -f ~/.ssh/$ssh_key -C "youremail@groland.grd"'
 
 az deployment group create --name aca-gh-self-hosted-runner -f iac/bicep/gh/gh-self-hosted-runner.bicep -g ${{ env.RG_APP }} \

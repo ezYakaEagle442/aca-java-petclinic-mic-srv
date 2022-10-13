@@ -1,3 +1,7 @@
+# https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+# Warning: The `set-output` command is deprecated and will be disabled soon. 
+# Please upgrade to using Environment Files. 
+
 name: Called Test Workflow
 env:
   APP_NAME: petcliaca

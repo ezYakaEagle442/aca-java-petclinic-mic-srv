@@ -1,3 +1,7 @@
+# https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+# Warning: The `set-output` command is deprecated and will be disabled soon. 
+# Please upgrade to using Environment Files. 
+
 # This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
