@@ -210,6 +210,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   identity: {
     // https://docs.microsoft.com/en-us/azure/container-apps/managed-identity?tabs=portal%2Cjava#configure-managed-identities
     type: 'UserAssigned'
+    // Workaround for System MI : create firs ta dummy fake HelloWorld, get the ID, then deploy a new revision with the actual Container image 
     userAssignedIdentities: {
       '${adminServerIdentity.id}': {}
     }
@@ -417,7 +418,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   }
 }
 
-output adminServerContainerAppIdentity string = AdminServerContainerApp.identity.principalId
+// output adminServerContainerAppIdentity string = AdminServerContainerApp.identity.userAssignedIdentities.${adminServerIdentity.id}.principalId
 output adminServerContainerAppOutboundIPAddresses array = AdminServerContainerApp.properties.outboundIPAddresses
 output adminServerContainerAppLatestRevisionName string = AdminServerContainerApp.properties.latestRevisionName
 output adminServerContainerAppLatestRevisionFqdn string = AdminServerContainerApp.properties.latestRevisionFqdn
@@ -561,7 +562,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   }
 }
 
-output apiGatewayContainerAppIdentity string = ApiGatewayContainerApp.identity.principalId
+//output apiGatewayContainerAppIdentity string = ApiGatewayContainerApp.identity.principalId
 output apiGatewayContainerAppOutboundIPAddresses array = ApiGatewayContainerApp.properties.outboundIPAddresses
 output apiGatewayContainerAppLatestRevisionName string = ApiGatewayContainerApp.properties.latestRevisionName
 output apiGatewayContainerAppLatestRevisionFqdn string = ApiGatewayContainerApp.properties.latestRevisionFqdn
@@ -705,7 +706,7 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   }
 }
 
-output configServerContainerAppIdentity string = ConfigServerContainerApp.identity.principalId
+//output configServerContainerAppIdentity string = ConfigServerContainerApp.identity.principalId
 output configServerContainerAppOutboundIPAddresses array = ConfigServerContainerApp.properties.outboundIPAddresses
 output configServerContainerAppLatestRevisionName string = ConfigServerContainerApp.properties.latestRevisionName
 output configServerContainerAppLatestRevisionFqdn string = ConfigServerContainerApp.properties.latestRevisionFqdn
@@ -850,7 +851,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
   }
 }
 
-output customersServiceContainerAppIdentity string = CustomersServiceContainerApp.identity.principalId
+//output customersServiceContainerAppIdentity string = CustomersServiceContainerApp.identity.principalId
 output customersServiceContainerAppOutboundIPAddresses array = CustomersServiceContainerApp.properties.outboundIPAddresses
 output customersServiceContainerAppLatestRevisionName string = CustomersServiceContainerApp.properties.latestRevisionName
 output customersServiceContainerAppLatestRevisionFqdn string = CustomersServiceContainerApp.properties.latestRevisionFqdn
@@ -995,7 +996,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   }
 }
 
-output vetsServiceContainerAppNameContainerAppIdentity string = VetsServiceContainerApp.identity.principalId
+//output vetsServiceContainerAppNameContainerAppIdentity string = VetsServiceContainerApp.identity.principalId
 output vetsServiceContainerAppOutboundIPAddresses array = VetsServiceContainerApp.properties.outboundIPAddresses
 output vetsServiceContainerAppLatestRevisionName string = VetsServiceContainerApp.properties.latestRevisionName
 output vetsServiceContainerAppLatestRevisionFqdn string = VetsServiceContainerApp.properties.latestRevisionFqdn
@@ -1141,7 +1142,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   }
 }
 
-output visitsServiceContainerAppIdentity string = VisitsServiceContainerApp.identity.principalId
+//output visitsServiceContainerAppIdentity string = VisitsServiceContainerApp.identity.principalId
 output visitsServiceContainerAppOutboundIPAddresses array = VisitsServiceContainerApp.properties.outboundIPAddresses
 output visitsServiceContainerAppLatestRevisionName string = VisitsServiceContainerApp.properties.latestRevisionName
 output visitsServiceContainerAppLatestRevisionFqdn string = VisitsServiceContainerApp.properties.latestRevisionFqdn
