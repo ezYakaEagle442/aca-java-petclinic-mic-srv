@@ -139,18 +139,21 @@ jobs:
           echo "ls /home"
           ls /home
 
-          echo "/home/runner/.ssh/"${{ env.SSH_KEY_NAME }}
+          echo "ls /home/runner/.ssh/"${{ env.SSH_KEY_NAME }}
           ls /home/runner/.ssh/${{ env.SSH_KEY_NAME }}
           echo ""
 
-          echo " /home/"${{ env.ADM_USR_NAME }}
-          ls /home/${{ env.ADM_USR_NAME }}
-          echo ""
-          
           # eval `ssh-agent -s`
           # ssh-add
           # sshpass -p foo ssh username@host.example.com
           $sshCommand -i ~/.ssh/${{ env.SSH_KEY_NAME }}
+
+          echo " /home/"${{ env.ADM_USR_NAME }}
+          ls /home/${{ env.ADM_USR_NAME }}
+          echo ""
+
+          # verify .ssh/authorized_keys
+          ls /home/${{ env.ADM_USR_NAME }}
 
           # Once you have successfully connected to the VM, install the DevTools
 
