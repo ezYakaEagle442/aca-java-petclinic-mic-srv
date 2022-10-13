@@ -103,9 +103,11 @@ var linuxConfiguration = {
   disablePasswordAuthentication: true
   patchSettings: { // https://learn.microsoft.com/en-us/azure/virtual-machines/automatic-vm-guest-patching#supported-os-images
     assessmentMode: 'ImageDefault'
+    /* AutomaticByPlatformSettings cannot be set if the PatchMode is not 'AutomaticByPlatform' 
     automaticByPlatformSettings: {
       rebootSetting: 'IfRequired'
     }
+    */
     patchMode: 'ImageDefault'
   }  
   ssh: {
