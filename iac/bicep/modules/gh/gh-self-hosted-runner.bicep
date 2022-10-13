@@ -107,7 +107,7 @@ var linuxConfiguration = {
 
 var osDiskType = 'Standard_LRS'
 
-/*
+
 resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing =  {
   name: vnetName
 }
@@ -116,9 +116,9 @@ output vnetId string = vnet.id
 output vnetGUID string = vnet.properties.resourceGuid
 output subnetId string = vnet.properties.subnets[0].id
 
-Resource ID of a subnet for infrastructure components. This subnet must be in the same VNET as the subnet defined in runtimeSubnetId. Must not overlap with any other provided IP ranges.
+// Resource ID of a subnet for infrastructure components. This subnet must be in the same VNET as the subnet defined in runtimeSubnetId. Must not overlap with any other provided IP ranges.
 var infrastructureSubnetID = vnet.properties.subnets[0].id
-*/
+
 
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.network/publicipaddresses?tabs=bicep#publicipaddresssku
@@ -193,11 +193,9 @@ resource NIC1 'Microsoft.Network/networkInterfaces@2021-08-01' = {
           }
           privateIPAllocationMethod: 'Dynamic'
           primary: true
-          /*
           subnet: {
             id: infrastructureSubnetID
           }
-          */
         }
       }
     ]
