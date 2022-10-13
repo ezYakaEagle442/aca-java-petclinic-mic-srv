@@ -31,7 +31,7 @@ param nsgRuleSourceAddressPrefix string
 
 param nicName string = 'nic-aca-${appName}-client-vm'
 
-@description('emailRecipient ainformed before the VM shutdown')
+@description('emailRecipient informed before the VM shutdown')
 param autoShutdownNotificationEmail string
 
 resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing =  {
