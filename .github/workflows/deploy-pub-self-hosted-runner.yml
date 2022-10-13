@@ -96,8 +96,14 @@ jobs:
           vmIpAddress=${{ needs.deploy-vm.outputs.vmIpAddress }}
           sshCommand=${{ needs.deploy-vm.outputs.sshCommand }}
 
+          echo "vmIpAddress" $vmIpAddress
+          echo "sshCommand" $sshCommand
+
           pub_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}.pub`
           prv_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}`
+
+          echo "pub_key" $pub_key
+          # echo "prv_key" $prv_key
 
           # verify .ssh/authorized_keys
           # eval `ssh-agent -s`
@@ -105,7 +111,7 @@ jobs:
           ssh -i ~/.ssh/${{ env.SSH_KEY_NAME }} $sshCommand <<< ${{ env.SSH_PASSPHRASE }}
 
           # verify .ssh/authorized_keys
-          ls ~/.ssh/authorized_keys
+          ls /home/${{ env.ADM_USR_NAME }}/.ssh/authorized_keys
 
           # Once you have successfully connected to the VM, install the DevTools
 
