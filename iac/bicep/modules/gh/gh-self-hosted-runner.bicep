@@ -101,12 +101,12 @@ var linuxConfiguration = {
   enableVMAgentPlatformUpdates: true
   provisionVMAgent: true
   disablePasswordAuthentication: true
-  patchSettings: {
-    assessmentMode: 'AutomaticByPlatform'
+  patchSettings: { // https://learn.microsoft.com/en-us/azure/virtual-machines/automatic-vm-guest-patching#supported-os-images
+    assessmentMode: 'ImageDefault'
     automaticByPlatformSettings: {
       rebootSetting: 'IfRequired'
     }
-    patchMode: 'AutomaticByPlatform'
+    patchMode: 'ImageDefault'
   }  
   ssh: {
     publicKeys: [
