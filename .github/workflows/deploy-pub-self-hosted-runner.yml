@@ -52,7 +52,6 @@ jobs:
     - name: Set Base environment variables
       run: |
         echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV
-        echo "LOCAL_IP " $LOCAL_IP
       shell: bash
 
     - name: Checkout
@@ -75,11 +74,11 @@ jobs:
           az deployment group create --name aca-gh-self-hosted-runner -f iac/bicep/modules/gh/gh-self-hosted-runner.bicep -g ${{ env.RG_APP }} \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
-            -p linuxVMName=${{ env.LINUX_VM_NAME }}
+            -p linuxVMName=${{ env.LINUX_VM_NAME }} \
             -p adminUsername=${{ env.ADM_USR_NAME }} \
             -p authenticationType="sshPublicKey" \
-            -p ghRunnerIP=$LOCAL_IP \
-            -p nsgRuleSourceAddressPrefix=$LOCAL_IP \
+            -p ghRunnerIP="$LOCAL_IP" \
+            -p nsgRuleSourceAddressPrefix="$LOCAL_IP" \
             -p adminPasswordOrKey="$pub_key"
 
           echo "::set-output name=sshCommand::$sshCommand"
