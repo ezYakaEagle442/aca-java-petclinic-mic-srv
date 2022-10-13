@@ -55,13 +55,14 @@ jobs:
           set -euo pipefail
           access_token=$(az account get-access-token --query accessToken -o tsv)
           refresh_token=$(curl https://${{ env.REGISTRY_URL }}/oauth2/exchange -v -d "grant_type=access_token&service=${{ env.REGISTRY_URL }}&access_token=$access_token" | jq -r .refresh_token)
-          docker login ${{ env.REGISTRY_URL }} -u 00000000-0000-0000-0000-000000000000 --password-stdin <<< "$refresh_token"
+          # docker login ${{ env.REGISTRY_URL }} -u 00000000-0000-0000-0000-000000000000 --password-stdin <<< "$refresh_token"
 
           acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryUsr.value | tr -d '"')
           acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryPwd.value | tr -d '"')
           az acr login --name ${{ env.REGISTRY_URL }} -u $acr_usr -p $acr_pwd
           
-          # az acr login --name ${{ env.REGISTRY_URL }} --expose-token
+          TOKEN=$(az acr login --name  ${{ env.REGISTRY_URL }} --expose-token --output tsv --query accessToken)
+          docker login ${{ env.REGISTRY_URL }} --username 00000000-0000-0000-0000-000000000000 <<< $TOKEN
 
           az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
           
