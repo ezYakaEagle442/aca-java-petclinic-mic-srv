@@ -11,6 +11,7 @@ env:
 
   ADM_USR_NAME: adm_run
   SSH_KEY_NAME: gha-runner
+  SSH_KEY_EMAIL:  youremail@groland.grd
   LINUX_VM_NAME: vm-linux-gha-run-acapetcli
 
   # ==== Identities ====
@@ -64,7 +65,7 @@ jobs:
     - name: Deploy VM
       id: deploy_VM      
       run: |
-          ssh-keygen -t rsa -b 4096 -N ${{ env.SSH_PASSPHRASE }} -f ~/.ssh/${{ env.SSH_KEY_NAME }} -C "youremail@groland.grd"
+          ssh-keygen -t rsa -b 4096 -N ${{ env.SSH_PASSPHRASE }} -f ~/.ssh/${{ env.SSH_KEY_NAME }} -C ${{ env.SSH_KEY_EMAIL }}
           pub_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}.pub`
           prv_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}`
 
@@ -75,7 +76,7 @@ jobs:
             -p location=${{ env.LOCATION }} \
             -p linuxVMName=${{ env.LINUX_VM_NAME }}
             -p adminUsername=${{ env.ADM_USR_NAME }} \
-            -p authenticationType=sshPublicKey \
+            -p authenticationType="sshPublicKey" \
             -p adminPasswordOrKey=$pub_key \
             -p ghRunnerIP=$LOCAL_IP \
             -p nsgRuleSourceAddressPrefix=$LOCAL_IP
