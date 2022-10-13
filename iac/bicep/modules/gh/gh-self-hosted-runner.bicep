@@ -87,7 +87,7 @@ param nsgName string = 'nsg-aca-${appName}-app-client'
 param nsgRuleName string = 'Allow SSH from local dev station'
 
 @description('The CIDR or source IP range. Asterisk "*" can also be used to match all source IPs. Default tags such as "VirtualNetwork", "AzureLoadBalancer" and "Internet" can also be used. If this is an ingress rule, specifies where network traffic originates from.')
-param nsgRuleSourceAddressPrefix string
+param nsgRuleSourceAddressPrefix string = '*'
 
 @description('The GitHub Runner IP adress')
 param ghRunnerIP string
@@ -151,7 +151,7 @@ resource NSG 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
           protocol: 'Tcp'
           access: 'Allow'
           direction: 'Inbound'
-          sourceAddressPrefix: '*' // Need to Allow the GH Runner IP
+          sourceAddressPrefix: nsgRuleSourceAddressPrefix // Need to Allow access from local workstation
           sourcePortRange: '*'
           destinationAddressPrefix: pip.properties.ipAddress // 'VirtualNetwork' pip.properties.ipAddress
           destinationPortRange: '22'

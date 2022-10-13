@@ -68,6 +68,8 @@ jobs:
           pub_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}.pub`
           prv_key=`cat ~/.ssh/${{ env.SSH_KEY_NAME }}`
 
+          echo "pub_key" $pub_key
+
           az deployment group create --name aca-gh-self-hosted-runner -f iac/bicep/modules/gh/gh-self-hosted-runner.bicep -g ${{ env.RG_APP }} \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
@@ -75,6 +77,9 @@ jobs:
             -p adminUsername=${{ env.ADM_USR_NAME }} \
             -p authenticationType=sshPublicKey \
             -p adminPasswordOrKey=$pub_key
+            -p ghRunnerIP=$LOCAL_IP
+            -p infrastructureSubnetID=
+            -p nsgRuleSourceAddressPrefix=
 
           echo "::set-output name=sshCommand::$sshCommand"
           echo "::set-output name=vmIpAddress::$IP"
