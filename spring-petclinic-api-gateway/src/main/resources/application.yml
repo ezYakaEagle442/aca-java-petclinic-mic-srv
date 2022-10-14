@@ -3,19 +3,19 @@ spring:
     gateway: # https://docs.spring.io/spring-cloud-gateway/docs/current/reference/html/#the-path-route-predicate-factory
       routes:
         - id: vets-service
-          uri: http://vets-service
+          uri: http://${VETS_SVC_URL}
           predicates:
             - Path=/api/vet/**
           filters:
             - StripPrefix=2
         - id: visits-service
-          uri: http://visits-service
+          uri: http://${VISITS_SVC_URL}
           predicates:
             - Path=/api/visit/**
           filters:
             - StripPrefix=2
         - id: customers-service
-          uri: http://customers-service
+          uri: http://${CUSTOMERS_SVC_URL}
           predicates:
             - Path=/api/customer/**
           filters:
