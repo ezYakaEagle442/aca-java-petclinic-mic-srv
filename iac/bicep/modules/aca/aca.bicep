@@ -575,157 +575,6 @@ output configServerContainerAppIngressFqdn string = ConfigServerContainerApp.pro
 output configServerContainerAppConfigSecrets array = ConfigServerContainerApp.properties.configuration.secrets
 
 
-resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
-  name: apiGatewayContainerAppName
-  location: location
-  identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${apiGatewayIdentity.id}': {}
-    }    
-  }
-  properties: {
-    managedEnvironmentId: corpManagedEnvironment.id 
-    configuration: {
-      activeRevisionsMode: 'Multiple'
-      ingress: {
-        allowInsecure: true
-        external: true
-        targetPort: 8080
-        traffic: [
-          {
-            latestRevision: true
-            // revisionName: revisionName Traffic weight cannot use "LatestRevision: true" and "RevisionName" at the same time
-            weight: 100
-          }
-        ]
-        transport: 'auto'
-      }
-      registries: [
-        {
-          // Managedidentity is enabled on ACR
-          server: registryUrl
-          identity: apiGatewayIdentity.id
-          //username: registryUsr
-          // passwordSecretRef: 'registrypassword'
-        }
-      ]
-      secrets: [
-        {
-          name: 'appinscon'
-          value: appInsightsInstrumentationKey
-        }
-        {
-          name: 'springcloudazuretenantid'
-          value: springCloudAzureTenantId
-        }
-        {
-          name: 'springcloudazurekvendpoint'
-          value: springCloudAzureKeyVaultEndpoint
-        }            
-      ]
-    }
-    template: {
-      containers: [
-        { /*
-          command: [
-            'java, -javaagent:"/tmp/app/applicationinsights-agent-3.4.1.jar", org.springframework.boot.loader.JarLauncher, --server.port=8080, --spring.profiles.active=docker,mysql'
-          ]*/
-          env: [
-            {
-              name: 'SPRING_PROFILES_ACTIVE'
-              value: 'docker,mysql'
-            }
-            {
-              // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
-              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-              secretRef: 'appinscon'
-            }
-            {
-              name: 'SPRING_CLOUD_AZURE_TENANT_ID'
-              secretRef: 'springcloudazuretenantid'
-            }   
-            {
-              name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
-              secretRef: 'springcloudazurekvendpoint'
-            }
-            {
-              name: 'CFG_SRV_URL'
-              value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
-            }                    
-          ]
-          image: imageNameApiGateway
-          name: apiGatewayContainerAppName
-          probes: [
-            {
-              failureThreshold: 5
-              httpGet: {
-                path: '/manage/health/liveness' /* /actuator */
-                port: 8081
-                scheme: 'HTTP'
-              }
-              initialDelaySeconds: 30
-              periodSeconds: 60
-              successThreshold: 5              
-              timeoutSeconds: 30
-              type: 'Liveness'
-            }
-            {
-              failureThreshold: 5
-              httpGet: {
-                path: '/manage/health/readiness' /* /actuator */
-                port: 8081
-                scheme: 'HTTP'
-              }
-              initialDelaySeconds: 30
-              periodSeconds: 60
-              successThreshold: 5              
-              timeoutSeconds: 30
-              type: 'Readiness'
-            }            
-          ]
-          resources: {
-            cpu: any(containerResourcesCpu)
-            memory: containerResourcesMemory
-          }
-        }
-      ]
-      scale: {
-        maxReplicas: 10
-        minReplicas: 1
-        rules: [
-          {
-            http: {
-              /*
-              auth: [
-                {
-                  secretRef: 'string'
-                  triggerParameter: 'string'
-                }
-              ]
-              */
-              metadata: {
-                concurrentRequests: '10'
-              }
-            }
-            name: 'http-scale'
-          }
-        ]
-      }
-    }
-  }
-  dependsOn:  [
-    ConfigServerContainerApp
-  ]
-}
-
-//output apiGatewayContainerAppIdentity string = ApiGatewayContainerApp.identity.principalId
-output apiGatewayContainerAppOutboundIPAddresses array = ApiGatewayContainerApp.properties.outboundIPAddresses
-output apiGatewayContainerAppLatestRevisionName string = ApiGatewayContainerApp.properties.latestRevisionName
-output apiGatewayContainerAppLatestRevisionFqdn string = ApiGatewayContainerApp.properties.latestRevisionFqdn
-output apiGatewayContainerAppIngressFqdn string = ApiGatewayContainerApp.properties.configuration.ingress.fqdn
-output apiGatewayContainerAppConfigSecrets array = ApiGatewayContainerApp.properties.configuration.secrets
-
 resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: customersServiceContainerAppName
   location: location
@@ -1179,3 +1028,158 @@ output visitsServiceContainerAppLatestRevisionName string = VisitsServiceContain
 output visitsServiceContainerAppLatestRevisionFqdn string = VisitsServiceContainerApp.properties.latestRevisionFqdn
 output visitsServiceContainerAppIngressFqdn string = VisitsServiceContainerApp.properties.configuration.ingress.fqdn
 output visitsServiceContainerAppConfigSecrets array = VisitsServiceContainerApp.properties.configuration.secrets
+
+
+resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+  name: apiGatewayContainerAppName
+  location: location
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${apiGatewayIdentity.id}': {}
+    }    
+  }
+  properties: {
+    managedEnvironmentId: corpManagedEnvironment.id 
+    configuration: {
+      activeRevisionsMode: 'Multiple'
+      ingress: {
+        allowInsecure: true
+        external: true
+        targetPort: 8080
+        traffic: [
+          {
+            latestRevision: true
+            // revisionName: revisionName Traffic weight cannot use "LatestRevision: true" and "RevisionName" at the same time
+            weight: 100
+          }
+        ]
+        transport: 'auto'
+      }
+      registries: [
+        {
+          // Managedidentity is enabled on ACR
+          server: registryUrl
+          identity: apiGatewayIdentity.id
+          //username: registryUsr
+          // passwordSecretRef: 'registrypassword'
+        }
+      ]
+      secrets: [
+        {
+          name: 'appinscon'
+          value: appInsightsInstrumentationKey
+        }
+        {
+          name: 'springcloudazuretenantid'
+          value: springCloudAzureTenantId
+        }
+        {
+          name: 'springcloudazurekvendpoint'
+          value: springCloudAzureKeyVaultEndpoint
+        }            
+      ]
+    }
+    template: {
+      containers: [
+        { /*
+          command: [
+            'java, -javaagent:"/tmp/app/applicationinsights-agent-3.4.1.jar", org.springframework.boot.loader.JarLauncher, --server.port=8080, --spring.profiles.active=docker,mysql'
+          ]*/
+          env: [
+            {
+              name: 'SPRING_PROFILES_ACTIVE'
+              value: 'docker,mysql'
+            }
+            {
+              // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
+              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+              secretRef: 'appinscon'
+            }
+            {
+              name: 'SPRING_CLOUD_AZURE_TENANT_ID'
+              secretRef: 'springcloudazuretenantid'
+            }   
+            {
+              name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
+              secretRef: 'springcloudazurekvendpoint'
+            }
+            {
+              name: 'CFG_SRV_URL'
+              value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
+            }                    
+          ]
+          image: imageNameApiGateway
+          name: apiGatewayContainerAppName
+          probes: [
+            {
+              failureThreshold: 5
+              httpGet: {
+                path: '/manage/health/liveness' /* /actuator */
+                port: 8081
+                scheme: 'HTTP'
+              }
+              initialDelaySeconds: 30
+              periodSeconds: 60
+              successThreshold: 5              
+              timeoutSeconds: 30
+              type: 'Liveness'
+            }
+            {
+              failureThreshold: 5
+              httpGet: {
+                path: '/manage/health/readiness' /* /actuator */
+                port: 8081
+                scheme: 'HTTP'
+              }
+              initialDelaySeconds: 30
+              periodSeconds: 60
+              successThreshold: 5              
+              timeoutSeconds: 30
+              type: 'Readiness'
+            }            
+          ]
+          resources: {
+            cpu: any(containerResourcesCpu)
+            memory: containerResourcesMemory
+          }
+        }
+      ]
+      scale: {
+        maxReplicas: 10
+        minReplicas: 1
+        rules: [
+          {
+            http: {
+              /*
+              auth: [
+                {
+                  secretRef: 'string'
+                  triggerParameter: 'string'
+                }
+              ]
+              */
+              metadata: {
+                concurrentRequests: '10'
+              }
+            }
+            name: 'http-scale'
+          }
+        ]
+      }
+    }
+  }
+  dependsOn:  [
+    ConfigServerContainerApp
+    CustomersServiceContainerApp
+    VetsServiceContainerApp
+    VisitsServiceContainerApp
+  ]
+}
+
+//output apiGatewayContainerAppIdentity string = ApiGatewayContainerApp.identity.principalId
+output apiGatewayContainerAppOutboundIPAddresses array = ApiGatewayContainerApp.properties.outboundIPAddresses
+output apiGatewayContainerAppLatestRevisionName string = ApiGatewayContainerApp.properties.latestRevisionName
+output apiGatewayContainerAppLatestRevisionFqdn string = ApiGatewayContainerApp.properties.latestRevisionFqdn
+output apiGatewayContainerAppIngressFqdn string = ApiGatewayContainerApp.properties.configuration.ingress.fqdn
+output apiGatewayContainerAppConfigSecrets array = ApiGatewayContainerApp.properties.configuration.secrets
