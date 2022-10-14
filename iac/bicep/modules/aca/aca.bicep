@@ -288,9 +288,10 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           // -javaagent:"path/to/applicationinsights-agent-3.4.1.jar"           
           // java,-javaagent:/tmp/app/applicationinsights-agent-3.4.1.jar,org.springframework.boot.loader.JarLauncher,--server.port=9090,--spring.profiles.active=docker,mysql
           // ["java", "-javaagent:/tmp/app/applicationinsights-agent-3.4.1.jar", "org.springframework.boot.loader.JarLauncher", "--server.port=9090", "--spring.profiles.active=docker,mysql"]
+          /*
           command: [
             'java, -javaagent:"/tmp/app/applicationinsights-agent-3.4.1.jar", org.springframework.boot.loader.JarLauncher, --server.port=9090, --spring.profiles.active=docker,mysql'
-          ]
+          ]*/
           env: [
             {
               name: 'SPRING_PROFILES_ACTIVE'
@@ -481,10 +482,10 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
     }
     template: {
       containers: [
-        {
+        { /*
           command: [
             'java, -javaagent:"/tmp/app/applicationinsights-agent-3.4.1.jar", org.springframework.boot.loader.JarLauncher, --server.port=8080, --spring.profiles.active=docker,mysql'
-          ]
+          ]*/
           env: [
             {
               name: 'SPRING_PROFILES_ACTIVE'
@@ -625,10 +626,10 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
     }
     template: {
       containers: [
-        {
+        { /*
           command: [
             'java, -javaagent:"/tmp/app/applicationinsights-agent-3.4.1.jar", org.springframework.boot.loader.JarLauncher, --server.port=8888, --spring.profiles.active=docker,mysql'
-          ]
+          ]*/
           env: [
             {
               name: 'SPRING_PROFILES_ACTIVE'
@@ -770,10 +771,10 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
     }
     template: {
       containers: [
-        {
+        { /*
           command: [
             'java, -javaagent:"/tmp/app/applicationinsights-agent-3.4.1.jar", org.springframework.boot.loader.JarLauncher, --server.port=8080, --spring.profiles.active=docker,mysql'
-          ]
+          ]*/
           env: [
             {
               name: 'SPRING_PROFILES_ACTIVE'
@@ -915,10 +916,10 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
     }
     template: {
       containers: [
-        {
+        { /*
           command: [
             'java, -javaagent:"/tmp/app/applicationinsights-agent-3.4.1.jar", org.springframework.boot.loader.JarLauncher, --server.port=8080, --spring.profiles.active=docker,mysql'
-          ]
+          ]*/
           env: [
             {
               name: 'SPRING_PROFILES_ACTIVE'
@@ -1061,10 +1062,10 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
     }
     template: {
       containers: [
-        {
+        { /*
           command: [
             'java, -javaagent:"/tmp/app/applicationinsights-agent-3.4.1.jar", org.springframework.boot.loader.JarLauncher, --server.port=8080, --spring.profiles.active=docker,mysql'
-          ]
+          ]*/
           env: [
             {
               name: 'SPRING_PROFILES_ACTIVE'
