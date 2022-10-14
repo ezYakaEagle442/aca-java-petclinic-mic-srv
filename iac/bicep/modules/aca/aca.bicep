@@ -666,7 +666,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 5              
+              successThreshold: 5
               timeoutSeconds: 30
               type: 'Liveness'
             }
@@ -679,7 +679,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 5              
+              successThreshold: 5
               timeoutSeconds: 30
               type: 'Readiness'
             }            
@@ -817,7 +817,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 5              
+              successThreshold: 5
               timeoutSeconds: 30
               type: 'Liveness'
             }
@@ -830,7 +830,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 5              
+              successThreshold: 5
               timeoutSeconds: 30
               type: 'Readiness'
             }            
@@ -969,7 +969,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 5              
+              successThreshold: 5
               timeoutSeconds: 30
               type: 'Liveness'
             }
@@ -982,7 +982,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 5              
+              successThreshold: 5
               timeoutSeconds: 30
               type: 'Readiness'
             }            
@@ -1107,7 +1107,19 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
-            }                    
+            }
+            {
+              name: 'CUSTOMERS_SVC_URL'
+              value: CustomersServiceContainerApp.properties.configuration.ingress.fqdn
+            }    
+            {
+              name: 'VETS_SVC_URL'
+              value: VetsServiceContainerApp.properties.configuration.ingress.fqdn
+            } 
+            {
+              name: 'VISITS_SVC_URL'
+              value: VisitsServiceContainerApp.properties.configuration.ingress.fqdn
+            }                                          
           ]
           image: imageNameApiGateway
           name: apiGatewayContainerAppName
@@ -1121,7 +1133,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 5              
+              successThreshold: 5 
               timeoutSeconds: 30
               type: 'Liveness'
             }
@@ -1134,7 +1146,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 5              
+              successThreshold: 5
               timeoutSeconds: 30
               type: 'Readiness'
             }            
