@@ -648,6 +648,10 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
               secretRef: 'springcloudazurekvendpoint'
+            }
+            {
+              name: 'CFG_SRV_URL'
+              value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
             }                    
           ]
           image: imageNameApiGateway
@@ -795,7 +799,11 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
             {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
               secretRef: 'springcloudazurekvendpoint'
-            } 
+            }
+            {
+              name: 'CFG_SRV_URL'
+              value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
+            }             
           ]
           image: imageNameCustomersService
           name: customersServiceContainerAppName
@@ -942,7 +950,11 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
               secretRef: 'springcloudazurekvendpoint'
-            } 
+            }
+            {
+              name: 'CFG_SRV_URL'
+              value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
+            }             
           ]
           image: imageNameVetsService
           name: vetsServiceContainerAppName
@@ -1090,7 +1102,11 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
               secretRef: 'springcloudazurekvendpoint'
-            }                         
+            } 
+            {
+              name: 'CFG_SRV_URL'
+              value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
+            }                                     
           ]
           image: imageNameVisitsService
           name: visitsServiceContainerAppName
