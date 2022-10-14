@@ -568,7 +568,7 @@ to get the App logs :
 ```bash
 az monitor log-analytics query \
   --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
-  --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == '$appName' | project ContainerAppName_s, Log_s, TimeGenerated | take 3" \
+  --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == '$appName' | project ContainerAppName_s, Log_s, Time | take 3" \
   --out table
 ```
 
@@ -581,18 +581,59 @@ Type and run the following Kusto query to see application logs:
 
 ```sh
 ContainerAppSystemLogs_CL
-| where ContainerAppName_s == 'customers'
-| project Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s, Message=Log_s
+| where ContainerAppName_s == 'aca-petcliaca-api-gateway'
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
 | take 100
 | limit 500
-| sort by TimeGenerated
+| sort by Time desc
 ```
 
 ```sh
 ContainerAppSystemLogs_CL
-| where Log contains "error" or Log contains "exception"
-| project Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s, Message=Log_s, ContainerId=ContainerId_s
-| summarize count_per_app = count() by EnvName, AppName,Revision, ContainerId
+| where Log_s contains "no such"
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
+| sort by Time desc
+| summarize count_per_app = count() by AppName
+| sort by count_per_app desc 
+| render piechart
+```
+
+```sh
+ContainerAppSystemLogs_CL
+| where Log_s contains "probe failed"
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
+| sort by Time desc
+| summarize count_per_app = count() by AppName
+| sort by count_per_app desc 
+| render piechart
+```
+
+
+```sh
+ContainerAppSystemLogs_CL
+| where RevisionName_s == "aca-petcliaca-admin-server--l2tcxpe"
+| where Log_s contains "no such"
+| project Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s, Message=Log_s
+| sort by Time desc
+| take 100
+| limit 500
+```
+
+```sh
+ContainerAppSystemLogs_CL
+| where RevisionName_s == "aca-petcliaca-admin-server--l2tcxpe"
+| where Log_s contains "failed"
+| project Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s, Message=Log_s
+| sort by Time desc
+| take 100
+| limit 500
+```
+
+```sh
+ContainerAppSystemLogs_CL
+| where Log_s contains "error" or Log_s contains "exception"
+| project Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s, Message=Log_s
+| summarize count_per_app = count() by EnvName, AppName,Revision
 | sort by count_per_app desc 
 | render piechart
 ```
@@ -602,7 +643,7 @@ ContainerAppSystemLogs_CL
 Type and run the following Kusto query to see all in the inbound calls into Azure Container Apps:
 
 ```sh
-AppPlatformIngressLogsv
+AppPlatformIngressLogs
 | project TimeGenerated, RemoteAddr, Host, Request, Status, BodyBytesSent, RequestTime, ReqId, RequestHeaders
 | sort by TimeGenerated
 ```
@@ -611,9 +652,18 @@ Type and run the following Kusto query to see all the logs from the Spring Cloud
 
 ```sh
 ContainerAppSystemLogs_CL
-| where LogType contains "ConfigServer"
-| project TimeGenerated, Level, LogType, ServiceName, Log
+| where ContainerAppName_s == 'aca-petcliaca-api-gateway'
+| where Type_s == 'Warning'
+| project TimeGenerated, Level, Type=Type, LogType=Type_s, AppName=ContainerAppName_s, Message=Log_s
 | sort by TimeGenerated
+
+ContainerAppSystemLogs_CL
+| where ContainerAppName_s == 'aca-petcliaca-api-gateway'
+| where Type_s == 'Normal'
+| project TimeGenerated, Level, Type=Type, LogType=Type_s, AppName=ContainerAppName_s, Message=Log_s
+| sort by TimeGenerated
+
+
 ```
 
 Type and run the following Kusto query to see all the logs from the managed Azure Container Registry :
