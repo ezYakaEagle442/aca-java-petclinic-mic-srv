@@ -19,7 +19,9 @@ urlFragment: "spring-petclinic-microservices"
 This microservices branch was initially derived from [AngularJS version](https://github.com/spring-petclinic/spring-petclinic-angular1) to demonstrate how to split sample Spring application into [microservices](http://www.martinfowler.com/articles/microservices.html).
 To achieve that goal we use IaC with Azure Bicep, MS build of OpenJDK 11, GitHub Actions, Azure Container Registry, Azure Container Apps, Azure Key Vault, Azure Database for MySQL
 
-See the [ACA Micro-services Reference Architecture](https://learn.microsoft.com/en-us/azure/architecture/example-scenario/serverless/microservices-with-container-apps)
+See :
+- the [ACA Micro-services Reference Architecture](https://learn.microsoft.com/en-us/azure/architecture/example-scenario/serverless/microservices-with-container-apps)
+- [https://github.com/Azure-Samples/java-on-azure-examples/tree/main/containerapp](https://github.com/Azure-Samples/java-on-azure-examples/tree/main/containerapp)
 
 # Pre-req
 
