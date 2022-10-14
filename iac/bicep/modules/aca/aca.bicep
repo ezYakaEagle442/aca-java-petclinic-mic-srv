@@ -288,10 +288,10 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           // -javaagent:"path/to/applicationinsights-agent-3.4.1.jar"           
           // java,-javaagent:/tmp/app/applicationinsights-agent-3.4.1.jar,org.springframework.boot.loader.JarLauncher,--server.port=9090,--spring.profiles.active=docker,mysql
           // ["java", "-javaagent:/tmp/app/applicationinsights-agent-3.4.1.jar", "org.springframework.boot.loader.JarLauncher", "--server.port=9090", "--spring.profiles.active=docker,mysql"]
-          /*
+          
           command: [
-            'java, -javaagent:"/tmp/app/applicationinsights-agent-3.4.1.jar", org.springframework.boot.loader.JarLauncher, --server.port=9090, --spring.profiles.active=docker,mysql'
-          ]*/
+            'java', '-javaagent:"/tmp/app/applicationinsights-agent-3.4.1.jar"', 'org.springframework.boot.loader.JarLauncher', '--server.port=9090', '--spring.profiles.active=docker,mysql'
+          ]
           env: [
             {
               name: 'SPRING_PROFILES_ACTIVE'
