@@ -137,7 +137,7 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
 // For example: Save spring-datasource-url in Azure Key Vault. In your application, you can still use spring.datasource.url to retrieve property value.
 
 // https://learn.microsoft.com/en-us/azure/templates/microsoft.app/containerapps?pivots=deployment-language-bicep
-module azurecontainerapp './modules/aca/aca-user-id.bicep' = {
+module azurecontainerapp './modules/aca/aca.bicep' = {
   name: 'azurecontainerapp'
   // scope: resourceGroup(rg.name)
   params: {
