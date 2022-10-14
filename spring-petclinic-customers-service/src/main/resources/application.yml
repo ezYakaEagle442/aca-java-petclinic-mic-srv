@@ -21,7 +21,7 @@ spring:
   config:
     activate:
       on-profile: docker
-    import: configserver:http://config-server:8888
+    import: configserver:http://{CFG_SRV_URL}:8888
 ---
 management:
   health:
