@@ -583,7 +583,123 @@ Type and run the following Kusto query to see application logs:
 
 ```sh
 ContainerAppSystemLogs_CL
+| where Log_s contains "success"
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
+| sort by Time desc
+
+ContainerAppSystemLogs_CL
+| where Log_s contains "Timeout"
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
+| sort by Time desc
+
+ContainerAppSystemLogs_CL
 | where ContainerAppName_s == 'aca-petcliaca-api-gateway'
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
+| take 100
+| limit 500
+| sort by Time desc
+```
+
+```sh
+ContainerAppSystemLogs_CL
+| where Log_s contains'nodes are available'
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
+| take 100
+| limit 500
+| sort by Time desc
+
+ContainerAppSystemLogs_CL
+| where Log_s contains'Failed to pull image'
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
+| take 100
+| limit 500
+| sort by Time desc
+
+ContainerAppSystemLogs_CL
+| where Log_s contains'500 Internal Server'
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
+| take 100
+| limit 500
+| sort by Time desc
+
+ContainerAppSystemLogs_CL
+| where Log_s contains'404'
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
+| take 100
+| limit 500
+| sort by Time desc
+
+ContainerAppSystemLogs_CL
+| where Log_s contains'401'
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
+| take 100
+| limit 500
+| sort by Time desc
+
+ContainerAppSystemLogs_CL
+| where Log_s contains'Unauthorized'
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
+| take 100
+| limit 500
+| sort by Time desc
+
+ContainerAppSystemLogs_CL
+| where Log_s contains'200'
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
+| take 100
+| limit 500
+| sort by Time desc
+
+ContainerAppSystemLogs_CL
+| where Log_s contains'token'
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
+| take 100
+| limit 500
+| sort by Time desc
+
+
+ContainerAppSystemLogs_CL
+| where Log_s contains'pod didn\'t trigger scale-up: 1 max node group size reached'
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
+| take 100
+| limit 500
+| sort by Time desc
+
+ContainerAppSystemLogs_CL
+| where Log_s contains'scale'
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
+| take 100
+| limit 500
+| sort by Time desc
+
+ContainerAppSystemLogs_CL
+| where Log_s contains'pod'
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
+| take 100
+| limit 500
+| sort by Time desc
+
+ContainerAppSystemLogs_CL
+| where TimeGenerated > ago (1h)
+| project Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s, Message=Log_s
+| sort by Time asc
+| take 100
+| limit 500
+
+
+
+ContainerAppSystemLogs_CL
+| where Log_s contains'Insufficient cpu'
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
+| take 100
+| limit 500
+| sort by Time desc
+| summarize count_per_app = count() by AppName
+| sort by count_per_app desc 
+| render piechart
+
+ContainerAppSystemLogs_CL
+| where Log_s contains'Insufficient memory'
 | project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
 | take 100
 | limit 500
@@ -665,6 +781,54 @@ ContainerAppSystemLogs_CL
 | project TimeGenerated, Level, Type=Type, LogType=Type_s, AppName=ContainerAppName_s, Message=Log_s
 | sort by TimeGenerated
 
+ContainerAppConsoleLogs_CL
+| where Log_s contains "endpoints"
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
+| sort by Time desc
+| take 100
+| limit 500
+
+ContainerAppConsoleLogs_CL
+| where Log_s contains "start"
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
+| sort by Time desc
+| take 100
+| limit 500
+
+ContainerAppConsoleLogs_CL
+| where Log_s contains "Application Insights"
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
+| sort by Time desc
+| take 100
+| limit 500
+
+ContainerAppConsoleLogs_CL
+| where Log_s contains "Starting service"
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
+| sort by Time desc
+| take 100
+| limit 500
+
+ContainerAppConsoleLogs_CL
+| where Log_s contains "started on port"
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
+| sort by Time desc
+| take 100
+| limit 500
+
+ContainerAppConsoleLogs_CL
+| where Log_s contains "Connection refused"
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
+| sort by Time desc
+| take 100
+| limit 500
+
+ContainerAppConsoleLogs_CL
+| where Log_s contains "nested exception"
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
+| sort by Time desc
+| take 100
+| limit 500
 
 ```
 
