@@ -17,6 +17,7 @@ param zoneRedundant bool = false
 @allowed([
   'log-analytics'
 ])
+@description('Cluster configuration which enables the log daemon to export app logs to a destination. Currently only "log-analytics" is supported https://learn.microsoft.com/en-us/azure/templates/microsoft.app/managedenvironments?pivots=deployment-language-bicep#managedenvironmentproperties')
 param logDestination string = 'log-analytics'
 
 resource logAnalyticsWorkspace  'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' existing =  {
@@ -33,7 +34,7 @@ container apps do no support currently diagnostic settings. Integration happen t
 https://github.com/microsoft/azure-container-apps/issues/382
 https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/diagnosticsettings?tabs=bicep
 */
-resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' = {
+resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-preview' = {
   name: azureContainerAppEnvName
   location: location
   properties: {
