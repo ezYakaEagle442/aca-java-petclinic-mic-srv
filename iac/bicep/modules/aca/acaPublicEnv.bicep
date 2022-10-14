@@ -39,7 +39,7 @@ resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-pr
   location: location
   properties: {
     appLogsConfiguration: {
-      destination: logDestination
+      destination: logDestination // azure-monitor
       logAnalyticsConfiguration: {
         customerId: logAnalyticsWorkspace.properties.customerId
         sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
@@ -53,3 +53,53 @@ resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-pr
 output corpManagedEnvironmentId string = corpManagedEnvironment.id 
 output corpManagedEnvironmentDefaultDomain string = corpManagedEnvironment.properties.defaultDomain
 output corpManagedEnvironmentStaticIp string = corpManagedEnvironment.properties.staticIp
+
+// https://github.com/microsoft/azure-container-apps/issues/382#issuecomment-1278623205
+// https://github.com/cwe1ss/msa-template/blob/db6f134dddf78f682b2cebd681fe11ebfb68026e/infrastructure/environment/app-environment.bicep
+
+
+
+resource appInsightsDiagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'dgs-${appName}-send-${azureContainerAppEnvName}-logs-and-metrics-to-log-analytics'
+  scope: corpManagedEnvironment
+  properties: {
+    logAnalyticsDestinationType: 'AzureDiagnostics'
+    workspaceId: logAnalyticsWorkspace.id
+    logs: [
+      {
+        category: 'ApplicationConsole'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'SystemLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+      {
+        category: 'IngressLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }    
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          days: 7
+          enabled: true
+        }
+      }
+    ]
+  }
+}
