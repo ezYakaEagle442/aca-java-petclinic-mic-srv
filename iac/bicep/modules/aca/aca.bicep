@@ -666,8 +666,8 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 1
-              timeoutSeconds: 3
+              successThreshold: 5              
+              timeoutSeconds: 30
               type: 'Liveness'
             }
             {
@@ -679,8 +679,8 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 1
-              timeoutSeconds: 3
+              successThreshold: 5              
+              timeoutSeconds: 30
               type: 'Readiness'
             }            
           ]
@@ -817,8 +817,8 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 1              
-              timeoutSeconds: 3
+              successThreshold: 5              
+              timeoutSeconds: 30
               type: 'Liveness'
             }
             {
@@ -830,8 +830,8 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 1              
-              timeoutSeconds: 3
+              successThreshold: 5              
+              timeoutSeconds: 30
               type: 'Readiness'
             }            
           ]
@@ -968,8 +968,8 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 1              
-              timeoutSeconds: 3
+              successThreshold: 5              
+              timeoutSeconds: 30
               type: 'Liveness'
             }
             {
@@ -981,8 +981,8 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 1              
-              timeoutSeconds: 3
+              successThreshold: 5              
+              timeoutSeconds: 30
               type: 'Readiness'
             }            
           ]
@@ -1120,8 +1120,8 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 1              
-              timeoutSeconds: 3
+              successThreshold: 5              
+              timeoutSeconds: 30
               type: 'Liveness'
             }
             {
@@ -1133,8 +1133,8 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               }
               initialDelaySeconds: 30
               periodSeconds: 60
-              successThreshold: 1              
-              timeoutSeconds: 3
+              successThreshold: 5              
+              timeoutSeconds: 30
               type: 'Readiness'
             }            
           ]
