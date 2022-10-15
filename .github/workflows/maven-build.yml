@@ -215,7 +215,7 @@ jobs:
           # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
           # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
           
-          # echo "::set-output name=tag_id::$tag_id"
+          echo "::set-output name=tag_id::$tag_id"
           echo "tag_id=$tag_id" >> $GITHUB_ENV
           echo "tag_id=$tag_id" >> $GITHUB_OUTPUT
 
