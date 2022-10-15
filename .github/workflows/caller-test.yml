@@ -14,7 +14,7 @@ jobs:
   # https://docs.github.com/en/actions/using-workflows/reusing-workflows#calling-a-reusable-workflow
   # invalid value workflow reference: references to workflows must be prefixed with format 'owner/repository/' or './' for local workflows
   call-workflow:
-    name: Trigger Maven
+    name: Trigger other Workflow
     uses: ./.github/workflows/called-test.yml # .github/workflows/maven-build.yml@main ==> references to workflows must be prefixed with format 'owner/repository/' or './' for local workflows
     secrets: inherit # pass all secrets
       # envPAT: ${{ secrets.envPAT }} # pass just this secret
