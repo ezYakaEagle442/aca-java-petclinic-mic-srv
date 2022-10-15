@@ -46,9 +46,9 @@ jobs:
           # see: https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
           # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
           # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter          
-          echo "::set-output name=tag_id::$tag_id"
-          echo "tag_id=$tag_id" >> $GITHUB_ENV
-          echo "tag_id=$tag_id" >> $GITHUB_OUTPUT
+          # echo "::set-output name=tagid::$tagid"
+          echo "tagid=$tagid" >> $GITHUB_ENV
+          echo "tagid=$tagid" >> $GITHUB_OUTPUT
 
       shell: bash
 
@@ -63,6 +63,6 @@ jobs:
           echo ***
           tagid=${{ needs.called-workflow.outputs.tagid }}
           echo "Image Build tag ID:"$tagid
-          echo "Image Build tag ID from {{ env.tag_id }}: "${{ env.tag_id }}
+          echo "Image Build tag ID from {{ env.tagid }}: "${{ env.tagid }}
           echo "Image Build tag ID from GITHUB_OUTPUT: "$GITHUB_OUTPUT
       shell: bash

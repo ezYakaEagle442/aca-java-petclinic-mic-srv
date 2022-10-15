@@ -30,6 +30,6 @@ jobs:
           echo "Checking tagid output ... : " ${{ needs.call-workflow.outputs.tagid }}
           tagid=${{ needs.call-workflow.outputs.tagid }}
           echo "Image Build tag ID:"$tagid
-          echo "Image Build tag ID from {{ env.tag_id }}: "${{ env.tag_id }}
+          echo "Image Build tag ID from {{ env.tagid }}: "${{ env.tagid }}
           echo "Image Build tag ID from GITHUB_OUTPUT: "$GITHUB_OUTPUT          
       shell: bash
