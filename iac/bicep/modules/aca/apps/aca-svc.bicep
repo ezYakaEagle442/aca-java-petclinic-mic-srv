@@ -6,9 +6,20 @@ param appName string = '101-${uniqueString(deployment().name)}'
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
 
+@maxLength(24)
+@description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
+param kvName string // = 'kv-${appName}'
+
+@description('The name of the KV RG')
+param kvRGName string
+
+@description('The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.')
+param acrName string = 'acr${appName}' // ==> $acr_registry_name.azurecr.io
+
 @description('The Azure Container App Environment name')
 param azureContainerAppEnvName string = 'aca-env-${appName}'
 
+param appInsightsName string = 'appi-${appName}'
 
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
 param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.1.jar'
@@ -21,20 +32,10 @@ param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights
 // like spring.datasource.url, just replace . to - when save secret in Azure Key Vault. 
 // For example: Save spring-datasource-url in Azure Key Vault. In your application, you can still use spring.datasource.url to retrieve property value.
 
-@secure()
-@description('The Azure Active Directory tenant ID that should be used by Key Vault in the Spring Config')
-param springCloudAzureTenantId string
-
-@secure()
-@description('The Azure Key Vault EndPoint that should be used by Key Vault in the Spring Config. Ex: https://<key-vault-name>.vault.azure.net')
-param springCloudAzureKeyVaultEndpoint string
-
 // https://docs.microsoft.com/en-us/azure/container-apps/managed-identity?tabs=portal%2Cjava#configure-managed-identities
 @description('The Azure Active Directory tenant ID that should be used to store the GH Actions SPN credentials and to manage Azure Container Apps Identities.')
 param tenantId string = subscription().tenantId
 param subscriptionId string = subscription().id
-
-
 
 @allowed([
   '0.25'
@@ -62,21 +63,6 @@ param containerResourcesCpu string = '0.5'
 @description('The container Resources Memory. The total CPU and memory allocations requested for all the containers in a container app must add up to one of the following combinations. See https://learn.microsoft.com/en-us/azure/container-apps/containers#configuration')
 param containerResourcesMemory string = '1.0Gi'
 
-@secure()
-@description('The Application Insights Intrumention Key. see https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string')
-param appInsightsInstrumentationKey string
-
-/*
-@description('The Container Registry Username')
-param registryUsr string
-
-@secure()
-@description('The Container Registry Password')
-param registryPassword string
-*/
-@description('The Container Registry URL')
-param registryUrl string
-
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-customers-service:{{ github.sha }}')
 param imageNameCustomersService string
 
@@ -98,12 +84,6 @@ param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
 @description('The Azure Container App instance name for visits-service')
 param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
 
-@description('The config-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param configServerAppIdentityName string = 'id-aca-petclinic-config-server-dev-westeurope-101'
-
-@description('The api-gateway Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param apiGatewayAppIdentityName string = 'id-aca-petclinic-api-gateway-dev-westeurope-101'
-
 @description('The customers-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param customersServiceAppIdentityName string = 'id-aca-petclinic-customers-service-dev-westeurope-101'
 
@@ -115,14 +95,6 @@ param visitsServiceAppIdentityName string = 'id-aca-petclinic-visits-service-dev
 
 resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' existing = {
   name: azureContainerAppEnvName
-}
-
-resource configServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
-  name: configServerAppIdentityName
-}
-
-resource apiGatewayIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
-  name: apiGatewayAppIdentityName
 }
 
 resource customersServicedentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
@@ -140,6 +112,22 @@ resource visitsServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities
 resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
   name: configServerContainerAppName
 }
+
+resource ACR 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
+  name: acrName
+}
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing = {
+  name: appInsightsName
+}
+
+@secure()
+@description('The Azure Active Directory tenant ID that should be used by Key Vault in the Spring Config')
+param springCloudAzureTenantId string
+
+@secure()
+@description('The Azure Key Vault EndPoint that should be used by Key Vault in the Spring Config. Ex: https://<key-vault-name>.vault.azure.net')
+param springCloudAzureKeyVaultEndpoint string
 
 resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: customersServiceContainerAppName
@@ -170,7 +158,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
       registries: [
         {
           // Managedidentity is enabled on ACR
-          server: registryUrl
+          server: ACR.properties.loginServer
           identity: customersServicedentity.id
           //username: registryUsr
           // passwordSecretRef: 'registrypassword'
@@ -179,7 +167,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
       secrets: [
         {
           name: 'appinscon'
-          value: appInsightsInstrumentationKey
+          value: appInsights.properties.ConnectionString
         }
         {
           name: 'springcloudazuretenantid'
@@ -313,7 +301,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       registries: [
         {
           // Managedidentity is enabled on ACR
-          server: registryUrl
+          server: ACR.properties.loginServer
           identity: vetsServiceAppIdentity.id
           //username: registryUsr
           // passwordSecretRef: 'registrypassword'
@@ -322,7 +310,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       secrets: [
         {
           name: 'appinscon'
-          value: appInsightsInstrumentationKey
+          value: appInsights.properties.ConnectionString
         }
         {
           name: 'springcloudazuretenantid'
@@ -455,7 +443,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       registries: [
         {
           // Managedidentity is enabled on ACR
-          server: registryUrl
+          server: ACR.properties.loginServer
           identity: visitsServiceIdentity.id
           //username: registryUsr
           // passwordSecretRef: 'registrypassword'
@@ -465,7 +453,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
         {
           name: 'appinscon'
-          value: appInsightsInstrumentationKey
+          value: appInsights.properties.ConnectionString
         }
         {
           name: 'springcloudazuretenantid'
