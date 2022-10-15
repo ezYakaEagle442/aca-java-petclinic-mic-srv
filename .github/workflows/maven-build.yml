@@ -209,7 +209,15 @@ jobs:
 
           tag_id=$SHORT_SHA
           echo "tag_id="$tag_id
-          echo "::set-output name=tag_id::$tag_id"
+
+          # The `set-output` command is deprecated and will be disabled soon. 
+          # see: https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+          # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
+          # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
+          
+          # echo "::set-output name=tag_id::$tag_id"
+          echo "tag_id=$tag_id" >> $GITHUB_ENV
+          echo "tag_id=$tag_id" >> $GITHUB_OUTPUT
 
           # https://github.com/cwe1ss/msa-template/blob/main/.github/workflows/_service-build.yml
           set -euo pipefail
