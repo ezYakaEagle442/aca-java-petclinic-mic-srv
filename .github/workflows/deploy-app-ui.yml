@@ -1,4 +1,4 @@
-name: Deploy Config-Server ACA App
+name: Deploy API-Gateway ACA App
 
 env:
   APP_NAME: petcliaca
@@ -49,7 +49,7 @@ on:
         type: string
 
 jobs:
-  deploy-apps:
+  deploy-ui:
     runs-on: ubuntu-latest
     steps:
 
@@ -64,14 +64,14 @@ jobs:
     - name: Deploy Azure Container Apps
       # with: # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepswith
       run: |
-          echo "About to deploy Config-Server ..." 
+          echo "About to deploy the UI + API Gateway ..." 
           tag_id=${{ inputs.tag_id }}
           echo "Image Build tag ID:"$tag_id
 
-          imageNameConfigServer="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.CONFIG_SERVER }}:$tag_id"
-          echo "imageNameConfigServer= " $imageNameConfigServer
+          imageNameApiGateway="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id"
+          echo "imageNameApiGateway= " $imageNameApiGateway
 
-          az deployment group create --name aca-petclinic-cfg-srv -f iac/bicep/aca/apps/aca-cfg.bicep -g ${{ env.RG_APP }} \
+          az deployment group create --name aca-petclinic-cfg-srv -f iac/bicep/modules/aca/apps/aca-ui.bicep -g ${{ env.RG_APP }} \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
             -p acrName=${{ env.AZURE_CONTAINER_REGISTRY }} \
@@ -79,9 +79,9 @@ jobs:
             -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
             -p kvName=${{ env.KV_NAME }} \
             -p kvRGName=${{ env.RG_KV }} \
-            -p imageNameConfigServer=$imageNameConfigServer \
-            -p XXX=${{ env.SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT }} \
-            -p XXX=${{ env.SPRING_CLOUD_AZURE_TENANT_ID }} 
+            -p imageNameApiGateway=$imageNameApiGateway \
+            -p springCloudAzureKeyVaultEndpoint=${{ env.SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT }} \
+            -p springCloudAzureTenantId=${{ env.SPRING_CLOUD_AZURE_TENANT_ID }} 
 
 
       shell: bash
