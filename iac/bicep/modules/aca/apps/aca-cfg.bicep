@@ -6,9 +6,13 @@ param appName string = '101-${uniqueString(deployment().name)}'
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
 
+@description('The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.')
+param acrName string = 'acr${appName}' // ==> $acr_registry_name.azurecr.io
+
 @description('The Azure Container App Environment name')
 param azureContainerAppEnvName string = 'aca-env-${appName}'
 
+param appInsightsName string = 'appi-${appName}'
 
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
 param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.1.jar'
@@ -39,21 +43,6 @@ param containerResourcesCpu string = '0.5'
 @description('The container Resources Memory. The total CPU and memory allocations requested for all the containers in a container app must add up to one of the following combinations. See https://learn.microsoft.com/en-us/azure/container-apps/containers#configuration')
 param containerResourcesMemory string = '1.0Gi'
 
-@secure()
-@description('The Application Insights Intrumention Key. see https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string')
-param appInsightsInstrumentationKey string
-
-/*
-@description('The Container Registry Username')
-param registryUsr string
-
-@secure()
-@description('The Container Registry Password')
-param registryPassword string
-*/
-@description('The Container Registry URL')
-param registryUrl string
-
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-config-server:{{ github.sha }}')
 param imageNameConfigServer string
 
@@ -69,6 +58,14 @@ resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' e
 
 resource configServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
   name: configServerAppIdentityName
+}
+
+resource ACR 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
+  name: acrName
+}
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing = {
+  name: appInsightsName
 }
 
 resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
@@ -100,7 +97,7 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       registries: [
         {
           // Managedidentity is enabled on ACR
-          server: registryUrl
+          server: ACR.properties.loginServer
           identity: configServerIdentity.id
           //username: registryUsr
           // passwordSecretRef: 'registrypassword'
@@ -109,7 +106,7 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       secrets: [
         {
           name: 'appinscon'
-          value: appInsightsInstrumentationKey
+          value: appInsights.properties.ConnectionString
         }
       ]
     }
