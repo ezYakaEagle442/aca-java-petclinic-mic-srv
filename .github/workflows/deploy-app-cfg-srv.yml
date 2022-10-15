@@ -76,8 +76,6 @@ jobs:
             -p location=${{ env.LOCATION }} \
             -p acrName=${{ env.AZURE_CONTAINER_REGISTRY }} \
             -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
-            -p kvName=${{ env.KV_NAME }} \
-            -p kvRGName=${{ env.RG_KV }} \
             -p imageNameConfigServer=$imageNameConfigServer
 
       shell: bash
