@@ -579,7 +579,9 @@ az monitor log-analytics query \
 Open the Log Analytics that you created - you can find the Log Analytics in the same Resource Group where you created an Azure Container Apps service instance.
 
 In the Log Analyics page, selects Logs blade and run any of the sample queries supplied below for Azure Container Apps.
-Type and run the following Kusto query to see application logs:
+
+Type and run the following Kusto query to see all the logs from the ACA Service :
+
 
 ```sh
 ContainerAppSystemLogs_CL
@@ -745,15 +747,45 @@ ContainerAppSystemLogs_CL
 | sort by Time desc
 | take 100
 | limit 500
+
+ContainerAppSystemLogs_CL
+| where ContainerAppName_s == 'aca-petcliaca-api-gateway'
+| where Type_s == 'Warning'
+| project TimeGenerated, Level, Type=Type, LogType=Type_s, AppName=ContainerAppName_s, Message=Log_s
+| sort by TimeGenerated
+
+ContainerAppSystemLogs_CL
+| where ContainerAppName_s == 'aca-petcliaca-api-gateway'
+| where Type_s == 'Normal'
+| project TimeGenerated, Level, Type=Type, LogType=Type_s, AppName=ContainerAppName_s, Message=Log_s
+| sort by TimeGenerated
+
+
 ```
 
 ```sh
 ContainerAppSystemLogs_CL
 | where Log_s contains "error" or Log_s contains "exception"
 | project Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s, Message=Log_s
-| summarize count_per_app = count() by EnvName, AppName,Revision
+| summarize count_per_app = count() by AppName,Revision
 | sort by count_per_app desc 
 | render piechart
+
+ContainerAppSystemLogs_CL
+| where Log_s contains "error" or Log_s contains "exception" and TimeGenerated > ago (10min)
+| project Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s, Message=Log_s
+| sort by Time desc
+
+ContainerAppSystemLogs_CL
+| where Log_s contains "the object has been modified; please apply your changes to the latest version and try again" and TimeGenerated > ago (10min)
+| project Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s, Message=Log_s
+| sort by Time desc
+
+ContainerAppSystemLogs_CL
+| where Log_s contains "Operation cannot be fulfilled on apps.k8se.microsoft.com" and TimeGenerated > ago (10min)
+| project Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s, Message=Log_s
+| sort by Time desc
+
 ```
 
 
@@ -766,20 +798,11 @@ AppPlatformIngressLogs
 | sort by TimeGenerated
 ```
 
-Type and run the following Kusto query to see all the logs from the Spring Cloud Config Server :
+
+Type and run the following Kusto query to see application logs:
+
 
 ```sh
-ContainerAppSystemLogs_CL
-| where ContainerAppName_s == 'aca-petcliaca-api-gateway'
-| where Type_s == 'Warning'
-| project TimeGenerated, Level, Type=Type, LogType=Type_s, AppName=ContainerAppName_s, Message=Log_s
-| sort by TimeGenerated
-
-ContainerAppSystemLogs_CL
-| where ContainerAppName_s == 'aca-petcliaca-api-gateway'
-| where Type_s == 'Normal'
-| project TimeGenerated, Level, Type=Type, LogType=Type_s, AppName=ContainerAppName_s, Message=Log_s
-| sort by TimeGenerated
 
 ContainerAppConsoleLogs_CL
 | where Log_s contains "endpoints"
@@ -803,6 +826,13 @@ ContainerAppConsoleLogs_CL
 | limit 500
 
 ContainerAppConsoleLogs_CL
+| where Log_s contains "applicationinsights-agent"
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
+| sort by Time desc
+| take 100
+| limit 500
+
+ContainerAppConsoleLogs_CL
 | where Log_s contains "Starting service"
 | project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
 | sort by Time desc
@@ -818,6 +848,13 @@ ContainerAppConsoleLogs_CL
 
 ContainerAppConsoleLogs_CL
 | where Log_s contains "Connection refused"
+| project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
+| sort by Time desc
+| take 100
+| limit 500
+
+ContainerAppConsoleLogs_CL
+| where Log_s contains "java.net.UnknownHostException"
 | project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
 | sort by Time desc
 | take 100
