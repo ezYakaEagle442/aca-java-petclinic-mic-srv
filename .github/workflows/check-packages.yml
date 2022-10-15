@@ -156,6 +156,9 @@ jobs:
     # Can be tested at https://docs.github.com/en/graphql/overview/explorer
     # see https://github.com/octokit/graphql-action/issues/160
     # https://github.com/community/community/discussions/35159
+
+    # /!\ Package registries on the new GitHub Packages architecture, including container registry and npm packages, no longer expose data through the GraphQL API. We recommend using the REST API instead.
+    # https://github.blog/changelog/2022-08-18-deprecation-notice-graphql-for-packages/
     - name: Get Admin-Server GH Package URL
       uses: octokit/graphql-action@v2.2.22
       id: get_latest_pkg_admin
