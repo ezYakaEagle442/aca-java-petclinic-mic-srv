@@ -52,7 +52,7 @@ module githubIdentity './modules/gh/github-identity-resources.bicep' = {
 }
 
 @description('The managed identity must be able to create & modify Azure resources in the subscription')
-resource githubIdentityContributor 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+resource githubIdentityContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(subscription().id, 'github', 'Contributor')
   properties: {
     roleDefinitionId: contributorRoleDefinition.id
@@ -62,7 +62,7 @@ resource githubIdentityContributor 'Microsoft.Authorization/roleAssignments@2020
 }
 
 @description('The managed identity must be able to assign roles to other managed identities')
-resource githubIdentityUserAccessAdministrator 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+resource githubIdentityUserAccessAdministrator 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(subscription().id, 'github', 'UserAccessAdministrator')
   properties: {
     roleDefinitionId: userAccessAdministratorRoleDefinition.id
