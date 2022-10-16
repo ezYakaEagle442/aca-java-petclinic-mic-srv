@@ -148,7 +148,8 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
 
 // You need Key Vault Administrator permission to be able to see the Keys/Secrets/Certificates in the Azure Portal
 resource kvSecretsUserRoleAssignmentCustomersService 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(kv.id, kvRoleType , subscription().subscriptionId)
+  name: guid(kv.id, kvRoleType , acaCustomersServicePrincipalId)
+  // scope: kv to be fixed
   properties: {
     roleDefinitionId: role[kvRoleType]
     principalId: acaCustomersServicePrincipalId
@@ -157,7 +158,7 @@ resource kvSecretsUserRoleAssignmentCustomersService 'Microsoft.Authorization/ro
 }
 
 resource kvSecretsUserRoleAssignmentVetsService 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(kv.id, kvRoleType , subscription().subscriptionId)
+  name: guid(kv.id, kvRoleType , acaVetsServicePrincipalId)
   properties: {
     roleDefinitionId: role[kvRoleType]
     principalId: acaVetsServicePrincipalId
@@ -166,7 +167,7 @@ resource kvSecretsUserRoleAssignmentVetsService 'Microsoft.Authorization/roleAss
 }
 
 resource kvSecretsUserRoleAssignmentVisitsService 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(kv.id, kvRoleType , subscription().subscriptionId)
+  name: guid(kv.id, kvRoleType , acaVisitsServicePrincipalId)
   properties: {
     roleDefinitionId: role[kvRoleType]
     principalId: acaVisitsServicePrincipalId
