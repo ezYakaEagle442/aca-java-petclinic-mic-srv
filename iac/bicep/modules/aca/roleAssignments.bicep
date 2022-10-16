@@ -146,6 +146,10 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
   scope: resourceGroup(kvRGName)
 }
 
+// https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-portal#prerequisites
+// /!\ To assign Azure roles, you must have: requires to have Microsoft.Authorization/roleAssignments/write and Microsoft.Authorization/roleAssignments/delete permissions, 
+// such as User Access Administrator or Owner.
+
 // You need Key Vault Administrator permission to be able to see the Keys/Secrets/Certificates in the Azure Portal
 resource kvSecretsUserRoleAssignmentCustomersService 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(kv.id, kvRoleType , acaCustomersServicePrincipalId)
