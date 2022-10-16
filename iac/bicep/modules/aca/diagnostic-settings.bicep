@@ -31,36 +31,36 @@ param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
 @description('The Azure Container App Environment name')
 param azureContainerAppEnvName string = 'aca-env-${appName}'
 
-resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' existing = {
+resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-preview' existing = {
   name: azureContainerAppEnvName
 }
 
 // https://learn.microsoft.com/en-us/azure/templates/microsoft.app/containerapps?pivots=deployment-language-bicep
-resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: adminServerContainerAppName
 }
 
-resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: apiGatewayContainerAppName
 }
 
-resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: configServerContainerAppName
 }
 
-resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: customersServiceContainerAppName
 }
 
-resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: vetsServiceContainerAppName
 }
 
-resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: visitsServiceContainerAppName
 }
 
-resource logAnalyticsWorkspace  'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' existing = {
+resource logAnalyticsWorkspace  'Microsoft.OperationalInsights/workspaces@2022-10-01' existing = {
   name: logAnalyticsWorkspaceName
 }
 

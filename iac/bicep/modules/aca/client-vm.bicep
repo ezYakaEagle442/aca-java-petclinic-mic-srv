@@ -42,7 +42,7 @@ output vnetGUID string = vnet.properties.resourceGuid
 output subnetId string = vnet.properties.subnets[0].id
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.network/publicipaddresses?tabs=bicep#publicipaddresssku
-resource pip 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
+resource pip 'Microsoft.Network/publicIPAddresses@2022-05-01' = {
   name: 'pip-vm-aca-petclinic-client'
   location: location
   sku: {
@@ -58,7 +58,7 @@ output pipId string = pip.id
 output pipGUID string = pip.properties.resourceGuid
 output pipAddress string = pip.properties.ipAddress
 
-resource NSG 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
+resource NSG 'Microsoft.Network/networkSecurityGroups@2022-05-01' = {
   name: nsgName
   location: location
   properties: {
@@ -82,7 +82,7 @@ resource NSG 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
 }
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.network/networkinterfaces?tabs=bicep
-resource NIC1 'Microsoft.Network/networkInterfaces@2021-08-01' = {
+resource NIC1 'Microsoft.Network/networkInterfaces@2022-05-01' = {
   location: location
   name: nicName
   properties: {
@@ -126,7 +126,7 @@ var unattendSetLocalRegionFirstRunXML = '<FirstLogonCommands><SynchronousCommand
 var customScript = 'Set-WinSystemLocale fr-FR\\r\\nSet-WinUserLanguageList -LanguageList fr-FR -Force\\r\\nSet-Culture -CultureInfo fr-FR\\r\\nSet-WinHomeLocation -GeoId 84\\r\\nRestart-Computer -Force'
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.compute/virtualmachines?tabs=bicep
-resource windowsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = {
+resource windowsVM 'Microsoft.Compute/virtualMachines@2022-08-01' = {
   name: windowsVMName
   location: location
   properties: {

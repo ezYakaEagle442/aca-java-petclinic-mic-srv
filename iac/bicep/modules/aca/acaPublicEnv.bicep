@@ -16,9 +16,10 @@ param zoneRedundant bool = false
 
 @allowed([
   'log-analytics'
+  'azure-monitor'
 ])
 @description('Cluster configuration which enables the log daemon to export app logs to a destination. Currently only "log-analytics" is supported https://learn.microsoft.com/en-us/azure/templates/microsoft.app/managedenvironments?pivots=deployment-language-bicep#managedenvironmentproperties')
-param logDestination string = 'log-analytics'
+param logDestination string = 'azure-monitor' // 'log-analytics'
 
 resource logAnalyticsWorkspace  'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' existing =  {
   name: logAnalyticsWorkspaceName

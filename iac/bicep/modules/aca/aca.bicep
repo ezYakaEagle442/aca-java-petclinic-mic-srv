@@ -169,7 +169,7 @@ param visitsServiceAppIdentityName string = 'id-aca-petclinic-visits-service-dev
 @description('The discovery-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param discoveryServerAppIdentityName string = 'id-aca-petclinic-discovery-server-dev-westeurope-101'
 
-resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' existing = {
+resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-preview' existing = {
   name: azureContainerAppEnvName
 }
 
@@ -204,7 +204,7 @@ resource discoveryServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentiti
 */
 
 // https://learn.microsoft.com/en-us/azure/templates/microsoft.app/containerapps?pivots=deployment-language-bicep
-resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: adminServerContainerAppName
   location: location
   identity: {
@@ -430,7 +430,7 @@ output adminServerContainerAppLatestRevisionFqdn string = AdminServerContainerAp
 output adminServerContainerAppIngressFqdn string = AdminServerContainerApp.properties.configuration.ingress.fqdn
 output adminServerContainerAppConfigSecrets array = AdminServerContainerApp.properties.configuration.secrets
 
-resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: configServerContainerAppName
   location: location
   identity: {
@@ -575,7 +575,7 @@ output configServerContainerAppIngressFqdn string = ConfigServerContainerApp.pro
 output configServerContainerAppConfigSecrets array = ConfigServerContainerApp.properties.configuration.secrets
 
 
-resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: customersServiceContainerAppName
   location: location
   identity: {
@@ -726,7 +726,7 @@ output customersServiceContainerAppLatestRevisionFqdn string = CustomersServiceC
 output customersServiceContainerAppIngressFqdn string = CustomersServiceContainerApp.properties.configuration.ingress.fqdn
 output customersServiceContainerAppConfigSecrets array = CustomersServiceContainerApp.properties.configuration.secrets
 
-resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: vetsServiceContainerAppName
   location: location
   identity: {
@@ -877,7 +877,7 @@ output vetsServiceContainerAppLatestRevisionFqdn string = VetsServiceContainerAp
 output vetsServiceContainerAppIngressFqdn string = VetsServiceContainerApp.properties.configuration.ingress.fqdn
 output vetsServiceContainerAppConfigSecrets array = VetsServiceContainerApp.properties.configuration.secrets
 
-resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: visitsServiceContainerAppName
   location: location
   identity: {
@@ -1030,7 +1030,7 @@ output visitsServiceContainerAppIngressFqdn string = VisitsServiceContainerApp.p
 output visitsServiceContainerAppConfigSecrets array = VisitsServiceContainerApp.properties.configuration.secrets
 
 
-resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: apiGatewayContainerAppName
   location: location
   identity: {

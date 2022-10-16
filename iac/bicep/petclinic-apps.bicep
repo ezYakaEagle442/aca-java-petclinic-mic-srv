@@ -106,15 +106,15 @@ param imageNameVetsService string
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-visits-service:{{ github.sha }}')
 param imageNameVisitsService string
 
-resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = if (deployToVNet) {
+resource vnet 'Microsoft.Network/virtualNetworks@2022-05-01' existing = if (deployToVNet) {
   name: vnetName
 }
 
-resource ACR 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
+resource ACR 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' existing = {
   name: acrName
 }
 
-resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing = {
+resource appInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: appInsightsName
 }
 
@@ -123,7 +123,7 @@ resource kvRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
   scope: subscription()
 }
 
-resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
+resource kv 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: kvName
   scope: kvRG
 }

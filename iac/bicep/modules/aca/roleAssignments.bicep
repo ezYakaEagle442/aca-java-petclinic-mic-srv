@@ -58,11 +58,11 @@ var role = {
   KeyVaultSecretsUser: '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/4633458b-17de-408a-b874-0445c86b69e6'
 }
 
-resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
+resource acr 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' existing = {
   name: acrName
 }
  // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
- resource AcrPullRoleAssignmentCustomersService 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+ resource AcrPullRoleAssignmentCustomersService 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(acr.id, acrRoleType , acaCustomersServicePrincipalId)
   scope: acr
   properties: {
@@ -73,7 +73,7 @@ resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
 }
 
  // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
- resource AcrPullRoleAssignmentVetsService 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+ resource AcrPullRoleAssignmentVetsService 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(acr.id, acrRoleType , acaVetsServicePrincipalId)
   scope: acr
   properties: {
@@ -84,7 +84,7 @@ resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
 }
 
  // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
- resource AcrPullRoleAssignmentVisitsService 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+ resource AcrPullRoleAssignmentVisitsService 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(acr.id, acrRoleType , acaVisitsServicePrincipalId)
   scope: acr
   properties: {
@@ -95,7 +95,7 @@ resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
 }
 
  // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
- resource AcrPullRoleAssignmentConfigServer 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+ resource AcrPullRoleAssignmentConfigServer 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(acr.id, acrRoleType , acaConfigServerPrincipalId)
   scope: acr
   properties: {
@@ -106,7 +106,7 @@ resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
 }
 
  // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
- resource AcrPullRoleAssignmentAdminServer 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+ resource AcrPullRoleAssignmentAdminServer 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(acr.id, acrRoleType , acaAdminServerPrincipalId)
   scope: acr
   properties: {
@@ -117,7 +117,7 @@ resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
 }
 
  // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
- resource AcrPullRoleAssignmentacaApiGateway 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+ resource AcrPullRoleAssignmentacaApiGateway 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(acr.id, acrRoleType , acaApiGatewayPrincipalId)
   scope: acr
   properties: {
@@ -147,7 +147,7 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
 }
 
 // You need Key Vault Administrator permission to be able to see the Keys/Secrets/Certificates in the Azure Portal
-resource kvSecretsUserRoleAssignmentCustomersService 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+resource kvSecretsUserRoleAssignmentCustomersService 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(kv.id, kvRoleType , subscription().subscriptionId)
   properties: {
     roleDefinitionId: role[kvRoleType]
@@ -156,7 +156,7 @@ resource kvSecretsUserRoleAssignmentCustomersService 'Microsoft.Authorization/ro
   }
 }
 
-resource kvSecretsUserRoleAssignmentVetsService 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+resource kvSecretsUserRoleAssignmentVetsService 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(kv.id, kvRoleType , subscription().subscriptionId)
   properties: {
     roleDefinitionId: role[kvRoleType]
@@ -165,7 +165,7 @@ resource kvSecretsUserRoleAssignmentVetsService 'Microsoft.Authorization/roleAss
   }
 }
 
-resource kvSecretsUserRoleAssignmentVisitsService 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+resource kvSecretsUserRoleAssignmentVisitsService 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(kv.id, kvRoleType , subscription().subscriptionId)
   properties: {
     roleDefinitionId: role[kvRoleType]
@@ -177,7 +177,7 @@ resource kvSecretsUserRoleAssignmentVisitsService 'Microsoft.Authorization/roleA
 // https://github.com/Azure/azure-quickstart-templates/blob/master/modules/Microsoft.ManagedIdentity/user-assigned-identity-role-assignment/1.0/main.bicep
 // https://github.com/Azure/bicep/discussions/5276
 // Assign ManagedIdentity ID to the "Network contributor" role to ACA VNet
-/*resource ACANetworkRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+/*resource ACANetworkRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(appSubnet.id, networkRoleType , acaPrincipalId)
   scope: appSubnet
   properties: {

@@ -41,11 +41,11 @@ param infrastructureSubnetCidr string = '10.42.2.0/23' // The CIDR prefix must b
 ])
 param logDestination string = 'log-analytics'
 
-resource logAnalyticsWorkspace  'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' existing =  {
+resource logAnalyticsWorkspace  'Microsoft.OperationalInsights/workspaces@2022-10-01' existing =  {
   name: logAnalyticsWorkspaceName
 }
 
-resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing = {
+resource appInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: appInsightsName
 }
 
@@ -64,11 +64,11 @@ module vnetModule 'vnet.bicep' = {
   }   
 }
 
-resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = {
+resource vnet 'Microsoft.Network/virtualNetworks@2022-05-01' existing = {
   name: vnetName
 }
 
-resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' =  {
+resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-preview' =  {
   name: azureContainerAppEnvName
   location: location
   properties: {

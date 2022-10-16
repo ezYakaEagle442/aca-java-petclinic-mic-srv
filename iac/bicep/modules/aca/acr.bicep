@@ -16,7 +16,7 @@ param networkRuleSetCidr string
 @description('The Azure Active Directory tenant ID that should be used for authenticating requests to the Key Vault.')
 param tenantId string = subscription().tenantId
 
-resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' = {
+resource acr 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' = {
   name: acrName
   location: location
   sku: {

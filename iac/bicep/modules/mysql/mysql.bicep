@@ -77,7 +77,7 @@ resource fwRuleAzureContainerApps 'Microsoft.DBforMySQL/flexibleServers/firewall
 */
 
 // Allow client workstation with IP 'clientIPAddress' for local Dev/Test only
-resource fwRuleClientIPAddress 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-05-01' = if (setFwRuleClient) {
+resource fwRuleClientIPAddress 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-12-01-preview' = if (setFwRuleClient) {
   name: 'ClientIPAddress'
   parent: mysqlserver
   properties: {
@@ -87,7 +87,7 @@ resource fwRuleClientIPAddress 'Microsoft.DBforMySQL/flexibleServers/firewallRul
 }
 
  // Allow Azure Container Apps
- resource fwRuleAllowAzureContainerApps 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-05-01' = {
+ resource fwRuleAllowAzureContainerApps 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-12-01-preview' = {
   name: 'Allow-Azure-Container-Apps-OutboundPubIP'
   parent: mysqlserver
   properties: {
