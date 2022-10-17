@@ -261,11 +261,11 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
                 port: 8081
                 scheme: 'HTTP'
               }
-              initialDelaySeconds: 30
+              initialDelaySeconds: 60
               periodSeconds: 60
               successThreshold: 1
               timeoutSeconds: 3
-              type: 'Startup'              
+              type: 'Startup'             
             }                       
           ]
           resources: {

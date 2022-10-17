@@ -244,7 +244,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
                 port: 8081
                 scheme: 'HTTP'
               }
-              initialDelaySeconds: 30
+              initialDelaySeconds: 120
               periodSeconds: 60
               successThreshold: 1
               timeoutSeconds: 3
