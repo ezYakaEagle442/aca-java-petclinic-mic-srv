@@ -533,7 +533,20 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-previe
               successThreshold: 1
               timeoutSeconds: 3
               type: 'Readiness'
-            }            
+            }
+            {
+              failureThreshold: 5
+              httpGet: {
+                path: '/manage/health/XXX' /* /actuator */
+                port: 8081
+                scheme: 'HTTP'
+              }
+              initialDelaySeconds: 30
+              periodSeconds: 60
+              successThreshold: 1
+              timeoutSeconds: 3
+              type: 'Startup'              
+            }                     
           ]
           resources: {
             cpu: any(containerResourcesCpu)

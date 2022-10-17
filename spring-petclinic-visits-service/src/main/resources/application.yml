@@ -25,7 +25,7 @@ management:
     web:
       base-path: "/manage"
       exposure: # https://docs.spring.io/spring-boot/docs/2.6.3/reference/html/actuator.html#actuator.endpoints.exposing
-        include: "health,info,env,mappings" # "*"
+        include: "health,info,startup,env,mappings,metrics" # "*"
         exclude: "beans"    
   endpoint:
     health:
@@ -39,7 +39,11 @@ management:
         readiness:
           include: "readinessState"
         liveness:
-          include: "livenessState"                      
+          include: "livenessState"
+        #startup:
+          #include: readinessProbe
+    startup: # https://docs.spring.io/spring-boot/docs/2.6.6/reference/html/actuator.html#actuator.endpoints.kubernetes-probes
+      enabled: true 
     probes:
         enabled: true      
     info:
@@ -50,3 +54,4 @@ management:
       enabled: true            
   server:
     port: 8081
+---
