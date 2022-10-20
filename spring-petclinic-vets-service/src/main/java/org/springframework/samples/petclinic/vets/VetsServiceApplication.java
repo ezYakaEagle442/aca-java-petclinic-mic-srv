@@ -21,6 +21,10 @@ import org.springframework.boot.context.metrics.buffering.BufferingApplicationSt
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.samples.petclinic.vets.system.VetsProperties;
 
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
+
 /**
  * @author Maciej Szarlinski
  */
@@ -28,12 +32,63 @@ import org.springframework.samples.petclinic.vets.system.VetsProperties;
 @EnableConfigurationProperties(VetsProperties.class)
 public class VetsServiceApplication {
 
-	public static void main(String[] args) {
-        // Set StatrtUp Probe
-        // https://docs.spring.io/spring-boot/docs/2.7.x/reference/htmlsingle/#features.spring-application.startup-tracking
+        @Value("${spring.cloud.azure.keyvault.secret.endpoint}")
+        private static String kvSecretEndpoint;
+    
+        @Value("${spring.cloud.azure.keyvault.secret.property-sources[0].endpoint}")
+        private static String kvSecretPropertySourcesEndpoint;
+    
+        @Value("${spring.datasource.url}")
+        private static String url;
+    
+        @Value("${spring.cache.cache-names}")
+        private static String cacheName;
+            
+        @Value("${spring.sql.init.mode}")
+        private static String sqlInitMode;
 
-        SpringApplication application = new SpringApplication(VetsServiceApplication.class);
-        application.setApplicationStartup(new BufferingApplicationStartup(2048));
-        application.run(args);	
+        @Value("${spring.sql.datasource.initialization-mode}")
+        private static String sqlDataSourceInitMode;
+
+        @Value("${spring.jpa.hibernate.ddl-auto}")
+        private static String jpaHibernateDdlAuto;
+
+	public static void main(String[] args) {
+
+        System.out.println("Checking ENV variables ..."+ "\n");
+
+                Map envMap = System.getenv();
+                for (Object key : envMap.keySet()) {
+                        System.out.println(key + " : " + envMap.get(key));
+                }
+
+                System.out.println("Checking ENV variable  : |" + "|\n");
+
+                System.out.println("Checking ENV variable SPRING_PROFILES_ACTIVE : |" + System.getenv("SPRING_PROFILES_ACTIVE") + "|\n");
+
+                System.out.println("Checking ENV variable AZURE_KEYVAULT_ENDPOINT : |" + System.getenv("AZURE_KEYVAULT_ENDPOINT") + "|\n");
+                System.out.println("Checking ENV variable AZURE_KEYVAULT_URI : |" + System.getenv("AZURE_KEYVAULT_URI") + "|\n");
+
+                System.out.println("Checking ENV variable spring.cloud.azure.keyvault.secret.endpoint : |" + System.getenv("SPRING_CLOUD_AZURE_KEYVAULT_SECRET_SECRET_ENDPOINT") + "|\n");
+                System.out.println("Checking ENV variable spring.cloud.azure.keyvault.secret.property-sources[0].endpoint : |" + System.getenv("SPRING_CLOUD_AZURE_KEYVAULT_SECRET_SECRET_PROPERTYSOURCES_ENDPOINT") + "|\n");
+
+                System.out.println("kvSecretEndpoint from config file: " + kvSecretEndpoint);
+                System.out.println("kvSecretPropertySourcesEndpoint from config file: " + kvSecretPropertySourcesEndpoint);
+
+                System.out.println("JDBC URL from config file: " + url);
+                System.out.println("cache name: " + cacheName);
+                System.out.println("SQL Init mode: " + sqlInitMode);
+
+                System.out.println("sqlDataSourceInitMode: " + sqlDataSourceInitMode);
+                System.out.println("jpaHibernateDdlAuto: " + jpaHibernateDdlAuto);
+
+                System.out.println("JDBC URL from config file: " + url);
+                                
+                // Set StatrtUp Probe
+                // https://docs.spring.io/spring-boot/docs/2.7.x/reference/htmlsingle/#features.spring-application.startup-tracking
+
+                SpringApplication application = new SpringApplication(VetsServiceApplication.class);
+                application.setApplicationStartup(new BufferingApplicationStartup(2048));
+                application.run(args);	
 	}
 }
