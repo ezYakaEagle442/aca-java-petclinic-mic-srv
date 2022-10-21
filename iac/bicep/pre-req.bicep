@@ -81,22 +81,19 @@ param nicName string = 'nic-aca-${appName}-client-vm'
 @description('The Azure Active Directory tenant ID that should be used for authenticating requests to the Key Vault.')
 param tenantId string = subscription().tenantId
 
+@description('Is KV Network access public ?')
+@allowed([
+  'enabled'
+  'disabled'
+])
+param publicNetworkAccess string = 'enabled'
+
 @maxLength(24)
 @description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
 param kvName string = 'kv-${appName}'
 
 @description('The name of the KV RG')
 param kvRGName string
-
-resource kvRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
-  name: kvRGName
-  scope: subscription()
-}
-
-resource kv 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
-  name: kvName
-  scope: kvRG
-}
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.operationalinsights/workspaces?tabs=bicep
 resource logAnalyticsWorkspace  'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
@@ -170,6 +167,35 @@ module defaultPublicManagedEnvironment './modules/aca/acaPublicEnv.bicep' = if (
 }
 
 
+
+resource kvRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
+  name: kvRGName
+  scope: subscription()
+}
+
+
+var  vNetRules = []
+var  ipRules = [defaultPublicManagedEnvironment.outputs.corpManagedEnvironmentStaticIp]
+
+// Now KV must Allow azureContainerAppsOutboundPubIP in the IP rules ...
+// Must allow ACA to access Existing KV
+
+module kvsetiprules './modules/kv/kv.bicep' = {
+  name: 'kv-set-iprules'
+  scope: kvRG
+  params: {
+    kvName: kvName
+    location: location
+    ipRules: ipRules
+    vNetRules: vNetRules
+  }
+}
+
+resource kv 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+  name: kvName
+}  
+
+
 module mysqlPub './modules/mysql/mysql.bicep' = {
   name: 'mysqldbpub'
   params: {
@@ -185,6 +211,7 @@ module mysqlPub './modules/mysql/mysql.bicep' = {
     azureContainerAppsOutboundPubIP: defaultPublicManagedEnvironment.outputs.corpManagedEnvironmentStaticIp
   }
 }
+
 
 module identities './modules/aca/identity.bicep' = {
   name: 'aca-identities'

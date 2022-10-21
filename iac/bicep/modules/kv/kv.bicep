@@ -34,8 +34,12 @@ param skuName string = 'standard'
 @description('The Azure Active Directory tenant ID that should be used for authenticating requests to the Key Vault.')
 param tenantId string = subscription().tenantId
 
+@description('The KV ipRules')
+param ipRules array = [] 
+
 @description('The KV vNetRules')
 param vNetRules array = [] 
+
 /*
 [
   id: vnet.outputs.appSubnetSubnetId
@@ -63,14 +67,12 @@ resource kv 'Microsoft.KeyVault/vaults@2022-07-01' = {
     networkAcls: {
       bypass: 'AzureServices'
       defaultAction: 'Deny'
-      /*
-      ipRules: [
-        {
-          value: 'string'
-        }
-      ]
-      */
-      virtualNetworkRules: vNetRules
+      ipRules:  [for ipRule in ipRules: {
+          value: ipRule
+      }]
+      virtualNetworkRules:  [for vNetRule in vNetRules: {
+        id: vNetRule.id
+      }]      
     }
     softDeleteRetentionInDays: 7 // 30 must be greater or equal than '7' but less or equal than '90'.
     //accessPolicies: []
