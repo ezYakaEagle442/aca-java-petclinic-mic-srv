@@ -309,11 +309,9 @@ jobs:
             -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
             -p setFwRuleClient=false \
             -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
-            -p autoShutdownNotificationEmail="toto@groland.grd" \
             -p clientIPAddress="10.0.0.0" \
             -p startIpAddress="10.0.0.0" \
-            -p endIpAddress="10.0.0.255" \
-            -p nsgRuleSourceAddressPrefix="10.0.0.0/16"
+            -p endIpAddress="10.0.0.255"
             
             az deployment group show \
               -g ${{ env.RG_APP }} \
