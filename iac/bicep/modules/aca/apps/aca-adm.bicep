@@ -84,7 +84,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       ingress: {
         allowInsecure: true
         external: true
-        targetPort: 8888
+        targetPort: 9090
         traffic: [
           {
             latestRevision: true
