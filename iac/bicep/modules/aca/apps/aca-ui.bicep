@@ -257,7 +257,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               failureThreshold: 5
               httpGet: {
-                path: '/manage/health' /* /actuator */
+                path: '/manage/info' /* /actuator */
                 port: 8081
                 scheme: 'HTTP'
               }
