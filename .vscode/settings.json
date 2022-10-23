@@ -1,3 +1,4 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "mta.executable.path": "c:\\Users\\STPINCAU\\AppData\\Roaming\\Code\\User\\globalStorage\\redhat.mta-vscode-extension\\.mta\\tooling\\vscode\\mta-cli\\mta-cli-5.3.0.Final\\bin\\mta-cli.bat"
 }

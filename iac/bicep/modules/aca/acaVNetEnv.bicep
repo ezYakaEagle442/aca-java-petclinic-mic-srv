@@ -81,6 +81,7 @@ resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-pr
     }
     zoneRedundant: zoneRedundant
     daprAIInstrumentationKey: appInsights.properties.InstrumentationKey
+    daprAIConnectionString: appInsights.properties.ConnectionString
     vnetConfiguration: {
       // The Docker bridge network address represents the default docker0 bridge network address present in all Docker installations. While docker0 bridge is not used by AKS clusters or the pods themselves, you must set this address to continue to support scenarios such as docker build within the AKS cluster. It is required to select a CIDR for the Docker bridge network address because otherwise Docker will pick a subnet automatically, which could conflict with other CIDRs. You must pick an address space that does not collide with the rest of the CIDRs on your networks, including the cluster's service CIDR and pod CIDR. Default of 172.17.0.1/16. You can reuse this range across different AKS clusters.
       internal: true // set to true if the environnement is private, i.e vnet injected. Boolean indicating the environment only has an internal load balancer. These environments do not have a public static IP resource. They must provide runtimeSubnetId and infrastructureSubnetId if enabling this property
