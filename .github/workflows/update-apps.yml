@@ -2,7 +2,7 @@
 name: Update Apps
 
 env:
-  LOCATION: westeurope
+  LOCATION: francecentral # westeurope
   RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to update the ACA Apps
 
   AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.

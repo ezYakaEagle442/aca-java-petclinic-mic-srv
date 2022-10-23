@@ -2,7 +2,7 @@
 name: Delete Apps
 
 env:
-  LOCATION: westeurope
+  LOCATION: francecentral # westeurope
   RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to delete the ACA Apps
 
   APP_NAME: petcliaca
