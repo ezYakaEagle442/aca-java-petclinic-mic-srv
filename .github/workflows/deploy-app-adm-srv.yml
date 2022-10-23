@@ -49,7 +49,7 @@ on:
         type: string
 
 jobs:
-  deploy-config-server:
+  deploy-admin-server:
     runs-on: ubuntu-latest
     steps:
 
