@@ -154,6 +154,7 @@ module kvsetiprules './modules/kv/kv.bicep' = {
 
 resource kv 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: kvName
+  scope: kvRG
 }  
 
 
