@@ -21,25 +21,7 @@ param appInsightsName string = 'appi-${appName}'
 
 @description('Should the service be deployed to a Corporate VNet ?')
 param deployToVNet bool = false
-param vnetName string = 'vnet-aca'
-param vnetCidr string = '10.42.0.0/21' // /16 minimum ? soon /27 see https://github.com/microsoft/azure-container-apps/issues/247
 
-
-// /!\ The following properties must be set together, or not set at all (they will be set by the platform): 
-// DockerBridgeCidr, PlatformReservedCidr, PlatformReservedDnsIP
-
-// Platform and Docker bridge CIDR blocks must not overlap each other, the address ranges of the provided subnets, or the following reserved IP ranges: 169.254.0.0/16,172.30.0.0/16,172.31.0.0/16,192.0.2.0/24,0.0.0.0/8,127.0.0.0/8
-// see https://docs.microsoft.com/en-us/azure/container-apps/networking#restrictions
-@description('Must have a size between /21 and /12. IP range in CIDR notation that can be reserved for environment infrastructure IP addresses. Must not overlap with any other provided IP ranges.')
-param platformReservedCidr string = '10.90.0.0/21'
-
-@description('An IP address from the IP range defined by platformReservedCidr that will be reserved for the internal DNS server. The address can not be the first address in the range, or the network address')
-param platformReservedDnsIP string = '10.90.0.10' 
-
-// https://docs.microsoft.com/en-us/azure/container-apps/vnet-custom-internal?tabs=bash&pivots=azure-cli#networking-parameters
-// The platform-reserved-cidr and docker-bridge-cidr address ranges can't conflict with each other, or with the ranges of either provided subnet. Further, make sure these ranges don't conflict with any other address range in the VNET.
-@description('The address range assigned to the Docker bridge network. This range must have a size between /28 and /12. CIDR notation IP range assigned to the Docker bridge, network. Must not overlap with any other provided IP ranges.')
-param dockerBridgeCidr string = '10.42.42.0/28' // 172.17.0.1/16
 
 @description('Resource ID of a subnet for infrastructure components. This subnet must be in the same VNET as the subnet defined in runtimeSubnetId. Must not overlap with any other provided IP ranges.')
 param infrastructureSubnetName string = 'snet-infra' // used for the AKS nodes
@@ -63,30 +45,9 @@ param startIpAddress string
 @description('Allow Azure Container App subnet to access MySQL DB')
 param endIpAddress string
 
-param zoneRedundant bool = false
-
-@description('emailRecipient informed before the VM shutdown')
-param autoShutdownNotificationEmail string
-
-@description('Windows client VM deployed to the VNet. Computer name cannot be more than 15 characters long')
-param windowsVMName string = 'vm-win-aca-petcli'
-
-@description('The CIDR or source IP range. Asterisk "*" can also be used to match all source IPs. Default tags such as "VirtualNetwork", "AzureLoadBalancer" and "Internet" can also be used. If this is an ingress rule, specifies where network traffic originates from.')
-param nsgRuleSourceAddressPrefix string
-param nsgName string = 'nsg-aca-${appName}-app-client'
-param nsgRuleName string = 'Allow RDP from local dev station'
-
-param nicName string = 'nic-aca-${appName}-client-vm'
-
 @description('The Azure Active Directory tenant ID that should be used for authenticating requests to the Key Vault.')
 param tenantId string = subscription().tenantId
 
-@description('Is KV Network access public ?')
-@allowed([
-  'enabled'
-  'disabled'
-])
-param publicNetworkAccess string = 'enabled'
 
 @maxLength(24)
 @description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
