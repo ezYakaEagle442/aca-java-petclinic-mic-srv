@@ -294,6 +294,8 @@ jobs:
 
           # https://github.com/Azure/bicep/issues/8006
           curl -v -L https://aka.ms/BicepLatestRelease
+          az upgrade -Y
+          az bicep install
           az bicep version
           az bicep upgrade
           az bicep version
