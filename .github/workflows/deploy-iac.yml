@@ -381,6 +381,7 @@ jobs:
             -p imageNameConfigServer=$imageNameConfigServer \
             -p imageNameCustomersService=$imageNameCustomersService \
             -p imageNameVetsService=$imageNameVetsService \
+            -p imageNameVisitsService=$imageNameVisitsService
       shell: bash
 
     - name: Configure Diagnostic-Settings
