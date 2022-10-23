@@ -292,6 +292,12 @@ jobs:
           echo "ACR adminUserEnabled option : Single account per registry, not recommended for multiple users . This registry must have the Admin User enabled, or the integration with ACA will not work from the Azure portal."
           echo ""
 
+          # https://github.com/Azure/bicep/issues/8006
+          curl -v -L https://aka.ms/BicepLatestRelease
+          az bicep version
+          az bicep upgrade
+          az bicep version
+
           az deployment group create --name aca-petclinic-pre-req -f iac/bicep/pre-req.bicep -g ${{ env.RG_APP }} \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
