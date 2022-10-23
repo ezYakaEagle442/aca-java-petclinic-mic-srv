@@ -49,5 +49,7 @@ output acrId string = acr.id
 output acrIdentity string = acr.identity.principalId
 output acrType string = acr.type
 output acrRegistryUrl string = acr.properties.loginServer
-output acrRegistryUsr string = acr.listCredentials().username
-output acrRegistryPwd string = acr.listCredentials().passwords[0].value
+
+// outputs-should-not-contain-secrets
+// output acrRegistryUsr string = acr.listCredentials().username
+//output acrRegistryPwd string = acr.listCredentials().passwords[0].value
