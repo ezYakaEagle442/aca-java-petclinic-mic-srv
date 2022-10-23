@@ -19,7 +19,7 @@ param zoneRedundant bool = false
   'azure-monitor'
 ])
 @description('Cluster configuration which enables the log daemon to export app logs to a destination. Currently only "log-analytics" is supported https://learn.microsoft.com/en-us/azure/templates/microsoft.app/managedenvironments?pivots=deployment-language-bicep#managedenvironmentproperties')
-param logDestination string = 'azure-monitor' // 'log-analytics'
+param logDestination string = 'log-analytics' // 'log-analytics' or 'azure-monitor' 
 
 resource logAnalyticsWorkspace  'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' existing =  {
   name: logAnalyticsWorkspaceName
@@ -61,6 +61,8 @@ output corpManagedEnvironmentStaticIp string = corpManagedEnvironment.properties
 
 
 
+// https://github.com/microsoft/azure-container-apps/issues/382
+/*
 resource appInsightsDiagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   name: 'dgs-${appName}-send-${azureContainerAppEnvName}-logs-and-metrics-to-log-analytics'
   scope: corpManagedEnvironment
@@ -113,3 +115,4 @@ resource appInsightsDiagnosticSettings 'Microsoft.Insights/diagnosticSettings@20
     ]
   }
 }
+*/
