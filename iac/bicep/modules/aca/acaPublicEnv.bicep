@@ -48,6 +48,7 @@ resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-pr
     }
     zoneRedundant: zoneRedundant
     daprAIInstrumentationKey: appInsights.properties.InstrumentationKey
+    daprAIConnectionString: appInsights.properties.ConnectionString
   }
 }
 
@@ -67,6 +68,14 @@ resource appInsightsDiagnosticSettings 'Microsoft.Insights/diagnosticSettings@20
     logAnalyticsDestinationType: 'AzureDiagnostics'
     workspaceId: logAnalyticsWorkspace.id
     logs: [
+      {
+        category: 'ContainerAppConsoleLogs'
+        enabled: true
+      }
+      {
+        category: 'ContainerAppSystemLogs'
+        enabled: true
+      }      
       {
         category: 'ApplicationConsole'
         enabled: true
