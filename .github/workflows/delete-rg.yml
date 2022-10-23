@@ -6,10 +6,10 @@ name: Delete Azure Resource Groups
 env:
   APP_NAME: petcliaca
   LOCATION: francecentral # westeurope
-  RG_KV: rg-iac-kv # RG where to deploy KV
+  RG_KV: rg-iac-kv29 # RG where to deploy KV
   RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
   
-  KV_NAME: kv-petcliaca # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
+  KV_NAME: kv-petcliaca29 # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
 
 
   # https://github.com/Azure/actions-workflow-samples/blob/master/assets/create-secrets-for-GitHub-workflows.md#consume-secrets-in-your-workflow
