@@ -534,10 +534,11 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-previe
               timeoutSeconds: 3
               type: 'Readiness'
             }
+            /*
             {
               failureThreshold: 5
               httpGet: {
-                path: '/manage/health/XXX' /* /actuator */
+                path: '/manage/health/XXX'
                 port: 8081
                 scheme: 'HTTP'
               }
@@ -546,7 +547,8 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-previe
               successThreshold: 1
               timeoutSeconds: 3
               type: 'Startup'              
-            }                     
+            }
+            */                     
           ]
           resources: {
             cpu: any(containerResourcesCpu)
@@ -560,14 +562,6 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-previe
         rules: [
           {
             http: {
-              /*
-              auth: [
-                {
-                  secretRef: 'string'
-                  triggerParameter: 'string'
-                }
-              ]
-              */
               metadata: {
                 concurrentRequests: '10'
               }
@@ -665,7 +659,12 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-pr
             {
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
-            }             
+            }
+            {
+              name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: customersServicedentity.properties.clientId
+
+            }       
           ]
           image: imageNameCustomersService
           name: customersServiceContainerAppName
@@ -816,7 +815,12 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview
             {
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
-            }             
+            }
+            {
+              name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: vetsServiceAppIdentity.properties.clientId
+
+            }                
           ]
           image: imageNameVetsService
           name: vetsServiceContainerAppName
@@ -860,14 +864,6 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview
         rules: [
           {
             http: {
-              /*
-              auth: [
-                {
-                  secretRef: 'string'
-                  triggerParameter: 'string'
-                }
-              ]
-              */
               metadata: {
                 concurrentRequests: '10'
               }
@@ -968,7 +964,12 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-previ
             {
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
-            }                                     
+            } 
+            {
+              name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: visitsServiceIdentity.properties.clientId
+
+            }                                                   
           ]
           image: imageNameVisitsService
           name: visitsServiceContainerAppName
@@ -1012,14 +1013,6 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-previ
         rules: [
           {
             http: {
-              /*
-              auth: [
-                {
-                  secretRef: 'string'
-                  triggerParameter: 'string'
-                }
-              ]
-              */
               metadata: {
                 concurrentRequests: '10'
               }
@@ -1132,7 +1125,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-06-01-preview'
             {
               name: 'VISITS_SVC_URL'
               value: VisitsServiceContainerApp.properties.configuration.ingress.fqdn
-            }                                          
+            }
           ]
           image: imageNameApiGateway
           name: apiGatewayContainerAppName
@@ -1176,14 +1169,6 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-06-01-preview'
         rules: [
           {
             http: {
-              /*
-              auth: [
-                {
-                  secretRef: 'string'
-                  triggerParameter: 'string'
-                }
-              ]
-              */
               metadata: {
                 concurrentRequests: '10'
               }
