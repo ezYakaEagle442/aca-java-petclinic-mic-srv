@@ -663,7 +663,6 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-pr
             {
               name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
               value: customersServicedentity.properties.clientId
-
             }       
           ]
           image: imageNameCustomersService
@@ -819,7 +818,6 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview
             {
               name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
               value: vetsServiceAppIdentity.properties.clientId
-
             }                
           ]
           image: imageNameVetsService
@@ -968,7 +966,6 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-previ
             {
               name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
               value: visitsServiceIdentity.properties.clientId
-
             }                                                   
           ]
           image: imageNameVisitsService

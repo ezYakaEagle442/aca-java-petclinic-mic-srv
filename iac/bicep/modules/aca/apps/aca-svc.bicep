@@ -206,7 +206,11 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
             {
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
-            }             
+            }
+            {
+              name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: customersServicedentity.properties.clientId
+            }                       
           ]
           image: imageNameCustomersService
           name: customersServiceContainerAppName
@@ -237,10 +241,11 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               timeoutSeconds: 30
               type: 'Readiness'
             }
+            /*
             {
               failureThreshold: 5
               httpGet: {
-                path: '/manage/info' /* /actuator */
+                path: '/manage/info'
                 port: 8081
                 scheme: 'HTTP'
               }
@@ -249,7 +254,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               successThreshold: 1
               timeoutSeconds: 3
               type: 'Startup'              
-            }            
+            }*/            
           ]
           resources: {
             cpu: any(containerResourcesCpu)
@@ -362,7 +367,11 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
-            }             
+            }
+            {
+              name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: vetsServiceAppIdentity.properties.clientId
+            }                         
           ]
           image: imageNameVetsService
           name: vetsServiceContainerAppName
@@ -370,7 +379,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               failureThreshold: 5
               httpGet: {
-                path: '/manage/health/liveness' /* /actuator */
+                path: '/manage/health/liveness'
                 port: 8081
                 scheme: 'HTTP'
               }
@@ -383,7 +392,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               failureThreshold: 5
               httpGet: {
-                path: '/manage/health/readiness' /* /actuator */
+                path: '/manage/health/readiness'
                 port: 8081
                 scheme: 'HTTP'
               }
@@ -505,7 +514,11 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
-            }                                     
+            }
+            {
+              name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: visitsServiceIdentity.properties.clientId
+            }                               
           ]
           image: imageNameVisitsService
           name: visitsServiceContainerAppName
@@ -513,7 +526,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               failureThreshold: 5
               httpGet: {
-                path: '/manage/health/liveness' /* /actuator */
+                path: '/manage/health/liveness'
                 port: 8081
                 scheme: 'HTTP'
               }
@@ -526,7 +539,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               failureThreshold: 5
               httpGet: {
-                path: '/manage/health/readiness' /* /actuator */
+                path: '/manage/health/readiness'
                 port: 8081
                 scheme: 'HTTP'
               }

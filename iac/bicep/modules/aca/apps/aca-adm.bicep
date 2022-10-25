@@ -156,10 +156,11 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               timeoutSeconds: 3
               type: 'Readiness'
             }
+            /*
             {
               failureThreshold: 5
               httpGet: {
-                path: '/manage/info' /* /actuator */
+                path: '/manage/info'
                 port: 8081
                 scheme: 'HTTP'
               }
@@ -169,6 +170,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               timeoutSeconds: 3
               type: 'Startup'
             }
+            */
           ]
           resources: {
             cpu: any(containerResourcesCpu)
