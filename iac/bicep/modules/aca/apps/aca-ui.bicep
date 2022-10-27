@@ -92,6 +92,15 @@ param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
 @description('The api-gateway Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param apiGatewayAppIdentityName string = 'id-aca-petclinic-api-gateway-dev-westeurope-101'
 
+@description('The customers-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+param customersServiceAppIdentityName string = 'id-aca-petclinic-customers-service-dev-westeurope-101'
+
+@description('The vets-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+param vetsServiceAppIdentityName string = 'id-aca-petclinic-vets-service-dev-westeurope-101'
+
+@description('The visits-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
+param visitsServiceAppIdentityName string = 'id-aca-petclinic-visits-service-dev-westeurope-101'
+
 resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' existing = {
   name: azureContainerAppEnvName
 }
@@ -134,6 +143,18 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
   scope: kvRG
 }
 
+resource customersServicedentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
+  name: customersServiceAppIdentityName
+}
+
+resource vetsServiceAppIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
+  name: vetsServiceAppIdentityName
+}
+
+resource visitsServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
+  name: visitsServiceAppIdentityName
+}
+
 resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: apiGatewayContainerAppName
   location: location
@@ -141,6 +162,10 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
     type: 'UserAssigned'
     userAssignedIdentities: {
       '${apiGatewayIdentity.id}': {}
+      // shall assign all 3 identities due to a bug/limitation in Azure SDK
+      '${customersServicedentity.id}': {}
+      '${visitsServiceIdentity.id}': {}
+      '${vetsServiceAppIdentity.id}': {}      
     }    
   }
   properties: {
@@ -208,6 +233,20 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
               secretRef: 'springcloudazurekvendpoint'
             }
+            // /!\ ALL Identyties are REQUIRED because the KV settings in the Config-Server have 3 property-sources, each having its own Identity/ClientId
+            // If they are not provided, will hit Exception java.net.MalformedURLException: no protocol: ${SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT}
+            {
+              name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: vetsServiceAppIdentity.properties.clientId
+            }                         
+            {
+              name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: visitsServiceIdentity.properties.clientId
+            }            
+            {
+              name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: customersServicedentity.properties.clientId
+            }               
             {
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
