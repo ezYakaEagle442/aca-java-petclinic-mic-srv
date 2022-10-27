@@ -344,3 +344,8 @@ output apiGatewayContainerAppLatestRevisionName string = ApiGatewayContainerApp.
 output apiGatewayContainerAppLatestRevisionFqdn string = ApiGatewayContainerApp.properties.latestRevisionFqdn
 output apiGatewayContainerAppIngressFqdn string = ApiGatewayContainerApp.properties.configuration.ingress.fqdn
 output apiGatewayContainerAppConfigSecrets array = ApiGatewayContainerApp.properties.configuration.secrets
+
+output CFG_SRV_URL string = ConfigServerContainerApp.properties.configuration.ingress.fqdn
+output CUSTOMERS_SVC_URL string = CustomersServiceContainerApp.properties.configuration.ingress.fqdn
+output VETS_SVC_URL string = VetsServiceContainerApp.properties.configuration.ingress.fqdn
+output VISITS_SVC_URL string = VisitsServiceContainerApp.properties.configuration.ingress.fqdn

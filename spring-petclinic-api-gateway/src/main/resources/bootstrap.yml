@@ -11,4 +11,4 @@ spring:
       on-profile: docker
   cloud:
     config:
-      uri: https://{CFG_SRV_URL}
+      uri: https://${CFG_SRV_URL}
