@@ -52,6 +52,10 @@ public class VetsServiceApplication {
 		});
 		*/
 
+		System.out.println("Checking ENV variable  : |" + "|\n");
+		System.out.println("Checking ENV variable SPRING_PROFILES_ACTIVE : |" +  System.getenv("SPRING_PROFILES_ACTIVE") + "|\n");		
+		System.out.println("Checking ENV variable SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT : |" + System.getenv("SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT") + "|\n");
+
         String systemipaddress = "";
         try {
             URL url_name = new URL("http://whatismyip.akamai.com");
