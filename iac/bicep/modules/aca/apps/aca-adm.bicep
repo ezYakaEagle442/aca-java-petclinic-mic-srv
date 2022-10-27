@@ -114,7 +114,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       containers: [
         { 
           command: [
-            'java', '-javaagent:${applicationInsightsAgentJarFilePath}', 'org.springframework.boot.loader.JarLauncher', '--server.port=8888'
+            'java', '-javaagent:${applicationInsightsAgentJarFilePath}', 'org.springframework.boot.loader.JarLauncher', '--server.port=9090', '--spring.profiles.active=mysql,key-vault,cloud'
           ]
           env: [
             {
