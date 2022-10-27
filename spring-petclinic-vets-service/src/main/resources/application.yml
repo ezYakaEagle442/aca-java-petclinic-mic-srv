@@ -13,7 +13,7 @@ spring:
   config:
     activate:
       on-profile: docker
-    import: configserver:https://{CFG_SRV_URL}
+    import: configserver:https://${CFG_SRV_URL}
 ---
 management:
   health:
