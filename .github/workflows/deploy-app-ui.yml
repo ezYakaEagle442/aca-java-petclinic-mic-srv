@@ -61,7 +61,7 @@ jobs:
       with:
         creds: ${{ env.credentials }}
 
-    - name: Deploy Azure Container Apps
+    - name: Deploy UI + API Gateway to ACA
       # with: # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepswith
       run: |
           echo "About to deploy the UI + API Gateway ..." 

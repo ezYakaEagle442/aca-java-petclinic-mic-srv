@@ -61,10 +61,10 @@ jobs:
       with:
         creds: ${{ env.credentials }}
 
-    - name: Deploy Azure Container Apps
+    - name: Deploy Customers, Vets & Visits services to ACA
       # with: # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepswith
       run: |
-          echo "About to deploy the UI + API Gateway ..." 
+          echo "About to deploy the Customers, Vets & Visits services ..." 
           tag_id=${{ inputs.tag_id }}
           echo "Image Build tag ID:"$tag_id
 
@@ -88,7 +88,6 @@ jobs:
             -p imageNameVisitsService=$imageNameVisitsService \
             -p springCloudAzureKeyVaultEndpoint=${{ env.SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT }} \
             -p springCloudAzureTenantId=${{ env.SPRING_CLOUD_AZURE_TENANT_ID }} 
-
 
       shell: bash
 
