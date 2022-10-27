@@ -806,12 +806,6 @@ ContainerAppSystemLogs_CL
 
 Type and run the following Kusto query to see all in the inbound calls into Azure Container Apps:
 
-```sh
-AppPlatformIngressLogs
-| project TimeGenerated, RemoteAddr, Host, Request, Status, BodyBytesSent, RequestTime, ReqId, RequestHeaders
-| sort by TimeGenerated
-```
-
 
 Type and run the following Kusto query to see application logs:
 
@@ -883,15 +877,6 @@ ContainerAppConsoleLogs_CL
 
 ```
 
-Type and run the following Kusto query to see all the logs from the managed Azure Container Registry :
-
-```sh
-  AppPlatformSystemLogs
-  | where LogType contains "Registry"
-  | project TimeGenerated, Level, LogType, ServiceName, Log
-  | sort by TimeGenerated
-```
-
 
 ### Custom metrics
 Spring Boot registers a lot number of core metrics: JVM, CPU, Tomcat, Logback... 
@@ -932,6 +917,14 @@ url: jdbc:mysql://${MYSQL_SERVER_FULL_NAME}:3306/${MYSQL_DATABASE_NAME}??useSSL=
 url: jdbc:mysql://petclinic-mysql-server.mysql.database.azure.com:3306/petclinic?useSSL=true
 url: jdbc:mysql://petclinic-mysql-server.mysql.database.azure.com:3306/petclinic?useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.2&verifyServerCertificate=true    
 
+
+If you face this Netty SSL Hadnshake issue :
+```console
+eactor.core.Exceptions$ReactiveException: io.netty.handler.ssl.SslHandshakeTimeoutException: handshake timed out after 10000ms
+```
+It means that you may need to upgrade your Spring Boot version to the latest one...
+See
+[https://github.com/netty/netty/issues/12343](https://github.com/netty/netty/issues/12343)
 
 
 ## Interesting Spring Petclinic forks
