@@ -207,10 +207,19 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
             }
+            // /!\ ALL Identyties are REQUIRED because the KV settings in the Config-Server have 3 property-sources, each having its own Identity/ClientId
+            {
+              name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: vetsServiceAppIdentity.properties.clientId
+            }                         
+            {
+              name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: visitsServiceIdentity.properties.clientId
+            }            
             {
               name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
               value: customersServicedentity.properties.clientId
-            }                       
+            }                   
           ]
           image: imageNameCustomersService
           name: customersServiceContainerAppName
@@ -368,10 +377,19 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
             }
+            // /!\ ALL Identyties are REQUIRED because the KV settings in the Config-Server have 3 property-sources, each having its own Identity/ClientId
             {
               name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
               value: vetsServiceAppIdentity.properties.clientId
             }                         
+            {
+              name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: visitsServiceIdentity.properties.clientId
+            }            
+            {
+              name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: customersServicedentity.properties.clientId
+            }
           ]
           image: imageNameVetsService
           name: vetsServiceContainerAppName
@@ -515,10 +533,19 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
             }
+            // /!\ ALL Identyties are REQUIRED because the KV settings in the Config-Server have 3 property-sources, each having its own Identity/ClientId
+            {
+              name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: vetsServiceAppIdentity.properties.clientId
+            }                         
             {
               name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
               value: visitsServiceIdentity.properties.clientId
-            }                               
+            }            
+            {
+              name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: customersServicedentity.properties.clientId
+            }                           
           ]
           image: imageNameVisitsService
           name: visitsServiceContainerAppName
