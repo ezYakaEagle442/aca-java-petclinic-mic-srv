@@ -186,7 +186,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
       containers: [
         { 
           command: [
-            'java', '-javaagent:${applicationInsightsAgentJarFilePath}', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080'
+            'java', '-javaagent:${applicationInsightsAgentJarFilePath}', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080', '--spring.profiles.active=mysql,key-vault,cloud', '-Xms512m -Xmx1024m'
           ]
           env: [
             {
@@ -359,7 +359,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       containers: [
         { 
           command: [
-            'java', '-javaagent:${applicationInsightsAgentJarFilePath}', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080'
+            'java', '-javaagent:${applicationInsightsAgentJarFilePath}', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080', '--spring.profiles.active=mysql,key-vault,cloud', '-Xms512m -Xmx1024m'
           ]
           env: [
             {
@@ -518,7 +518,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       containers: [
         { 
           command: [
-            'java', '-javaagent:${applicationInsightsAgentJarFilePath}', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080'
+            'java', '-javaagent:${applicationInsightsAgentJarFilePath}', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080', '--spring.profiles.active=mysql,key-vault,cloud', '-Xms512m -Xmx1024m'
           ]
           env: [
             {
