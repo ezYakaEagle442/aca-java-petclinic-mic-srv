@@ -188,7 +188,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       containers: [
         { 
           command: [
-            'java', '-javaagent:${applicationInsightsAgentJarFilePath}', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080'
+            'java', '-javaagent:${applicationInsightsAgentJarFilePath}', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080', '--spring.profiles.active=mysql,key-vault,cloud', '-Xms512m -Xmx1024m'
           ]
           env: [
             {
@@ -254,10 +254,11 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               timeoutSeconds: 30
               type: 'Readiness'
             } 
+            /*
             {
               failureThreshold: 5
               httpGet: {
-                path: '/manage/info' /* /actuator */
+                path: '/manage/info'
                 port: 8081
                 scheme: 'HTTP'
               }
@@ -266,7 +267,8 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               successThreshold: 1
               timeoutSeconds: 3
               type: 'Startup'             
-            }                       
+            }
+            */
           ]
           resources: {
             cpu: any(containerResourcesCpu)
