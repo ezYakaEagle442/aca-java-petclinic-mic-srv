@@ -76,7 +76,7 @@ jobs:
           echo "imageNameVetsService= " $imageNameVetsService
           echo "imageNameVisitsService= " $imageNameVisitsService
 
-          az deployment group create --name aca-petclinic-cfg-srv -f iac/bicep/modules/aca/apps/aca-svc.bicep -g ${{ env.RG_APP }} \
+          az deployment group create --name aca-petclinic-svc -f iac/bicep/modules/aca/apps/aca-svc.bicep -g ${{ env.RG_APP }} \
             -p appName=${{ env.APP_NAME }} \
             -p location=${{ env.LOCATION }} \
             -p acrName=${{ env.AZURE_CONTAINER_REGISTRY }} \
