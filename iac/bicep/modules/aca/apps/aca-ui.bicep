@@ -224,21 +224,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
               secretRef: 'springcloudazurekvendpoint'
-            }
-            // /!\ ALL Identyties are REQUIRED because the KV settings in the Config-Server have 3 property-sources, each having its own Identity/ClientId
-            // If they are not provided, will hit Exception java.net.MalformedURLException: no protocol: ${SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT}
-            {
-              name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
-              value: vetsServiceAppIdentity.properties.clientId
-            }                         
-            {
-              name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
-              value: visitsServiceIdentity.properties.clientId
-            }            
-            {
-              name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
-              value: customersServicedentity.properties.clientId
-            }               
+            }           
             {
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn

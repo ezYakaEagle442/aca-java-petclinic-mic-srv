@@ -392,8 +392,10 @@ vCPUs (cores)	| Memory
 
 Quick local test just to verify that the jar files can be run (the routing will not work out of a K8S cluster, and also the apps will fail to start as soon as management port 8081 will be already in use by config server ...) : 
 
+<span style="color:red">**/!\ IMPORTANT WARNING: projects must be built with -Denv=cloud  EXCEPT for api-gateway**</span>
+
 ```sh
-mvn package -DskipTests
+ mvn clean package -DskipTests -Denv=cloud
 java -jar spring-petclinic-config-server\target\aca-spring-petclinic-config-server-2.6.6.jar --server.port=8888
 java -jar spring-petclinic-admin-server\target\aca-spring-petclinic-admin-server-2.6.6.jar --server.port=9090
 java -jar spring-petclinic-visits-service\target\aca-spring-petclinic-visits-service-2.6.6.jar --server.port=8082 # --spring.profiles.active=docker
@@ -926,6 +928,15 @@ It means that you may need to upgrade your Spring Boot version to the latest one
 See
 [https://github.com/netty/netty/issues/12343](https://github.com/netty/netty/issues/12343)
 
+
+If you face this issue :
+```console
+error Caused by: java.net.MalformedURLException: no protocol: ${SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT}
+```
+
+It means that the api-gateway project had been built with mvn -B clean package --file pom.xml -DskipTests **-Denv=cloud**
+This set the env=cloud at in the parent [POM](pom.xml#L246) which then injects the spring-cloud-azure-starter-keyvault-secrets dependency at [POM](pom.xml#L289)
+it looks like event just having such dependency would cause the runtime to look for ${SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT}
 
 ## Interesting Spring Petclinic forks
 
