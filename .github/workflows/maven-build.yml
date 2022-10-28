@@ -265,10 +265,10 @@ jobs:
             --file ${{ env.DOCKERFILE_PATH_CONFIG_SERVER }} \
             ${{ github.workspace }}
 
-          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-            -t ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id \
-            --file ${{ env.DOCKERFILE_PATH_API_GATEWAY }} \
-            ${{ github.workspace }}
+          #az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
+          #  -t ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id \
+          #  --file ${{ env.DOCKERFILE_PATH_API_GATEWAY }} \
+          #  ${{ github.workspace }}
 
           az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
             -t ${{ env.REPOSITORY }}/${{ env.CUSTOMERS_SERVICE }}:$tag_id \
