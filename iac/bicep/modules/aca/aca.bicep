@@ -290,13 +290,9 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview
           // ["java", "-javaagent:/tmp/app/applicationinsights-agent-3.4.1.jar", "org.springframework.boot.loader.JarLauncher", "--server.port=9090", "--spring.profiles.active=docker,mysql"]
           
           command: [
-            'java', '-javaagent:"${applicationInsightsAgentJarFilePath}"', 'org.springframework.boot.loader.JarLauncher', '--server.port=9090', '--spring.profiles.active=docker,mysql'
+            'java', '-javaagent:"${applicationInsightsAgentJarFilePath}"', 'org.springframework.boot.loader.JarLauncher', '--server.port=9090', '-Xms512m -Xmx1024m'
           ]
           env: [
-            {
-              name: 'SPRING_PROFILES_ACTIVE'
-              value: 'docker,mysql'
-            }
             {
               // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -484,13 +480,9 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-previe
       containers: [
         { 
           command: [
-            'java', '-javaagent:"${applicationInsightsAgentJarFilePath}"', 'org.springframework.boot.loader.JarLauncher', '--server.port=8888', '--spring.profiles.active=docker,mysql'
+            'java', '-javaagent:"${applicationInsightsAgentJarFilePath}"', 'org.springframework.boot.loader.JarLauncher', '--server.port=8888', '-Xms512m -Xmx1024m'
           ]
           env: [
-            {
-              name: 'SPRING_PROFILES_ACTIVE'
-              value: 'docker,mysql'
-            }
             {
               // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -589,6 +581,9 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-pr
     type: 'UserAssigned'
     userAssignedIdentities: {
       '${customersServicedentity.id}': {}
+      // shall assign all 3 identities due to a bug/limitation in Azure SDK
+      '${visitsServiceIdentity.id}': {}
+      '${vetsServiceAppIdentity.id}': {}
     }    
   }
   properties: {
@@ -636,7 +631,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-pr
       containers: [
         { 
           command: [
-            'java', '-javaagent:"${applicationInsightsAgentJarFilePath}"', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080', '--spring.profiles.active=docker,mysql'
+            'java', '-javaagent:"${applicationInsightsAgentJarFilePath}"', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080', '--spring.profiles.active=docker,mysql', '-Xms512m -Xmx1024m'
           ]
           env: [
             {
@@ -744,6 +739,9 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview
     type: 'UserAssigned'
     userAssignedIdentities: {
       '${vetsServiceAppIdentity.id}': {}
+      // shall assign all 3 identities due to a bug/limitation in Azure SDK
+      '${visitsServiceIdentity.id}': {}
+      '${customersServicedentity.id}': {}
     }    
   }
   properties: {
@@ -791,7 +789,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview
       containers: [
         { 
           command: [
-            'java', '-javaagent:"${applicationInsightsAgentJarFilePath}"', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080', '--spring.profiles.active=docker,mysql'
+            'java', '-javaagent:"${applicationInsightsAgentJarFilePath}"', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080', '--spring.profiles.active=docker,mysql', '-Xms512m -Xmx1024m'
           ]
           env: [
             {
@@ -891,6 +889,9 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-previ
     type: 'UserAssigned'
     userAssignedIdentities: {
       '${visitsServiceIdentity.id}': {}
+      // shall assign all 3 identities due to a bug/limitation in Azure SDK
+      '${customersServicedentity.id}': {}
+      '${vetsServiceAppIdentity.id}': {}
     }    
   }
   properties: {
@@ -939,7 +940,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-previ
       containers: [
         { 
           command: [
-            'java', '-javaagent:"${applicationInsightsAgentJarFilePath}"', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080', '--spring.profiles.active=docker,mysql'
+            'java', '-javaagent:"${applicationInsightsAgentJarFilePath}"', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080', '--spring.profiles.active=docker,mysql', '-Xms512m -Xmx1024m'
           ]
           env: [
             {
