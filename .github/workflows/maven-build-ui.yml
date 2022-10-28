@@ -176,15 +176,7 @@ jobs:
 
           az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
           
-          echo ""
-          echo "Read https://learn.microsoft.com/en-us/azure/container-registry/container-registry-java-quickstart"
-          echo "Read https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication-managed-identity?tabs=azure-cli#example-2-access-with-a-system-assigned-identity"
-          echo ""
-          echo "/!\ Managed Identity is set on ACR ..."
-          echo "you need to az login  az acr login before calling az acr build ..."
-          echo ""
-
-
+          
           # https://github.com/Azure/acr-build/issues/10
           # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
           # {{.Run.ID}} would be different for each az acr build , not the best to simplify Image Tag
@@ -197,8 +189,8 @@ jobs:
           # https://learn.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli
           docker build --build-arg --no-cache -t ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }} -f "./docker/petclinic-api-gateway/Dockerfile" .
           docker tag  ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id
-          docker tag ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}
-          docker push ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}
+          docker tag ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id 
+          docker push ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id 
 
 
     # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
