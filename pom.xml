@@ -82,12 +82,20 @@
 
             <!--https://www.baeldung.com/spring-boot-actuator-enable-endpoints  
             Additionally, starting with Spring Boot 2.0, we need to include the web starter if we want our endpoints exposed via HTTP:
-            This is configured already in the child pom -->
+            This is configured already in the child pom 
+
+            That would throw this exception:
+            Spring MVC found on classpath, which is incompatible with Spring Cloud Gateway
+            Please set spring.main.web-application-type=reactive or remove spring-boot-starter-web dependency.
+            See:    https://stackoverflow.com/questions/68587832/spring-cloud-gateway-spring-mvc-found-on-classpath-which-is-incompatible-with
+                    https://cloud.spring.io/spring-cloud-gateway/reference/html/#gateway-starter
+
             <dependency>
                 <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-web</artifactId> <!-- spring-boot-dependencies -->
+                <artifactId>spring-boot-starter-web</artifactId> spring-boot-dependencies
                 <version>${spring-boot.version}</version>
             </dependency>
+            -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-test</artifactId>
