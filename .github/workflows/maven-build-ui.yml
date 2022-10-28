@@ -132,7 +132,7 @@ jobs:
 
     # https://github.com/marketplace/actions/docker-setup-buildx
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2.0.0
+      uses: docker/setup-buildx-action@v2
 
     - name: Azure Login
       uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
@@ -187,11 +187,21 @@ jobs:
           #  ${{ github.workspace }}
 
           # https://learn.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli
-          docker build --build-arg --no-cache -t ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }} -f "./docker/petclinic-api-gateway/Dockerfile" .
-          docker tag ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id
-          docker tag "${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id" "${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id"
+          docker build --build-arg --no-cache -t ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id -f "./docker/petclinic-api-gateway/Dockerfile" .
           docker push "${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id"
 
+
+    # https://github.com/marketplace/actions/docker-build-push-action
+    #- name: Build and push
+    #  uses: docker/build-push-action@v5
+    #  with:
+    #    image: ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}
+    #    registry: ${{ env.REGISTRY_URL }}
+    #    directory: .
+    #    dockerfile: ./docker/petclinic-api-gateway/Dockerfile
+    #    pushImage: true
+    #    tags: ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id
+    #    addLatest: true
 
     # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
     # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#hardening-for-self-hosted-runners
