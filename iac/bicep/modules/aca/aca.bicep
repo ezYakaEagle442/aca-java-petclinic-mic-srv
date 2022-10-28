@@ -655,10 +655,19 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-pr
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
             }
+            // /!\ ALL Identyties are REQUIRED because the KV settings in the Config-Server have 3 property-sources, each having its own Identity/ClientId
+            {
+              name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: vetsServiceAppIdentity.properties.clientId
+            }                         
+            {
+              name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: visitsServiceIdentity.properties.clientId
+            }            
             {
               name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
               value: customersServicedentity.properties.clientId
-            }       
+            }   
           ]
           image: imageNameCustomersService
           name: customersServiceContainerAppName
@@ -813,10 +822,19 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
             }
+            // /!\ ALL Identyties are REQUIRED because the KV settings in the Config-Server have 3 property-sources, each having its own Identity/ClientId
             {
               name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
               value: vetsServiceAppIdentity.properties.clientId
-            }                
+            }                         
+            {
+              name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: visitsServiceIdentity.properties.clientId
+            }            
+            {
+              name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: customersServicedentity.properties.clientId
+            }                  
           ]
           image: imageNameVetsService
           name: vetsServiceContainerAppName
@@ -964,10 +982,19 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-previ
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
             } 
+            // /!\ ALL Identyties are REQUIRED because the KV settings in the Config-Server have 3 property-sources, each having its own Identity/ClientId
+            {
+              name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: vetsServiceAppIdentity.properties.clientId
+            }                         
             {
               name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
               value: visitsServiceIdentity.properties.clientId
-            }                                                   
+            }            
+            {
+              name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
+              value: customersServicedentity.properties.clientId
+            }                                                 
           ]
           image: imageNameVisitsService
           name: visitsServiceContainerAppName
@@ -1088,7 +1115,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-06-01-preview'
       containers: [
         { 
           command: [
-            'java', '-javaagent:"${applicationInsightsAgentJarFilePath}"', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080', '--spring.profiles.active=docker,mysql'
+            'java', '-javaagent:"${applicationInsightsAgentJarFilePath}"', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080', '-Xms512m -Xmx1024m', '--spring.cloud.azure.keyvault.secret.enabled=false', '--spring.cloud.azure.keyvault.secret.property-source-enabled=false'
           ]
           env: [
             {
