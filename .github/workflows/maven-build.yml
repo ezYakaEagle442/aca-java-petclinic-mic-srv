@@ -5,7 +5,7 @@
 # This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
-name: Java CI with Maven
+name: Java CI with Maven for SVC
 
 env:
   AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
@@ -237,50 +237,42 @@ jobs:
           #acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryUsr.value | tr -d '"')
           #acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryPwd.value | tr -d '"')
           # az acr login --name ${{ env.REGISTRY_URL }} -u $acr_usr -p $acr_pwd
-          
           # az acr login --name ${{ env.REGISTRY_URL }} --expose-token
-
           az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
           
-          echo ""
-          echo "Read https://learn.microsoft.com/en-us/azure/container-registry/container-registry-java-quickstart"
-          echo "Read https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication-managed-identity?tabs=azure-cli#example-2-access-with-a-system-assigned-identity"
-          echo ""
-          echo "/!\ Managed Identity is set on ACR ..."
-          echo "you need to az login --identity, az acr login before calling az acr build ..."
-          echo ""
-
-          #az login --identity --username $identityID
-
           # https://github.com/Azure/acr-build/issues/10
           # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
           # {{.Run.ID}} would be different for each az acr build , not the best to simplify Image Tag
-          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-            -t ${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }}:$tag_id \
-            --file ${{ env.DOCKERFILE_PATH_ADMIN_SERVER }} \
-            ${{ github.workspace }}
 
-          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-            -t ${{ env.REPOSITORY }}/${{ env.CONFIG_SERVER }}:$tag_id \
-            --file ${{ env.DOCKERFILE_PATH_CONFIG_SERVER }} \
-            ${{ github.workspace }}
+          # https://learn.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli
+          docker build --build-arg --no-cache -t ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.CONFIG_SERVER }}:$tag_id -f "./docker/petclinic-config-server/Dockerfile" .
+          docker push "${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.CONFIG_SERVER }}:$tag_id"
+
+          docker build --build-arg --no-cache -t ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.CUSTOMERS_SERVICE }}:$tag_id -f "./docker/xx/Dockerfile" .
+          docker push "${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.CUSTOMERS_SERVICE }}:$tag_id"
+
+          docker build --build-arg --no-cache -t ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.VETS_SERVICE }}:$tag_id -f "./docker/xx/Dockerfile" .
+          docker push "${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.VETS_SERVICE }}:$tag_id"
+
+          docker build --build-arg --no-cache -t ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.VISITS_SERVICE }}:$tag_id -f "./docker/xxx/Dockerfile" .
+          docker push "${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.VISITS_SERVICE }}:$tag_id"
 
           #az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-          #  -t ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id \
-          #  --file ${{ env.DOCKERFILE_PATH_API_GATEWAY }} \
+          #  -t ${{ env.REPOSITORY }}/${{ env.CONFIG_SERVER }}:$tag_id \
+          #  --file ${{ env.DOCKERFILE_PATH_CONFIG_SERVER }} \
           #  ${{ github.workspace }}
 
-          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-            -t ${{ env.REPOSITORY }}/${{ env.CUSTOMERS_SERVICE }}:$tag_id \
-            --file ${{ env.DOCKERFILE_PATH_CUSTOMERS_SERVICE }} \
-            ${{ github.workspace }}
+          #az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
+          #  -t ${{ env.REPOSITORY }}/${{ env.CUSTOMERS_SERVICE }}:$tag_id \
+          #  --file ${{ env.DOCKERFILE_PATH_CUSTOMERS_SERVICE }} \
+          #  ${{ github.workspace }}
 
-          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-            -t ${{ env.REPOSITORY }}/${{ env.VETS_SERVICE }}:$tag_id \
-            --file ${{ env.DOCKERFILE_PATH_VETS_SERVICE }} \
-            ${{ github.workspace }}
+          #az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
+          #  -t ${{ env.REPOSITORY }}/${{ env.VETS_SERVICE }}:$tag_id \
+          #  --file ${{ env.DOCKERFILE_PATH_VETS_SERVICE }} \
+          #  ${{ github.workspace }}
 
-          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-            -t ${{ env.REPOSITORY }}/${{ env.VISITS_SERVICE }}:$tag_id \
-            --file ${{ env.DOCKERFILE_PATH_VISITS_SERVICE }} \
-            ${{ github.workspace }}
+          #az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
+          #  -t ${{ env.REPOSITORY }}/${{ env.VISITS_SERVICE }}:$tag_id \
+          #  --file ${{ env.DOCKERFILE_PATH_VISITS_SERVICE }} \
+          #  ${{ github.workspace }}
