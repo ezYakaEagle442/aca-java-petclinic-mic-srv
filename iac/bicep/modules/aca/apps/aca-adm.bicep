@@ -114,13 +114,9 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
       containers: [
         { 
           command: [
-            'java', '-javaagent:${applicationInsightsAgentJarFilePath}', 'org.springframework.boot.loader.JarLauncher', '--server.port=9090', '--spring.profiles.active=mysql,key-vault,cloud'
+            'java', '-javaagent:${applicationInsightsAgentJarFilePath}', 'org.springframework.boot.loader.JarLauncher', '--server.port=9090', '--spring.cloud.azure.keyvault.secret.enabled=false', '--spring.cloud.azure.keyvault.secret.property-source-enabled=false', '-Xms512m', '-Xmx1024m'
           ]
           env: [
-            {
-              name: 'SPRING_PROFILES_ACTIVE'
-              value: 'docker,mysql'
-            }
             {
               // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
