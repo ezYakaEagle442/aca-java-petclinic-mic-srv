@@ -130,6 +130,16 @@ jobs:
       run: |
         pwd
         ls -al
+
+        echo "****************************************************************************************"
+        echo "*                                                                                      *"
+        echo "*                                                                                      *"
+        echo "* /!\ IMPORTANT WARNING: projects must be built with -Denv=cloud                       *"
+        echo "* EXCEPT for api-gateway                                                               *"
+        echo "*                                                                                      *"
+        echo "*                                                                                      *"
+        echo "****************************************************************************************"
+
         mvn -B clean package --file pom.xml -DskipTests -Denv=cloud
         echo "github.workspace = ${{ github.workspace }}"
         
@@ -177,7 +187,6 @@ jobs:
         ls -al spring-petclinic-${{ env.VISITS_SERVICE }}/target/*.jar
         ls -al spring-petclinic-${{ env.CONFIG_SERVER }}/target/*.jar
         # ls -al spring-petclinic-${{ env.DISCOVERY_SERVER }}/target/*.jar
-
 
     # https://github.com/marketplace/actions/docker-setup-buildx
     - name: Set up Docker Buildx
