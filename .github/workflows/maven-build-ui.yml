@@ -5,7 +5,7 @@
 # This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
-name: Builds UI WITHOUT -Denv=cloud 
+name: Java CI with Maven for UI WITHOUT -Denv=cloud 
 
 env:
   AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
@@ -189,10 +189,17 @@ jobs:
           # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
           # {{.Run.ID}} would be different for each az acr build , not the best to simplify Image Tag
 
-          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-            -t ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id \
-            --file ${{ env.DOCKERFILE_PATH_API_GATEWAY }} \
-            ${{ github.workspace }}
+          #az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
+          #  -t ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id \
+          #  --file ${{ env.DOCKERFILE_PATH_API_GATEWAY }} \
+          #  ${{ github.workspace }}
+
+          # https://learn.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli
+          docker build --build-arg --no-cache -t ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }} -f "./docker/petclinic-api-gateway/Dockerfile" .
+          docker tag  ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id
+          docker tag ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}
+          docker push ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}
+
 
     # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
     # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#hardening-for-self-hosted-runners
