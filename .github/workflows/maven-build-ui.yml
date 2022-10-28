@@ -1,0 +1,205 @@
+# https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+# Warning: The `set-output` command is deprecated and will be disabled soon. 
+# Please upgrade to using Environment Files. 
+
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Builds UI WITHOUT -Denv=cloud 
+
+env:
+  AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
+  REGISTRY_URL: acrpetcliaca.azurecr.io  # set this to the URL of your registry
+  REPOSITORY: petclinic                  # set this to your ACR repository
+  PROJECT_NAME: petclinic                # set this to your project's name
+  KV_NAME: kv-petcliaca29               # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
+  
+  RG_KV: rg-iac-kv29 # RG where to deploy KV
+  RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
+
+  # ==== APPS ====
+  PRJ_PREFIX: aca-spring-petclinic
+
+  API_GATEWAY: api-gateway
+  ADMIN_SERVER: admin-server
+  CUSTOMERS_SERVICE: customers-service
+  VETS_SERVICE: vets-service
+  VISITS_SERVICE: visits-service
+
+  CONFIG_SERVER: config-server
+  DISCOVERY_SERVER: discovery-server
+
+  DOCKERFILE_PATH_ADMIN_SERVER: ./docker/petclinic-admin-server/Dockerfile
+  DOCKERFILE_PATH_DISCOVERY_SERVER: ./docker/petclinic-discovery-server/Dockerfile
+  DOCKERFILE_PATH_API_GATEWAY: ./docker/petclinic-api-gateway/Dockerfile
+  DOCKERFILE_PATH_CONFIG_SERVER: ./docker/petclinic-config-server/Dockerfile
+  DOCKERFILE_PATH_CUSTOMERS_SERVICE: ./docker/petclinic-customers-service/Dockerfile
+  DOCKERFILE_PATH_VETS_SERVICE: ./docker/petclinic-vets-service/Dockerfile
+  DOCKERFILE_PATH_VISITS_SERVICE: ./docker/petclinic-visits-service/Dockerfile
+
+  # ==== Versions ====
+  DEPLOYMENT_VERSION: 2.6.6
+  AZ_CLI_VERSION: 2.40.0
+  JAVA_VERSION: 11
+
+  # https://github.com/Azure/actions-workflow-samples/blob/master/assets/create-secrets-for-GitHub-workflows.md#consume-secrets-in-your-workflow
+  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-secrets
+  # ==== Secrets ====
+  credentials: ${{ secrets.AZURE_CREDENTIALS }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  SPN_ID: ${{ secrets.SPN_ID }}
+  SPN_PWD: ${{ secrets.SPN_PWD }}
+  
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
+on:
+  workflow_call:
+    outputs:
+      tag_id:
+        description: "The Maven Build job output"
+        value: ${{ jobs.maven-build.outputs.tag_id }}
+
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      
+jobs:
+
+  maven-build:
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: read
+      packages: write    
+
+    outputs:
+      tag_id: ${{ steps.acr_build.outputs.tag_id }}
+
+    steps:
+    # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
+    # /!\ IMPORTANT:  The step that creates or updates the environment variable does not have access to the new value, but all subsequent steps in a job will have access.
+    - name: Set Base environment variables
+      run: |
+        echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV
+        
+        echo "API_GATEWAY_JAR_ARTIFACT=${{ env.PRJ_PREFIX }}-${{ env.API_GATEWAY }}-${{ env.DEPLOYMENT_VERSION }}.jar" >> $GITHUB_ENV
+
+        echo "API_GATEWAY_GROUP_ID=org.springframework.samples.petclinic.api" >> $GITHUB_ENV
+        echo "API_GATEWAY_ARTIFACT_ID=${{ env.PRJ_PREFIX }}-${{ env.API_GATEWAY }}" >> $GITHUB_ENV
+
+        echo "GH_WORKSPACE=${{ github.workspace }}" >> $GITHUB_ENV # "/github/workspace"
+      shell: bash
+
+    - name: Checkout
+      uses: actions/checkout@v3
+      
+    - name: Set up JDK
+      uses: actions/setup-java@v3 
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'microsoft' # https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#Microsoft
+        cache: maven
+    
+    - name: Build with Maven
+      id: mvn_build
+      run: |
+        pwd
+        ls -al
+
+        echo "****************************************************************************************"
+        echo "*                                                                                      *"
+        echo "*                                                                                      *"
+        echo "* /!\ IMPORTANT WARNING: projects must be built with -Denv=cloud                       *"
+        echo "* EXCEPT for api-gateway                                                               *"
+        echo "*                                                                                      *"
+        echo "*                                                                                      *"
+        echo "****************************************************************************************"
+
+        mvn -B clean package --file pom.xml -DskipTests
+        echo "github.workspace = ${{ github.workspace }}"
+        
+        ls -al
+        ls -al spring-petclinic-${{ env.API_GATEWAY }}/target/*.jar
+
+    - name: Check all Jar artifacts
+      run: |
+        pwd
+        ls -al
+
+        echo "Checking all artifacts Jar files :"
+        ls -al spring-petclinic-${{ env.API_GATEWAY }}/target/*.jar
+
+    # https://github.com/marketplace/actions/docker-setup-buildx
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2.0.0
+
+    - name: Azure Login
+      uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
+      with:
+        creds: ${{ env.credentials }}
+
+    - name: Build image and push it to ACR
+      id: acr_build      
+      run: |
+
+          # https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs
+          # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
+          # GITHUB_SHA: The commit SHA that triggered the workflow
+          # GITHUB_RUN_ID: A unique number for each workflow run within a repository. This number does not change if you re-run the workflow run.
+          # mismatch with ACR {{.Run.ID}}. {{.Run.ID}} would be different for each az acr build 
+          tag_id=$GITHUB_SHA
+          echo "GITHUB_RUN_ID="$GITHUB_RUN_ID
+          echo "GITHUB_SHA="$GITHUB_SHA
+          echo "run_id="${{ github.run_id }}
+          echo "github.sha="${{ github.sha }}
+          
+          echo "tag_id="$tag_id
+          SHORT_SHA=`echo $GITHUB_SHA | cut -c1-8`
+          echo "SHORT_SHA="$SHORT_SHA
+
+          tag_id=$SHORT_SHA
+          echo "tag_id="$tag_id
+
+          # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
+          # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
+          
+          echo "tag_id=$tag_id" >> $GITHUB_ENV
+          echo "tag_id=$tag_id" >> $GITHUB_OUTPUT
+
+          # https://github.com/cwe1ss/msa-template/blob/main/.github/workflows/_service-build.yml
+          set -euo pipefail
+          access_token=$(az account get-access-token --query accessToken -o tsv)
+          refresh_token=$(curl https://${{ env.REGISTRY_URL }}/oauth2/exchange -v -d "grant_type=access_token&service=${{ env.REGISTRY_URL }}&access_token=$access_token" | jq -r .refresh_token)
+          docker login ${{ env.REGISTRY_URL }} -u 00000000-0000-0000-0000-000000000000 --password-stdin <<< "$refresh_token"
+
+
+          az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
+          
+          echo ""
+          echo "Read https://learn.microsoft.com/en-us/azure/container-registry/container-registry-java-quickstart"
+          echo "Read https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication-managed-identity?tabs=azure-cli#example-2-access-with-a-system-assigned-identity"
+          echo ""
+          echo "/!\ Managed Identity is set on ACR ..."
+          echo "you need to az login  az acr login before calling az acr build ..."
+          echo ""
+
+
+          # https://github.com/Azure/acr-build/issues/10
+          # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
+          # {{.Run.ID}} would be different for each az acr build , not the best to simplify Image Tag
+
+          az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
+            -t ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id \
+            --file ${{ env.DOCKERFILE_PATH_API_GATEWAY }} \
+            ${{ github.workspace }}
+
+    # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
+    # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#hardening-for-self-hosted-runners
+    # if the runner is self-hosted which is not github provided it is recommended to manually logout at the end of the workflow as shown below.
+    - name: Azure Logout security hardening
+      run: |
+          az logout
+          az cache purge
+          az account clear
+      shell: bash
