@@ -472,12 +472,103 @@ The Spring Zuul(Netflix Intelligent Routing) config at https://github.com/ezYaka
 
 The Spring Cloud Gateway routing is configured at [spring-petclinic-api-gateway/src/main/resources/application.yml](spring-petclinic-api-gateway/src/main/resources/application.yml)
 
-the API Gateway Controller is located at [spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/boundary/web/ApiGatewayController.java](spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/boundary/web/ApiGatewayController.java)
+The API Gateway Controller is located at [spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/boundary/web/ApiGatewayController.java](spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/boundary/web/ApiGatewayController.java)
 
 **Specifically required when deploying the Petclinic App to ACA**, ${VETS_SVC_URL}, ${VISITS_SVC_URL}, ${CUSTOMERS_SVC_URL} Environment variables have been configured in :
+
 -  [spring-petclinic-api-gateway/src/main/resources/application.yml](spring-petclinic-api-gateway/src/main/resources/application.yml)
+
+original code :
+```sh
+spring:
+  cloud:
+    gateway:
+      discovery:
+        # make sure a DiscoveryClient implementation (such as Netflix Eureka) is on the classpath and enabled
+        locator: # https://cloud.spring.io/spring-cloud-gateway/reference/html/#the-discoveryclient-route-definition-locator
+          enabled: true #  to configure Spring Cloud Gateway to use the Spring Cloud Service Registry to discover the available microservices.    
+      routes:
+        - id: vets-service
+          uri: http://vets-service
+          predicates:
+            - Path=/api/vet/**
+          filters:
+            - StripPrefix=2
+        - id: visits-service
+          uri: http://visits-service
+          predicates:
+            - Path=/api/visit/**
+          filters:
+            - StripPrefix=2
+        - id: customers-service
+          uri: http://customers-service
+          predicates:
+            - Path=/api/customer/**
+          filters:
+            - StripPrefix=2
+```
+
+coe update required to deploy Petclinic to ACA :
+```sh
+spring:      
+  cloud:
+    gateway:
+      routes:
+        - id: vets-service
+          uri: https://${VETS_SVC_URL}
+          predicates:
+            - Path=/api/vet/**
+          filters:
+            - StripPrefix=2
+        - id: visits-service
+          uri: https://${VISITS_SVC_URL}
+          predicates:
+            - Path=/api/visit/**
+          filters:
+            - StripPrefix=2
+        - id: customers-service
+          uri: https://${CUSTOMERS_SVC_URL}
+          predicates:
+            - Path=/api/customer/**
+          filters:
+            - StripPrefix=2
+```
+
 - [spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/CustomersServiceClient.java](spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/CustomersServiceClient.java)
+
+
+original code :
+```sh
+public Mono<OwnerDetails> getOwner(final int ownerId) {
+    return webClientBuilder.build().get()
+        .uri("http://customers-service/owners/{ownerId}", ownerId)
+        .retrieve()
+        .bodyToMono(OwnerDetails.class);
+}
+```
+
+coe update required to deploy Petclinic to ACA :
+```sh
+public Mono<OwnerDetails> getOwner(final int ownerId) {
+    return webClientBuilder.build().get()
+        .uri("https://${CUSTOMERS_SVC_URL}/owners/{ownerId}", ownerId)
+        .retrieve()
+        .bodyToMono(OwnerDetails.class);
+    }
+```
+
 - [spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/VisitsServiceClient.java](spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/VisitsServiceClient.java)
+
+
+original code :
+```sh
+private String hostname = "http://visits-service/";
+```
+
+coe update required to deploy Petclinic to ACA :
+```sh
+private String hostname = "https://${VISITS_SVC_URL}/";
+```
 
 The Git repo URL used by Spring config is set in spring-petclinic-config-server/src/main/resources/application.yml
 
