@@ -474,7 +474,7 @@ The Spring Cloud Gateway routing is configured at [spring-petclinic-api-gateway/
 
 The API Gateway Controller is located at [spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/boundary/web/ApiGatewayController.java](spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/boundary/web/ApiGatewayController.java)
 
-**Specifically required when deploying the Petclinic App to ACA**, ${VETS_SVC_URL}, ${VISITS_SVC_URL}, ${CUSTOMERS_SVC_URL} Environment variables have been configured in :
+**Specifically required when deploying the Petclinic App to ACA**  ${} ${VETS_SVC_URL} ${}  , ${VISITS_SVC_URL} , ${CUSTOMERS_SVC_URL} Environment variables have been configured in :
 
 -  [spring-petclinic-api-gateway/src/main/resources/application.yml](spring-petclinic-api-gateway/src/main/resources/application.yml)
 
