@@ -468,11 +468,18 @@ You can then access petclinic here: http://localhost:8080/
 
 The UI code is located at spring-petclinic-api-gateway\src\main\resources\static\scripts.
 
-The Git repo URL used by Spring config is set in spring-petclinic-config-server\src\main\resources\application.yml
-
-The Spring Cloud Gateway routing is configured at spring-petclinic-api-gateway\src\main\resources\application.yml
-
 The Spring Zuul(Netflix Intelligent Routing) config at https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/api-gateway.yml has been deprecated and replaced by the Spring Cloud Gateway.
+
+The Spring Cloud Gateway routing is configured at [spring-petclinic-api-gateway/src/main/resources/application.yml](spring-petclinic-api-gateway/src/main/resources/application.yml)
+
+the API Gateway Controller is located at [spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/boundary/web/ApiGatewayController.java](spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/boundary/web/ApiGatewayController.java)
+
+**Specifically required when deploying the Petclinic App to ACA**, ${VETS_SVC_URL}, ${VISITS_SVC_URL}, ${CUSTOMERS_SVC_URL} Environment variables have been configured in :
+-  [spring-petclinic-api-gateway/src/main/resources/application.yml](spring-petclinic-api-gateway/src/main/resources/application.yml)
+- [spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/CustomersServiceClient.java](spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/CustomersServiceClient.java)
+- [spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/VisitsServiceClient.java](spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/VisitsServiceClient.java)
+
+The Git repo URL used by Spring config is set in spring-petclinic-config-server/src/main/resources/application.yml
 
 If you want to know more about the Spring Boot Admin server, you might be interested in [https://github.com/codecentric/spring-boot-admin](https://github.com/codecentric/spring-boot-admin)
 
@@ -575,7 +582,7 @@ Read the Application Insights docs :
 - [https://techcommunity.microsoft.com/t5/apps-on-azure-blog/observability-with-azure-container-apps/ba-p/3627909](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/observability-with-azure-container-apps/ba-p/3627909)
 - [https://techcommunity.microsoft.com/t5/apps-on-azure-blog/bg-p/AppsonAzureBlog](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/bg-p/AppsonAzureBlog)
 
-The config files are located in each micro-service at src\main\resources\applicationinsights.json
+The config files are located in each micro-service at src/main/resources/applicationinsights.json
 The Java agent is downloaded in the App container, you can have a look at a Docker file, example at [./docker/petclinic-customers-service/Dockerfile](./docker/petclinic-customers-service/Dockerfile)
 
 
@@ -937,6 +944,25 @@ error Caused by: java.net.MalformedURLException: no protocol: ${SPRING_CLOUD_AZU
 It means that the api-gateway project had been built with mvn -B clean package --file pom.xml -DskipTests **-Denv=cloud**
 This set the env=cloud at in the parent [POM](pom.xml#L246) which then injects the spring-cloud-azure-starter-keyvault-secrets dependency at [POM](pom.xml#L289)
 it looks like event just having such dependency would cause the runtime to look for ${SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT}
+
+
+If you face this issue :
+```console
+Spring MVC found on classpath, which is incompatible with Spring Cloud Gateway
+Please set spring.main.web-application-type=reactive or remove spring-boot-starter-web dependency.
+```
+See:
+-[https://cloud.spring.io/spring-cloud-gateway/reference/html/#gateway-starter](https://cloud.spring.io/spring-cloud-gateway/reference/html/#gateway-starter)
+- [https://stackoverflow.com/questions/68587832/spring-cloud-gateway-spring-mvc-found-on-classpath-which-is-incompatible-with](https://stackoverflow.com/questions/68587832/spring-cloud-gateway-spring-mvc-found-on-classpath-which-is-incompatible-with)
+
+spring-cloud-starter-netflix-eureka-server depends on spring-boot-starter-web
+you would need to remove the dependency on spring-boot-starter-web in the api-gateway module
+
+check with : mvn dependency:tree
+```sh
+mvn dependency:tree | grep spring-boot-starter-web
+```
+
 
 ## Interesting Spring Petclinic forks
 
