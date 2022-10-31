@@ -78,30 +78,6 @@ resource appInsightsDiagnosticSettings 'Microsoft.Insights/diagnosticSettings@20
         category: 'ContainerAppSystemLogs'
         enabled: true
       }      
-      {
-        category: 'ApplicationConsole'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'SystemLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }
-      {
-        category: 'IngressLogs'
-        enabled: true
-        retentionPolicy: {
-          days: 7
-          enabled: true
-        }
-      }    
     ]
     metrics: [
       {
