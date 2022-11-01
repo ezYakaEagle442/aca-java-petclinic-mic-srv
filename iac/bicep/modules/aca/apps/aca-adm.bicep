@@ -17,6 +17,9 @@ param appInsightsName string = 'appi-${appName}'
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
 param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.1.jar'
 
+@description('The applicationinsights config file location')
+param applicationInsightsConfigFile string = 'BOOT-INF/classes/applicationinsights.json'
+
 @allowed([
   '0.25'
   '0.5'
@@ -122,6 +125,11 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
               secretRef: 'appinscon'
             }
+            {
+              // https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-standalone-config#configuration-file-path
+              name: 'APPLICATIONINSIGHTS_CONFIGURATION_FILE'
+              value: applicationInsightsConfigFile
+            }            
           ]
           image: imageNameAdminServer
           name: adminServerContainerAppName

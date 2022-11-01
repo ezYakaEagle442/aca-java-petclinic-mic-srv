@@ -24,6 +24,9 @@ param appInsightsName string = 'appi-${appName}'
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
 param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.1.jar'
 
+@description('The applicationinsights config file location')
+param applicationInsightsConfigFile string = 'BOOT-INF/classes/applicationinsights.json'
+
 @secure()
 @description('The Azure Active Directory tenant ID that should be used by Key Vault in the Spring Config')
 param springCloudAzureTenantId string
@@ -240,7 +243,12 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               name: 'VISITS_SVC_URL'
               value: VisitsServiceContainerApp.properties.configuration.ingress.fqdn
-            }                                          
+            }
+            {
+              // https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-standalone-config#configuration-file-path
+              name: 'APPLICATIONINSIGHTS_CONFIGURATION_FILE'
+              value: applicationInsightsConfigFile
+            }                                                  
           ]
           image: imageNameApiGateway
           name: apiGatewayContainerAppName

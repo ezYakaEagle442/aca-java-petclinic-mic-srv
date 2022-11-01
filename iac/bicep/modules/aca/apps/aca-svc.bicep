@@ -24,6 +24,9 @@ param appInsightsName string = 'appi-${appName}'
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
 param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.1.jar'
 
+@description('The applicationinsights config file location')
+param applicationInsightsConfigFile string = 'BOOT-INF/classes/applicationinsights.json'
+
 // Spring Cloud for Azure params required to get secrets from Key Vault.
 // https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#basic-usage-3
 // https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#advanced-usage
@@ -222,7 +225,12 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
             {
               name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
               value: customersServicedentity.properties.clientId
-            }                   
+            }
+            {
+              // https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-standalone-config#configuration-file-path
+              name: 'APPLICATIONINSIGHTS_CONFIGURATION_FILE'
+              value: applicationInsightsConfigFile
+            }                      
           ]
           image: imageNameCustomersService
           name: customersServiceContainerAppName
@@ -396,6 +404,11 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
               value: customersServicedentity.properties.clientId
             }
+            {
+              // https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-standalone-config#configuration-file-path
+              name: 'APPLICATIONINSIGHTS_CONFIGURATION_FILE'
+              value: applicationInsightsConfigFile
+            }             
           ]
           image: imageNameVetsService
           name: vetsServiceContainerAppName
@@ -554,7 +567,12 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
               value: customersServicedentity.properties.clientId
-            }                           
+            }
+            {
+              // https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-standalone-config#configuration-file-path
+              name: 'APPLICATIONINSIGHTS_CONFIGURATION_FILE'
+              value: applicationInsightsConfigFile
+            }                                   
           ]
           image: imageNameVisitsService
           name: visitsServiceContainerAppName
