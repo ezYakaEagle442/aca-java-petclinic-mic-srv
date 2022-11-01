@@ -674,8 +674,16 @@ Read the Application Insights docs :
 - [https://techcommunity.microsoft.com/t5/apps-on-azure-blog/bg-p/AppsonAzureBlog](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/bg-p/AppsonAzureBlog)
 
 The config files are located in each micro-service at src/main/resources/applicationinsights.json
-The Java agent is downloaded in the App container, you can have a look at a Docker file, example at [./docker/petclinic-customers-service/Dockerfile](./docker/petclinic-customers-service/Dockerfile)
+The Java agent is downloaded in the App container in /tmp/app, you can have a look at a Docker file, example at [./docker/petclinic-customers-service/Dockerfile](./docker/petclinic-customers-service/Dockerfile)
 
+<span style="color:red">**[By default, Application Insights Java 3.x expects the configuration file to be named applicationinsights.json and to be located in the same directory as applicationinsights-agent-3.x.x.jar.](https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-standalone-config#configuration-file-path)**</span>
+
+You can specify your own configuration file path by using one of these two options:
+- APPLICATIONINSIGHTS_CONFIGURATION_FILE environment variable
+- applicationinsights.configuration.file Java system property
+
+In our configuration, in the containers the applicationinsights.json is located at BOOT-INF/classes/applicationinsights.json
+so we must set APPLICATIONINSIGHTS_CONFIGURATION_FILE=BOOT-INF/classes/applicationinsights.json
 
 The Application Insights [Connection String](./iac/bicep/aca/main.bicep#L234) [set in the Apps](./iac/bicep/aca/aca.bicep#L736) is retrieved from the [AppInsights Resource](./iac/bicep/aca/pre-req.bicep#L126) created at the pre-req provisionning stage.
 
@@ -688,6 +696,13 @@ az monitor log-analytics query \
   --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
   --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == '$appName'  | where TimeGenerated > ago(1d) | project ContainerAppName_s, Log_s, Time | take 3" \
   --out table
+
+az monitor log-analytics query \
+--workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
+--analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s contains 'api' | where RevisionName_s == 'aca-petcliaca-api-gateway--8kxwht8' | where TimeGenerated > ago(10m) | project Time=TimeGenerated, Message=Log_s | sort by Time desc" \
+--out table > aca-petcliaca-api-gateway--8kxwht8.log
+
+
 ```
 
 
