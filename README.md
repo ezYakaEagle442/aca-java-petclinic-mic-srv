@@ -508,7 +508,7 @@ spring:
             - StripPrefix=2
 ```
 
-coe update required to deploy Petclinic to ACA :
+code update required to deploy Petclinic to ACA :
 ```sh
 spring:      
   cloud:
@@ -547,7 +547,7 @@ public Mono<OwnerDetails> getOwner(final int ownerId) {
 }
 ```
 
-coe update required to deploy Petclinic to ACA :
+code update required to deploy Petclinic to ACA :
 ```sh
 public Mono<OwnerDetails> getOwner(final int ownerId) {
     return webClientBuilder.build().get()
@@ -565,7 +565,7 @@ original code :
 private String hostname = "http://visits-service/";
 ```
 
-coe update required to deploy Petclinic to ACA :
+code update required to deploy Petclinic to ACA :
 ```sh
 private String hostname = "https://${VISITS_SVC_URL}/";
 ```
@@ -682,9 +682,11 @@ The Application Insights [Connection String](./iac/bicep/aca/main.bicep#L234) [s
 
 to get the App logs :
 ```bash
+LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az monitor log-analytics workspace show -n $LOG_ANALYTICS_WORKSPACE -g $RESOURCE_GROUP --query customerId  --out tsv`
+
 az monitor log-analytics query \
   --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
-  --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == '$appName' | project ContainerAppName_s, Log_s, Time | take 3" \
+  --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == '$appName'  | where TimeGenerated > ago(1d) | project ContainerAppName_s, Log_s, Time | take 3" \
   --out table
 ```
 
@@ -697,7 +699,7 @@ In the Log Analyics page, selects Logs blade and run any of the sample queries s
 Type and run the following Kusto query to see all the logs from the ACA Service :
 
 
-```sh
+```sql
 ContainerAppSystemLogs_CL
 | where Log_s contains "success"
 | project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
@@ -716,7 +718,7 @@ ContainerAppSystemLogs_CL
 | sort by Time desc
 ```
 
-```sh
+```sql
 ContainerAppSystemLogs_CL
 | where Log_s contains'nodes are available'
 | project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
@@ -822,7 +824,7 @@ ContainerAppSystemLogs_CL
 | sort by Time desc
 ```
 
-```sh
+```sql
 ContainerAppSystemLogs_CL
 | where Log_s contains "no such"
 | project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
@@ -832,7 +834,7 @@ ContainerAppSystemLogs_CL
 | render piechart
 ```
 
-```sh
+```sql
 ContainerAppSystemLogs_CL
 | where Log_s contains "probe failed"
 | project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
@@ -843,7 +845,7 @@ ContainerAppSystemLogs_CL
 ```
 
 
-```sh
+```sql
 ContainerAppSystemLogs_CL
 | where RevisionName_s == "aca-petcliaca-admin-server--l2tcxpe"
 | where Log_s contains "no such"
@@ -853,7 +855,7 @@ ContainerAppSystemLogs_CL
 | limit 500
 ```
 
-```sh
+```sql
 ContainerAppSystemLogs_CL
 | where RevisionName_s == "aca-petcliaca-admin-server--l2tcxpe"
 | where Log_s contains "failed"
@@ -877,7 +879,7 @@ ContainerAppSystemLogs_CL
 
 ```
 
-```sh
+```sql
 ContainerAppSystemLogs_CL
 | where Log_s contains "error" or Log_s contains "exception"
 | project Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s, Message=Log_s
@@ -910,7 +912,7 @@ Type and run the following Kusto query to see all in the inbound calls into Azur
 Type and run the following Kusto query to see application logs:
 
 
-```sh
+```sql
 
 ContainerAppConsoleLogs_CL
 | where Log_s contains "endpoints"
