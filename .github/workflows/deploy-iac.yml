@@ -312,6 +312,51 @@ jobs:
               
       shell: bash
 
+      # TODO
+      # /!\ the ACA StaticIp is the ingress ip of the environment, NOT the outboundIP
+      # today the the outboundIP can be got ONLY from the Apps NOT yet from the Env., they all share the same the outboundIP
+      # KV must Allow azureContainerAppsOutboundPubIP in the IP rules ...
+      # MySQL DB Must allow azureContainerAppsOutboundPubIP to access in the IP rules ...
+      # workaround : deploy a hello world App and get MyApp.properties.outboundIPAddresses 
+      # see https://github.com/microsoft/azure-container-apps/issues/469
+    - name: Whitelist ACA Env. OutboundIP
+      run: |
+            az provider register --namespace Microsoft.App
+            envOutboundIP=$(az containerapp create \
+            --name hello-test \
+            --resource-group ${{ env.RG_APP }} \
+            --environment ${{ env.ACA_ENV_NAME }} \
+            --image mcr.microsoft.com/azuredocs/containerapps-helloworld:latest \
+            --target-port 80 \
+            --ingress 'external' \
+            --query properties.configuration.ingress.fqdn)
+
+            echo "hello-test ACA test created"
+            echo "About to Whitelist ACA Env. OutboundIP $envOutboundIP in KV & MySQL"
+
+            az deployment group create --name aca-petclinic-pre-req -f iac/bicep/set-ip-rules.bicep -g ${{ env.RG_APP }} \
+              -p appName=${{ env.APP_NAME }} \
+              -p location=${{ env.LOCATION }} \
+              -p kvName=${{ env.KV_NAME }} \
+              -p kvRGName=${{ env.RG_KV }} \
+              -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
+              -p vNetRules=[] \
+              -p ipRules=[$envOutboundIP] \
+              -p setFwRuleClient=false \
+              -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
+              -p clientIPAddress="10.0.0.0" \
+              -p startIpAddress="10.0.0.0" \
+              -p endIpAddress="10.0.0.255"
+
+            az containerapp delete \
+            --name hello-test \
+            --resource-group ${{ env.RG_APP }}
+
+            echo "hello-test ACA test deleted"
+
+      shell: bash
+
+
     - name: Azure Logout security hardening
       run: |
           az logout

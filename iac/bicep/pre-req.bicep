@@ -127,29 +127,9 @@ module defaultPublicManagedEnvironment './modules/aca/acaPublicEnv.bicep' = if (
   ]
 }
 
-
-
 resource kvRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
   name: kvRGName
   scope: subscription()
-}
-
-
-var  vNetRules = []
-var  ipRules = [defaultPublicManagedEnvironment.outputs.corpManagedEnvironmentStaticIp]
-
-// Now KV must Allow azureContainerAppsOutboundPubIP in the IP rules ...
-// Must allow ACA to access Existing KV
-
-module kvsetiprules './modules/kv/kv.bicep' = {
-  name: 'kv-set-iprules'
-  scope: kvRG
-  params: {
-    kvName: kvName
-    location: location
-    ipRules: ipRules
-    vNetRules: vNetRules
-  }
 }
 
 resource kv 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
@@ -157,7 +137,7 @@ resource kv 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   scope: kvRG
 }  
 
-
+/* MOVED TO set-ip-rules.bicep
 module mysqlPub './modules/mysql/mysql.bicep' = {
   name: 'mysqldbpub'
   params: {
@@ -173,7 +153,7 @@ module mysqlPub './modules/mysql/mysql.bicep' = {
     azureContainerAppsOutboundPubIP: defaultPublicManagedEnvironment.outputs.corpManagedEnvironmentStaticIp
   }
 }
-
+*/
 
 module identities './modules/aca/identity.bicep' = {
   name: 'aca-identities'
@@ -182,9 +162,7 @@ module identities './modules/aca/identity.bicep' = {
   }
 }
 
-
 // https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scope-extension-resources
-
 module roleAssignments './modules/aca/roleAssignments.bicep' = {
   name: 'role-assignments'
   params: {
