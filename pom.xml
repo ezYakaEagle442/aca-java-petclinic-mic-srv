@@ -135,6 +135,10 @@
     </dependencyManagement>
 
 
+    <!-- 
+    as This Dockerize plugin adds dependencies and is deprecated.
+    FYI https://www.eclipse.org/jkube/docs/kubernetes-maven-plugin is the next gen plugin.
+    -->
     <profiles>
         <profile>
             <id>buildDocker</id>
