@@ -16,6 +16,10 @@
 package org.springframework.samples.petclinic.api.application;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.samples.petclinic.api.dto.OwnerDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -29,11 +33,43 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class CustomersServiceClient {
 
+    /*
+    see 
+    https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv/issues/1
+    https://github.com/microsoft/azure-container-apps/issues/473
+
+    An alternate way of achieving this without getting the fqdn of the app:
+
+    An environment variable: **CONTAINER_APP_ENV_DNS_SUFFIX** is auto-injected for every container running on the environment which describes the environments default domain.
+
+    This environment variable can help formulate the Internal FQDN of the app. e.g.:
+    http://<containerapp-name>.internal.<CONTAINER_APP_ENV_DNS_SUFFIX>
+    ex: https://myinternalapp.internal.icyforest-6dcfec24.regionname.azurecontainerapps.io
+
+    https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config
+    https://www.baeldung.com/spring-boot-properties-env-variables
+
+    */
+
     private final WebClient.Builder webClientBuilder;
+
+    @Value("${container.app.env.dns.suffix}")
+    private String acaEnvDnsSuffix;
+
+    @Value("${customers.service.url}")
+    private String customersServiceUrl;
+
+    @Autowired
+    private Environment environment;
+
+    String CONTAINER_APP_ENV_DNS_SUFFIX = environment.getProperty("container.app.env.dns.suffix");
+    String CUSTOMERS_SVC_URL = environment.getProperty("customers.service.url");
+
+    String internalK8Ssvc2svcRoute = "http://customers-service.internal." + acaEnvDnsSuffix;
 
     public Mono<OwnerDetails> getOwner(final int ownerId) {
         return webClientBuilder.build().get()
-            .uri("https://${CUSTOMERS_SVC_URL}/owners/{ownerId}", ownerId)
+            .uri(internalK8Ssvc2svcRoute + "/owners/{ownerId}", ownerId)
             .retrieve()
             .bodyToMono(OwnerDetails.class);
     }
