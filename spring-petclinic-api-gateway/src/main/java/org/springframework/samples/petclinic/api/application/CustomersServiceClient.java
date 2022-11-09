@@ -56,6 +56,22 @@ public class CustomersServiceClient {
     @Value("${container.app.env.dns.suffix}")
     private String acaEnvDnsSuffix;
 
+    public String getAcaEnvDnsSuffix() {
+        return acaEnvDnsSuffix;
+    }
+
+    public void setAcaEnvDnsSuffix(String acaEnvDnsSuffix) {
+        this.acaEnvDnsSuffix = acaEnvDnsSuffix;
+    }
+
+    public String getCustomersServiceUrl() {
+        return customersServiceUrl;
+    }
+
+    public void setCustomersServiceUrl(String customersServiceUrl) {
+        this.customersServiceUrl = customersServiceUrl;
+    }
+
     @Value("${customers.svc.url}")
     private String customersServiceUrl;
 
@@ -65,9 +81,20 @@ public class CustomersServiceClient {
     //String CONTAINER_APP_ENV_DNS_SUFFIX = environment.getProperty("container.app.env.dns.suffix");
     //String CUSTOMERS_SVC_URL = environment.getProperty("customers.svc.url");
 
-    String internalK8Ssvc2svcRoute = "http://customers-service.internal." + acaEnvDnsSuffix;
+    String internalK8Ssvc2svcRoute = "http://customers-service.internal." + getAcaEnvDnsSuffix();
 
     public Mono<OwnerDetails> getOwner(final int ownerId) {
+
+        System.out.println("Checking ALL ENV variable  : |" + "|\n");
+		System.getenv().forEach((key, value) -> {
+			System.out.println(key + ":" + value);
+		});
+
+		System.out.println("Checking ALL ENV Properties  : |" + "|\n");
+		System.getProperties().forEach((key, value) -> {
+			System.out.println(key + ":" + value);
+		});
+        
         return webClientBuilder.build().get()
             .uri(internalK8Ssvc2svcRoute + "/owners/{ownerId}", ownerId)
             .retrieve()
