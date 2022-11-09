@@ -62,8 +62,8 @@ public class CustomersServiceClient {
     @Autowired
     private Environment environment;
 
-    String CONTAINER_APP_ENV_DNS_SUFFIX = environment.getProperty("container.app.env.dns.suffix");
-    String CUSTOMERS_SVC_URL = environment.getProperty("customers.svc.url");
+    //String CONTAINER_APP_ENV_DNS_SUFFIX = environment.getProperty("container.app.env.dns.suffix");
+    //String CUSTOMERS_SVC_URL = environment.getProperty("customers.svc.url");
 
     String internalK8Ssvc2svcRoute = "http://customers-service.internal." + acaEnvDnsSuffix;
 
