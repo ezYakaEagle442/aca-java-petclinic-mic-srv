@@ -245,6 +245,10 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               value: VisitsServiceContainerApp.properties.configuration.ingress.fqdn
             }
             {
+              name: 'ACA_ENV_DNS_SUFFIX'
+              value: corpManagedEnvironment.properties.defaultDomain
+            }
+            {
               // https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-standalone-config#configuration-file-path
               name: 'APPLICATIONINSIGHTS_CONFIGURATION_FILE'
               value: applicationInsightsConfigFile
