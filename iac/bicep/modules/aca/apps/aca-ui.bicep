@@ -249,6 +249,14 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               value: corpManagedEnvironment.properties.defaultDomain
             }
             {
+              name: 'CUSTOMERS_SVC_APP_NAME'
+              value: customersServiceContainerAppName
+            }
+            {
+              name: 'VISITS_SVC_APP_NAME'
+              value: visitsServiceContainerAppName
+            }
+            {
               // https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-standalone-config#configuration-file-path
               name: 'APPLICATIONINSIGHTS_CONFIGURATION_FILE'
               value: applicationInsightsConfigFile

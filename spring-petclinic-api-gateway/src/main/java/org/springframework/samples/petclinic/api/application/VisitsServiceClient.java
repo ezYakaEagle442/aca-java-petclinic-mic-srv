@@ -91,7 +91,7 @@ public class VisitsServiceClient {
     //String CONTAINER_APP_ENV_DNS_SUFFIX = environment.getProperty("container.app.env.dns.suffix");
     //String VISITS_SVC_URL = environment.getProperty("visits.svc.url");
 
-    String internalK8Ssvc2svcRoute = "http://visits-service.internal." + System.getenv("CONTAINER_APP_ENV_DNS_SUFFIX");
+    String internalK8Ssvc2svcRoute = "http://" + System.getenv("VISITS_SVC_APP_NAME") + ".internal." + System.getenv("CONTAINER_APP_ENV_DNS_SUFFIX");
 
     // Could be changed for testing purpose
     private String hostname = internalK8Ssvc2svcRoute ; // "https://${VISITS_SVC_URL}/";

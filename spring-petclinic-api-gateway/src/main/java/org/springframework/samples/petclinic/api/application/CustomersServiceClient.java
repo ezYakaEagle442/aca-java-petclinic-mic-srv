@@ -81,7 +81,7 @@ public class CustomersServiceClient {
     //String CONTAINER_APP_ENV_DNS_SUFFIX = environment.getProperty("container.app.env.dns.suffix");
     //String CUSTOMERS_SVC_URL = environment.getProperty("customers.svc.url");
 
-    String internalK8Ssvc2svcRoute = "http://customers-service.internal." + System.getenv("CONTAINER_APP_ENV_DNS_SUFFIX");
+    String internalK8Ssvc2svcRoute = "http://" + System.getenv("CUSTOMERS_SVC_APP_NAME") + ".internal." + System.getenv("CONTAINER_APP_ENV_DNS_SUFFIX");
 
     public Mono<OwnerDetails> getOwner(final int ownerId) {
 
@@ -90,10 +90,12 @@ public class CustomersServiceClient {
 			System.out.println(key + ":" + value);
 		});
 
+        /* 
 		System.out.println("Checking ALL ENV Properties  : |" + "|\n");
 		System.getProperties().forEach((key, value) -> {
 			System.out.println(key + ":" + value);
 		});
+        */
         
         return webClientBuilder.build().get()
             .uri(internalK8Ssvc2svcRoute + "/owners/{ownerId}", ownerId)
