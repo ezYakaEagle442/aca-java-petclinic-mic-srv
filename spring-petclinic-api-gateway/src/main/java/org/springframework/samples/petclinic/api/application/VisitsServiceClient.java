@@ -61,13 +61,37 @@ public class VisitsServiceClient {
     @Value("${visits.svc.url}")
     private String visitsServiceUrl;
 
+    public String getAcaEnvDnsSuffix() {
+        return acaEnvDnsSuffix;
+    }
+
+    public void setAcaEnvDnsSuffix(String acaEnvDnsSuffix) {
+        this.acaEnvDnsSuffix = acaEnvDnsSuffix;
+    }
+
+    public String getVisitsServiceUrl() {
+        return visitsServiceUrl;
+    }
+
+    public void setVisitsServiceUrl(String visitsServiceUrl) {
+        this.visitsServiceUrl = visitsServiceUrl;
+    }
+
+    public Environment getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
+
     @Autowired
     private Environment environment;
 
     //String CONTAINER_APP_ENV_DNS_SUFFIX = environment.getProperty("container.app.env.dns.suffix");
     //String VISITS_SVC_URL = environment.getProperty("visits.svc.url");
 
-    String internalK8Ssvc2svcRoute = "http://visits-service.internal." + acaEnvDnsSuffix;
+    String internalK8Ssvc2svcRoute = "http://visits-service.internal." + System.getenv("CONTAINER_APP_ENV_DNS_SUFFIX");
 
     // Could be changed for testing purpose
     private String hostname = internalK8Ssvc2svcRoute ; // "https://${VISITS_SVC_URL}/";
