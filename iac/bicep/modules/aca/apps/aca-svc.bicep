@@ -139,9 +139,6 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
     type: 'UserAssigned'
     userAssignedIdentities: {
       '${customersServicedentity.id}': {}
-      // shall assign all 3 identities due to a bug/limitation in Azure SDK
-      '${visitsServiceIdentity.id}': {}
-      '${vetsServiceAppIdentity.id}': {}
     }    
   }
   properties: {
@@ -317,9 +314,6 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
     type: 'UserAssigned'
     userAssignedIdentities: {
       '${vetsServiceAppIdentity.id}': {}
-      // shall assign all 3 identities due to a bug/limitation in Azure SDK
-      '${visitsServiceIdentity.id}': {}
-      '${customersServicedentity.id}': {}
     }    
   }
   properties: {
@@ -479,10 +473,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
-      '${visitsServiceIdentity.id}': {}
-      // shall assign all 3 identities due to a bug/limitation in Azure SDK
-      '${vetsServiceAppIdentity.id}': {}
-      '${customersServicedentity.id}': {}      
+      '${visitsServiceIdentity.id}': {}    
     }    
   }
   properties: {
