@@ -146,18 +146,6 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
   scope: kvRG
 }
 
-resource customersServicedentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
-  name: customersServiceAppIdentityName
-}
-
-resource vetsServiceAppIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
-  name: vetsServiceAppIdentityName
-}
-
-resource visitsServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
-  name: visitsServiceAppIdentityName
-}
-
 resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: apiGatewayContainerAppName
   location: location
