@@ -149,9 +149,6 @@ az role assignment create --assignee $SPN_ID --scope /subscriptions/${SUBSCRIPTI
 To assign Azure roles, you must have: requires to have Microsoft.Authorization/roleAssignments/write and Microsoft.Authorization/roleAssignments/delete permissions, such as User Access Administrator or Owner.
 **</span>
 
-
-
-
 <span style="color:red">**"Key Vault Secrets User" [built-in role](https://learn.microsoft.com/en-us/azure/key-vault/general/rbac-guide?tabs=azure-cli#azure-built-in-roles-for-key-vault-data-plane-operations) read secret contents including secret portion of a certificate with private key. Only works for key vaults that use the 'Azure role-based access control' permission model.**
 </span>
 
@@ -310,7 +307,9 @@ Read :
 - [https://github.com/Azure/azure-sdk-for-java/issues/28310](https://github.com/Azure/azure-sdk-for-java/issues/28310)
 - [Maven Project parent pom.xml](pom.xml#L168)
 
-The Config-server uses the config declared on the repo at [https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml](https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml) and need a Service Principal to be able to read secrets from KeyVault.
+The Config-server does **NOT** use the config declared on the repo at [https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml](https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml) and need uses a [User-Assigned Managed Identity](https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview#managed-identity-types) to be able to read secrets from KeyVault.
+
+If you face any issue, see the [troubleshoot section](#key-vault-troubleshoot-with-USER-Assigned-MI)
 
 ## Deployment to VNet
 
@@ -474,105 +473,37 @@ The Spring Cloud Gateway routing is configured at [spring-petclinic-api-gateway/
 
 The API Gateway Controller is located at [spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/boundary/web/ApiGatewayController.java](spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/boundary/web/ApiGatewayController.java)
 
-**Specifically required when deploying the Petclinic App to ACA**  ${} ${VETS_SVC_URL} ${}  , ${VISITS_SVC_URL} , ${CUSTOMERS_SVC_URL} Environment variables have been configured in :
-
--  [spring-petclinic-api-gateway/src/main/resources/application.yml](spring-petclinic-api-gateway/src/main/resources/application.yml)
-
-original code :
-```sh
-spring:
-  cloud:
-    gateway:
-      discovery:
-        # make sure a DiscoveryClient implementation (such as Netflix Eureka) is on the classpath and enabled
-        locator: # https://cloud.spring.io/spring-cloud-gateway/reference/html/#the-discoveryclient-route-definition-locator
-          enabled: true #  to configure Spring Cloud Gateway to use the Spring Cloud Service Registry to discover the available microservices.    
-      routes:
-        - id: vets-service
-          uri: http://vets-service
-          predicates:
-            - Path=/api/vet/**
-          filters:
-            - StripPrefix=2
-        - id: visits-service
-          uri: http://visits-service
-          predicates:
-            - Path=/api/visit/**
-          filters:
-            - StripPrefix=2
-        - id: customers-service
-          uri: http://customers-service
-          predicates:
-            - Path=/api/customer/**
-          filters:
-            - StripPrefix=2
-```
-
-code update required to deploy Petclinic to ACA :
-```sh
-spring:      
-  cloud:
-    gateway:
-      routes:
-        - id: vets-service
-          uri: https://${VETS_SVC_URL}
-          predicates:
-            - Path=/api/vet/**
-          filters:
-            - StripPrefix=2
-        - id: visits-service
-          uri: https://${VISITS_SVC_URL}
-          predicates:
-            - Path=/api/visit/**
-          filters:
-            - StripPrefix=2
-        - id: customers-service
-          uri: https://${CUSTOMERS_SVC_URL}
-          predicates:
-            - Path=/api/customer/**
-          filters:
-            - StripPrefix=2
-```
-
-- [spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/CustomersServiceClient.java](spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/CustomersServiceClient.java)
 
 
-original code :
-```sh
-public Mono<OwnerDetails> getOwner(final int ownerId) {
-    return webClientBuilder.build().get()
-        .uri("http://customers-service/owners/{ownerId}", ownerId)
-        .retrieve()
-        .bodyToMono(OwnerDetails.class);
-}
-```
+Note: The Spring Cloud Discovery Server is NOT deployed as the underlying K8S/AKS discovery/DNS service is used.
+see :
+- [https://spring.io/guides/gs/service-registration-and-discovery](https://spring.io/guides/gs/service-registration-and-discovery/)
+- [https://spring.io/projects/spring-cloud-netflix](https://spring.io/projects/spring-cloud-netflix)
+- [https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolutionhttps://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/
+- [https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)
 
-code update required to deploy Petclinic to ACA :
-```sh
-public Mono<OwnerDetails> getOwner(final int ownerId) {
-    return webClientBuilder.build().get()
-        .uri("https://${CUSTOMERS_SVC_URL}/owners/{ownerId}", ownerId)
-        .retrieve()
-        .bodyToMono(OwnerDetails.class);
-    }
-```
-
-- [spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/VisitsServiceClient.java](spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/VisitsServiceClient.java)
-
-
-original code :
-```sh
-private String hostname = "http://visits-service/";
-```
-
-code update required to deploy Petclinic to ACA :
-```sh
-private String hostname = "https://${VISITS_SVC_URL}/";
-```
+**Specifically required when deploying the Petclinic App to ACA**  see [ACA Internal routing section](#aca-internal-routing)
 
 The Git repo URL used by Spring config is set in spring-petclinic-config-server/src/main/resources/application.yml
 
 If you want to know more about the Spring Boot Admin server, you might be interested in [https://github.com/codecentric/spring-boot-admin](https://github.com/codecentric/spring-boot-admin)
+
+
+## Understand the Spring Cloud Config
+
+Read [https://learn.microsoft.com/en-us/azure/spring-apps/quickstart-setup-config-server?tabs=Azure-portal&pivots=programming-language-java](https://learn.microsoft.com/en-us/azure/spring-apps/quickstart-setup-config-server?tabs=Azure-portal&pivots=programming-language-java)
+
+
+Spring Boot is a framework aimed to help developers to easily create and build stand-alone, production-grade Spring based Applications that you can “just run”.
+
+Spring Cloud Config provides server and client-side support for externalized configuration in a distributed system. With the Spring Cloud Config Server you have a central place to manage external properties for applications across all environments.
+
+Spring Cloud Config Server is a centralized service that via HTTP provides all the applications configuration (name-value pairs or equivalent YAML content). The server is embeddable in a Spring Boot application, by using the @EnableConfigServer annotation.
+
+In other words, the Spring Cloud Config Server is simply a Spring Boot application, configured as a Spring Cloud Config Server, and that is able to retrieve the properties from the configured property source. The property source can be a Git repository, svn or Consul service. 
+
+A Spring Boot application properly configured, can take immediate advantage of the Spring Config Server. It also picks up some additional useful features related to Environment change events. Any Spring Boot application can easily be configured as a Spring Cloud Config Client.
+
 
 ## Containerize your Java applications
 
@@ -672,6 +603,7 @@ Read the Application Insights docs :
 - [https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string](https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string)
 - [https://techcommunity.microsoft.com/t5/apps-on-azure-blog/observability-with-azure-container-apps/ba-p/3627909](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/observability-with-azure-container-apps/ba-p/3627909)
 - [https://techcommunity.microsoft.com/t5/apps-on-azure-blog/bg-p/AppsonAzureBlog](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/bg-p/AppsonAzureBlog)
+- [https://github.com/microsoft/ApplicationInsights-Java](https://github.com/microsoft/ApplicationInsights-Java)
 
 The config files are located in each micro-service at src/main/resources/applicationinsights.json
 The Java agent is downloaded in the App container in /tmp/app, you can have a look at a Docker file, example at [./docker/petclinic-customers-service/Dockerfile](./docker/petclinic-customers-service/Dockerfile)
@@ -688,7 +620,62 @@ so we must set APPLICATIONINSIGHTS_CONFIGURATION_FILE=BOOT-INF/classes/applicati
 The Application Insights [Connection String](./iac/bicep/aca/main.bicep#L234) [set in the Apps](./iac/bicep/aca/aca.bicep#L736) is retrieved from the [AppInsights Resource](./iac/bicep/aca/pre-req.bicep#L126) created at the pre-req provisionning stage.
 
 
-to get the App logs :
+### Use the Petclinic application and make a few REST API calls
+
+Open the Petclinic application and try out a few tasks - view pet owners and their pets, 
+vets, and schedule pet visits:
+
+```bash
+open https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/
+```
+
+You can also use your browser or  `curl` the REST API exposed by the Petclinic application. 
+The admin REST API allows you to create/update/remove items in Pet Owners, Pets, Vets and Visits.
+You can run the following curl commands:
+
+URL ex:
+- https://aca-petcliaca-api-gateway.bluepebble-754d2322.francecentral.azurecontainerapps.io/
+- http://aca-petcliaca-customers-service--0uvglgf.bluepebble-754d2322.francecentral.azurecontainerapps.io/owners/3/pets/4
+- https://aca-petcliaca-visits-service--l1fs5w2.bluepebble-754d2322.francecentral.azurecontainerapps.io/owners/6/pets/8/visits
+- https://aca-petcliaca-vets-service--mxki9ff.bluepebble-754d2322.francecentral.azurecontainerapps.io/vets
+
+<CONTAINER_APP_ENV_DNS_SUFFIX>=<GUID>.<CONTAINER_APP_ENV_DNS_SUFFIX>
+ex: mxki9ff.bluepebble-754d2322.francecentral.azurecontainerapps.io
+
+```bash
+curl -X GET https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/api/customer/owners
+curl -X GET https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/api/customer/owners/4
+curl -X GET https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/api/customer/owners/ 
+curl -X GET https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/api/customer/petTypes
+curl -X GET https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/api/customer/owners/3/pets/4
+curl -X GET https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/api/customer/owners/6/pets/8/
+curl -X GET https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/api/vet/vets
+curl -X GET https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/api/visit/owners/6/pets/8/visits
+curl -X GET https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/api/visit/owners/6/pets/8/visits
+```
+
+### Open Actuator endpoints for API Gateway and Customers Service apps
+
+Spring Boot includes a number of additional features to help you monitor and manage your application when you push it to production ([Spring Boot Actuator: Production-ready Features](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#actuator)). You can choose to manage and monitor your application by using HTTP endpoints or with JMX. Auditing, health, and metrics gathering can also be automatically applied to your application.
+
+Actuator endpoints let you monitor and interact with your application. By default, Spring Boot application exposes `health` and `info` endpoints to show arbitrary application info and health information. Apps in this project are pre-configured to expose all the Actuator endpoints.
+
+You can try them out by opening the following app actuator endpoints in a browser:
+
+```bash
+https://aca-petcliaca-api-gateway.bluepebble-754d2322.francecentral.azurecontainerapps.io/
+
+open https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/manage/
+open https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/manage/env
+open https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/manage/configprops
+
+open https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/api/customer/manage
+open https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/api/customer/manage/env
+open https://aca-petcliaca-api-gateway-<CONTAINER_APP_ENV_DNS_SUFFIX>/api/customer/manage/configprops
+
+### Monitor Petclinic logs and metrics in Azure Log Analytics
+
+To get the App logs :
 ```bash
 LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az monitor log-analytics workspace show -n $LOG_ANALYTICS_WORKSPACE -g $RESOURCE_GROUP --query customerId  --out tsv`
 
@@ -699,8 +686,8 @@ az monitor log-analytics query \
 
 az monitor log-analytics query \
 --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
---analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s contains 'api' | where RevisionName_s == 'aca-petcliaca-api-gateway--8kxwht8' | where TimeGenerated > ago(10m) | project Time=TimeGenerated, Message=Log_s | sort by Time desc" \
---out table > aca-petcliaca-api-gateway--8kxwht8.log
+--analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s contains 'api' | where RevisionName_s == 'aca-petcliaca-api-gateway--2nstmem' | where TimeGenerated > ago(5m) | where Log_s  contains 'api' | project Time=TimeGenerated, Message=Log_s | sort by Time desc" \
+--out table > aca-petcliaca-api-gateway--2nstmem_ROUTING_ERROR500.log
 
 
 ```
@@ -789,15 +776,18 @@ ContainerAppSystemLogs_CL
 | take 100
 | limit 500
 | sort by Time desc
+```
 
-
+```sql
 ContainerAppSystemLogs_CL
-| where Log_s contains'pod didn\'t trigger scale-up: 1 max node group size reached'
+| where Log_s contains'pod didn't trigger scale-up: 1 max node group size reached'
 | project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
 | take 100
 | limit 500
 | sort by Time desc
+```
 
+```sql
 ContainerAppSystemLogs_CL
 | where Log_s contains'scale'
 | project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s, Revision=RevisionName_s
@@ -818,8 +808,6 @@ ContainerAppSystemLogs_CL
 | sort by Time asc
 | take 100
 | limit 500
-
-
 
 ContainerAppSystemLogs_CL
 | where Log_s contains'Insufficient cpu'
@@ -859,7 +847,6 @@ ContainerAppSystemLogs_CL
 | render piechart
 ```
 
-
 ```sql
 ContainerAppSystemLogs_CL
 | where RevisionName_s == "aca-petcliaca-admin-server--l2tcxpe"
@@ -890,8 +877,6 @@ ContainerAppSystemLogs_CL
 | where Type_s == 'Normal'
 | project TimeGenerated, Level, Type=Type, LogType=Type_s, AppName=ContainerAppName_s, Message=Log_s
 | sort by TimeGenerated
-
-
 ```
 
 ```sql
@@ -922,20 +907,17 @@ ContainerAppSystemLogs_CL
 
 
 Type and run the following Kusto query to see all in the inbound calls into Azure Container Apps:
-
-
-Type and run the following Kusto query to see application logs:
-
-
 ```sql
-
 ContainerAppConsoleLogs_CL
 | where Log_s contains "endpoints"
 | project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
 | sort by Time desc
 | take 100
 | limit 500
+```
 
+Type and run the following Kusto query to see application logs:
+```sql
 ContainerAppConsoleLogs_CL
 | where Log_s contains "start"
 | project Message=Log_s, Time=TimeGenerated, EnvName=EnvironmentName_s, AppName=ContainerAppName_s ,Revision=RevisionName_s
@@ -1010,6 +992,7 @@ All those three REST controllers `OwnerResource`, `PetResource` and `VisitResour
 ## Scaling
 
 TODO !
+see [https://github.com/MicrosoftLearning/Deploying-and-Running-Java-Applications-in-Azure-Spring-Apps/blob/master/Instructions/Labs/LAB_05_implement_messaging_asc.md](https://github.com/MicrosoftLearning/Deploying-and-Running-Java-Applications-in-Azure-Spring-Apps/blob/master/Instructions/Labs/LAB_05_implement_messaging_asc.md)
 
 ## Resiliency
 
@@ -1035,7 +1018,7 @@ url: jdbc:mysql://petclinic-mysql-server.mysql.database.azure.com:3306/petclinic
 url: jdbc:mysql://petclinic-mysql-server.mysql.database.azure.com:3306/petclinic?useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.2&verifyServerCertificate=true    
 
 
-If you face this Netty SSL Hadnshake issue :
+If you face this Netty SSL Handshake issue :
 ```console
 eactor.core.Exceptions$ReactiveException: io.netty.handler.ssl.SslHandshakeTimeoutException: handshake timed out after 10000ms
 ```
@@ -1069,6 +1052,230 @@ you would need to remove the dependency on spring-boot-starter-web in the api-ga
 check with : mvn dependency:tree
 ```sh
 mvn dependency:tree | grep spring-boot-starter-web
+```
+
+### ACA internal routing
+
+${} ${VETS_SVC_URL} ${}  , ${VISITS_SVC_URL} , ${CUSTOMERS_SVC_URL} Environment variables have been configured in :
+
+-  [spring-petclinic-api-gateway/src/main/resources/application.yml](spring-petclinic-api-gateway/src/main/resources/application.yml)
+
+original code :
+```sh
+spring:
+  cloud:
+    gateway:
+      discovery:
+        # make sure a DiscoveryClient implementation (such as Netflix Eureka) is on the classpath and enabled
+        locator: # https://cloud.spring.io/spring-cloud-gateway/reference/html/#the-discoveryclient-route-definition-locator
+          enabled: true #  to configure Spring Cloud Gateway to use the Spring Cloud Service Registry to discover the available microservices.    
+      routes:
+        - id: vets-service
+          uri: http://vets-service
+          predicates:
+            - Path=/api/vet/**
+          filters:
+            - StripPrefix=2
+        - id: visits-service
+          uri: http://visits-service
+          predicates:
+            - Path=/api/visit/**
+          filters:
+            - StripPrefix=2
+        - id: customers-service
+          uri: http://customers-service
+          predicates:
+            - Path=/api/customer/**
+          filters:
+            - StripPrefix=2
+```
+
+code update required to deploy Petclinic to ACA :
+```sh
+spring:      
+  cloud:
+    gateway:
+      routes:
+        - id: vets-service
+          uri: https://${VETS_SVC_URL}
+          predicates:
+            - Path=/api/vet/**
+          filters:
+            - StripPrefix=2
+        - id: visits-service
+          uri: https://${VISITS_SVC_URL}
+          predicates:
+            - Path=/api/visit/**
+          filters:
+            - StripPrefix=2
+        - id: customers-service
+          uri: https://${CUSTOMERS_SVC_URL}
+          predicates:
+            - Path=/api/customer/**
+          filters:
+            - StripPrefix=2
+```
+
+- [spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/CustomersServiceClient.java](spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/CustomersServiceClient.java)
+
+
+original code :
+```sh
+public Mono<OwnerDetails> getOwner(final int ownerId) {
+    return webClientBuilder.build().get()
+        .uri("http://customers-service/owners/{ownerId}", ownerId)
+        .retrieve()
+        .bodyToMono(OwnerDetails.class);
+}
+```
+
+code update required to deploy Petclinic to ACA :
+```sh
+    //String CUSTOMERS_SVC_URL = environment.getProperty("customers.svc.url");
+    String internalK8Ssvc2svcRoute = "http://" + System.getenv("CUSTOMERS_SVC_APP_NAME") + ".internal." + System.getenv("CONTAINER_APP_ENV_DNS_SUFFIX");
+
+    public Mono<OwnerDetails> getOwner(final int ownerId) {
+        return webClientBuilder.build().get()
+            .uri(internalK8Ssvc2svcRoute + "/owners/{ownerId}", ownerId)
+            .retrieve()
+            .bodyToMono(OwnerDetails.class);
+    }
+```
+
+- [spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/VisitsServiceClient.java](spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/application/VisitsServiceClient.java)
+
+
+original code :
+```sh
+private String hostname = "http://visits-service/";
+```
+
+code update required to deploy Petclinic to ACA :
+```sh
+   //String VISITS_SVC_URL = environment.getProperty("visits.svc.url");
+    String internalK8Ssvc2svcRoute = "http://" + System.getenv("VISITS_SVC_APP_NAME") + ".internal." + System.getenv("CONTAINER_APP_ENV_DNS_SUFFIX");
+
+    private String hostname = internalK8Ssvc2svcRoute ; // "https://${VISITS_SVC_URL}/";
+
+    private final WebClient.Builder webClientBuilder;
+    public Mono<Visits> getVisitsForPets(final List<Integer> petIds) {
+        return webClientBuilder.build()
+            .get()
+            .uri(hostname + "/pets/visits?petId={petId}", joinIds(petIds))
+            .retrieve()
+            .bodyToMono(Visits.class);
+    }
+
+```
+
+Support of `http://<service-name>` as a route for service to service calls between the apps without using dapr is in ACA Roadmap
+
+see :
+- [https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv/issues/1](https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv/issues/1)
+- [https://github.com/microsoft/azure-container-apps/issues/473](https://github.com/microsoft/azure-container-apps/issues/473)
+    
+An alternate way of achieving this without getting the App FQDN is to use the internal Load Balancer:
+
+An environment variable: **CONTAINER_APP_ENV_DNS_SUFFIX** is auto-injected for every container running on the environment which describes the environments default domain.
+
+Note there are other vars auto-injected  like:
+KUBERNETES_SERVICE_HOST:10.0.0.1
+KUBERNETES_PORT:tcp://10.0.0.1:443
+
+This environment variable can help formulate the Internal FQDN of the app. e.g.:
+- https://<containerapp-name>.internal.<CONTAINER_APP_ENV_DNS_SUFFIX>
+- http://<containerapp-name>.internal.<CONTAINER_APP_ENV_DNS_SUFFIX>
+
+ex: https://myinternalapp.internal.icyforest-6dcfec24.regionname.azurecontainerapps.io
+
+```sh
+find / -name "*kube*"
+cat /var/run/secrets/kubernetes.io/serviceaccount/namespace
+```
+```console
+k8se-apps
+```
+
+```sh
+find / -name "*.io*"
+/run/secrets/kubernetes.io
+
+curl -k  https://kubernetes.default/api/v1/namespaces/k8se-apps/pods -H 'Accept: application/json' -H "Authorization: Bearer $token_secret_value"
+curl -k  https://10.0.0.1/api/v1/namespaces/k8se-apps/pods -H 'Accept: application/json' -H "Authorization: Bearer $token_secret_value"
+```
+
+About How to use Env. variable in Spring Boot, see :
+- [https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config)
+- [https://www.baeldung.com/spring-boot-properties-env-variables](https://www.baeldung.com/spring-boot-properties-env-variables)
+
+### Key Vault troubleshoot with USER-Assigned MI
+
+https://learn.microsoft.com/en-us/azure/spring-apps/tutorial-managed-identities-key-vault?tabs=user-assigned-managed-identity
+[Fast-Track for Azure OpenLab aka Java OpenHack](https://github.com/MicrosoftLearning/Deploying-and-Running-Java-Applications-in-Azure-Spring-Apps/blob/master/Instructions/Labs/LAB_04_secure_secrets_asc.md) uses SYSTEM-Assigned MI 
+
+The Azure SDK API change is summarized at [Issue #28310](https://github.com/Azure/azure-sdk-for-java/issues/28310)
+
+KeyVault integration runs easily when :
+- You use SYSTEM-Assigned MI, because then in the Config use by the Config-server you do NOT need to specify the client-id
+- When you use 1 & only 1 USER-Assigned MI for ALL your Apps/Micro-services, this is not a good practice from a security perspective as it is safer to assign 1 Identity to each App
+
+When you use USER-Assigned MI, assigning 1 Identity to each App , see one [App in Bicep](iac/bicep/modules/aca/apps/aca-svc.bicep#L141).
+In the Config used by the Config-server if you declare as many property-sources as the number of micro-services setting the client-id with the App Id (using Env. Var. set in the GH Workflow)  :
+
+      keyvault:
+        secret:
+          enabled: true
+          property-source-enabled: true
+          property-sources:
+            - name: kv-cfg-vets # KV Config for each App Vets-Service
+              endpoint: ${SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT}
+              credential:
+                managed-identity-enabled: true
+                client-id: ${VETS_SVC_APP_IDENTITY_CLIENT_ID}
+              #  client-secret: ${AZURE_CLIENT_SECRET} for SPN not for MI
+              # profile:
+              #  tenant-id: ${SPRING_CLOUD_AZURE_TENANT_ID}
+            - name: kv-cfg-visits # KV Config for each App Visits-Service
+              endpoint: ${SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT}
+              credential:
+                managed-identity-enabled: true
+                client-id: ${VISITS_SVC_APP_IDENTITY_CLIENT_ID}
+            - name: kv-cfg-customers # KV Config for each App Customers-Service
+              endpoint: ${SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT}
+              credential:
+                managed-identity-enabled: true
+                client-id: ${CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID}
+
+As a consequence this initially failed as each App uses the above Config and tried to fetch KV secrets from other App property-sources. which failed because it was not allowed as  it was assigned only 1/4 Identity.
+
+The solution is to remove all the above config from the Config repo and to add it instead in each App in \src\main\resources\application.yaml. 
+
+Ex for the vets-service, 1 & only 1 property-source is declared using 1 client-id only ${VETS_SVC_APP_IDENTITY_CLIENT_ID} :
+```code
+spring:
+  cloud:
+    azure:    
+      #profile: # spring.cloud.azure.profile
+        # subscription-id:
+        # tenant-id: ${SPRING_CLOUD_AZURE_TENANT_ID}
+      #credential:
+        #managed-identity-enabled: true        
+      keyvault:
+        secret:
+          enabled: true
+          property-source-enabled: true
+          # endpoint: ${SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT}
+          property-sources:
+            - name: kv-cfg-vets # KV Config for each App Vets-Service
+              endpoint: ${SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT}
+              credential:
+                managed-identity-enabled: true
+                client-id: ${VETS_SVC_APP_IDENTITY_CLIENT_ID}
+              #  client-secret: ${AZURE_CLIENT_SECRET} for SPN not for MI
+              # profile:
+              #  tenant-id: ${SPRING_CLOUD_AZURE_TENANT_ID}
+  profiles:
+    active: mysql    
 ```
 
 
