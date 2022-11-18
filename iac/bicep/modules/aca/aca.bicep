@@ -20,6 +20,9 @@ param azureContainerAppEnvName string = 'aca-env-${appName}'
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
 param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.4.jar'
 
+@description('The applicationinsights config file location')
+param applicationInsightsConfigFile string = 'BOOT-INF/classes/applicationinsights.json'
+
 // Spring Cloud for Azure params required to get secrets from Key Vault.
 // https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#basic-usage-3
 // https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#advanced-usage
@@ -222,6 +225,11 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-previe
               secretRef: 'appinscon'
             }
             {
+              // https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-standalone-config#configuration-file-path
+              name: 'APPLICATIONINSIGHTS_CONFIGURATION_FILE'
+              value: applicationInsightsConfigFile
+            }             
+            {
               name: 'SPRING_CLOUD_AZURE_TENANT_ID'
               secretRef: 'springcloudazuretenantid'
             }
@@ -314,9 +322,6 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-pr
     type: 'UserAssigned'
     userAssignedIdentities: {
       '${customersServicedentity.id}': {}
-      // shall assign all 3 identities due to a bug/limitation in Azure SDK
-      '${visitsServiceIdentity.id}': {}
-      '${vetsServiceAppIdentity.id}': {}
     }    
   }
   properties: {
@@ -377,6 +382,11 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-pr
               secretRef: 'appinscon'
             }
             {
+              // https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-standalone-config#configuration-file-path
+              name: 'APPLICATIONINSIGHTS_CONFIGURATION_FILE'
+              value: applicationInsightsConfigFile
+            }             
+            {
               name: 'SPRING_CLOUD_AZURE_TENANT_ID'
               secretRef: 'springcloudazuretenantid'
             }   
@@ -388,15 +398,6 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-pr
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
             }
-            // /!\ ALL Identyties are REQUIRED because the KV settings in the Config-Server have 3 property-sources, each having its own Identity/ClientId
-            {
-              name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
-              value: vetsServiceAppIdentity.properties.clientId
-            }                         
-            {
-              name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
-              value: visitsServiceIdentity.properties.clientId
-            }            
             {
               name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
               value: customersServicedentity.properties.clientId
@@ -482,9 +483,6 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview
     type: 'UserAssigned'
     userAssignedIdentities: {
       '${vetsServiceAppIdentity.id}': {}
-      // shall assign all 3 identities due to a bug/limitation in Azure SDK
-      '${visitsServiceIdentity.id}': {}
-      '${customersServicedentity.id}': {}
     }    
   }
   properties: {
@@ -545,6 +543,11 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview
               secretRef: 'appinscon'
             }
             {
+              // https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-standalone-config#configuration-file-path
+              name: 'APPLICATIONINSIGHTS_CONFIGURATION_FILE'
+              value: applicationInsightsConfigFile
+            }             
+            {
               name: 'SPRING_CLOUD_AZURE_TENANT_ID'
               secretRef: 'springcloudazuretenantid'
             }   
@@ -556,19 +559,10 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
             }
-            // /!\ ALL Identyties are REQUIRED because the KV settings in the Config-Server have 3 property-sources, each having its own Identity/ClientId
             {
               name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
               value: vetsServiceAppIdentity.properties.clientId
-            }                         
-            {
-              name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
-              value: visitsServiceIdentity.properties.clientId
-            }            
-            {
-              name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
-              value: customersServicedentity.properties.clientId
-            }                  
+            }                               
           ]
           image: imageNameVetsService
           name: vetsServiceContainerAppName
@@ -638,9 +632,6 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-previ
     type: 'UserAssigned'
     userAssignedIdentities: {
       '${visitsServiceIdentity.id}': {}
-      // shall assign all 3 identities due to a bug/limitation in Azure SDK
-      '${customersServicedentity.id}': {}
-      '${vetsServiceAppIdentity.id}': {}
     }    
   }
   properties: {
@@ -702,6 +693,11 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-previ
               secretRef: 'appinscon'
             }
             {
+              // https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-standalone-config#configuration-file-path
+              name: 'APPLICATIONINSIGHTS_CONFIGURATION_FILE'
+              value: applicationInsightsConfigFile
+            }             
+            {
               name: 'SPRING_CLOUD_AZURE_TENANT_ID'
               secretRef: 'springcloudazuretenantid'
             }   
@@ -713,19 +709,10 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-previ
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
             } 
-            // /!\ ALL Identyties are REQUIRED because the KV settings in the Config-Server have 3 property-sources, each having its own Identity/ClientId
-            {
-              name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
-              value: vetsServiceAppIdentity.properties.clientId
-            }                         
             {
               name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
               value: visitsServiceIdentity.properties.clientId
             }            
-            {
-              name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
-              value: customersServicedentity.properties.clientId
-            }                                                 
           ]
           image: imageNameVisitsService
           name: visitsServiceContainerAppName
