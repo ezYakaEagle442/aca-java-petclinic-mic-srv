@@ -49,7 +49,7 @@ param kvRGName string
 param  vNetRules array = []
 
 @description('The IP rules to whitelist for the KV & MySQL')
-param  ipRules array = []
+param  ipRules array
 
 resource kvRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
   name: kvRGName
@@ -76,6 +76,7 @@ resource kv 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   scope: kvRG
 }  
 
+var azureContainerAppsOutboundPubIP = string(ipRules[0])
 
 module mysqlPub './modules/mysql/mysql.bicep' = {
   name: 'mysqldbpub'
@@ -89,6 +90,6 @@ module mysqlPub './modules/mysql/mysql.bicep' = {
     serverName: kv.getSecret('MYSQL-SERVER-NAME')
     administratorLogin: kv.getSecret('SPRING-DATASOURCE-USERNAME')
     administratorLoginPassword: kv.getSecret('SPRING-DATASOURCE-PASSWORD')
-    azureContainerAppsOutboundPubIP: ipRules[0]
+    azureContainerAppsOutboundPubIP: azureContainerAppsOutboundPubIP
   }
 }
