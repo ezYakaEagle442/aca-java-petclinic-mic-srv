@@ -345,7 +345,6 @@ jobs:
               -p location=${{ env.LOCATION }} \
               -p kvName=${{ env.KV_NAME }} \
               -p kvRGName=${{ env.RG_KV }} \
-              -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
               -p vNetRules=[] \
               -p ipRules=$(az containerapp show --name hello-test -g ${{ env.RG_APP }} --query properties | jq .outboundIpAddresses) \
               -p setFwRuleClient=false \
