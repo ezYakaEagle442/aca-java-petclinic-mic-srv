@@ -184,8 +184,11 @@ Finally Create a GH [PAT](https://docs.github.com/en/authentication/keeping-your
 
 See GitHub Actions :
 - [Deploy the Azure Infra services workflow](./.github/workflows/deploy-iac.yml)
-- [Maven Build workflow](./.github/workflows/maven-build.yml)
-- [Java Apps Deploy workflow](./.github/workflows/deploy-apps.yml)
+- [Maven Backends Build workflow](./.github/workflows/maven-build.yml)
+- [Maven UI Build workflow](./.github/workflows/maven-build-ui.yml)
+- [Java Apps Config-Server Deploy workflow](./.github/workflows/deploy-app-cfg-srv.yml)
+- [Java Apps Backends Deploy workflow](./.github/workflows/deploy-app-svc.yml)
+- [Java Apps UI Deploy workflow](./.github/workflows/deploy-app-ui.yml)
 - [Delete ALL the Azure Infra services workflow, except KeyVault](./.github/workflows/delete-rg.yml)
 
 
@@ -264,8 +267,7 @@ env:
   RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
 ```
 
-Once you commit, then push your code update to your repo, it will trigger a Maven build which you need to can CANCELL from https://github.com/USERNAME/aca-java-petclinic-mic-srv/actions/workflows/maven-build.yml the first time you trigger the workflow
-
+Once you commit, then push your code update to your repo, it will trigger a Maven build which you need to can CANCELL from https://github.com/USERNAME/aca-java-petclinic-mic-srv/actions/workflows/maven-build.yml the first time you trigger the workflow, anyway it will fail because the ACR does not exist yet and the docker build will fail to push the Images.
 
 Note: the GH Hosted Runner / [Ubuntu latest image has already Azure CLI installed](https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md#cli-tools)
 
@@ -763,7 +765,7 @@ az monitor log-analytics query \
 
 ```
 
-
+### Kusto Query with Log Analytics
 
 Open the Log Analytics that you created - you can find the Log Analytics in the same Resource Group where you created an Azure Container Apps service instance.
 
