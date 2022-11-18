@@ -321,7 +321,7 @@ jobs:
       # see https://github.com/microsoft/azure-container-apps/issues/469
     - name: Whitelist ACA Env. OutboundIP
       run: |
-            az provider register --namespace Microsoft.App
+            # az provider register --namespace Microsoft.App
             envOutboundIP=$(az containerapp create \
             --name hello-test \
             --resource-group ${{ env.RG_APP }} \
