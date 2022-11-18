@@ -322,6 +322,8 @@ jobs:
     - name: Whitelist ACA Env. OutboundIP
       run: |
             # az provider register --namespace Microsoft.App
+            az config set extension.use_dynamic_install=yes_without_prompt
+            
             envOutboundIP=$(az containerapp create \
             --name hello-test \
             --resource-group ${{ env.RG_APP }} \
