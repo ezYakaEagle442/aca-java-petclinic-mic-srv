@@ -18,7 +18,7 @@ param azureContainerAppEnvName string = 'aca-env-${appName}'
 
 
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
-param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.1.jar'
+param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.4.jar'
 
 // Spring Cloud for Azure params required to get secrets from Key Vault.
 // https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#basic-usage-3

@@ -45,7 +45,7 @@ param subscriptionId string = subscription().id
 param logAnalyticsWorkspaceName string = 'log-${appName}'
 
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
-param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.1.jar'
+param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.4.jar'
 
 param appInsightsName string = 'appi-${appName}'
 
