@@ -173,35 +173,10 @@ jobs:
           refresh_token=$(curl https://${{ env.REGISTRY_URL }}/oauth2/exchange -v -d "grant_type=access_token&service=${{ env.REGISTRY_URL }}&access_token=$access_token" | jq -r .refresh_token)
           docker login ${{ env.REGISTRY_URL }} -u 00000000-0000-0000-0000-000000000000 --password-stdin <<< "$refresh_token"
 
-
           az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
-          
-          
-          # https://github.com/Azure/acr-build/issues/10
-          # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
-          # {{.Run.ID}} would be different for each az acr build , not the best to simplify Image Tag
-
-          #az acr build --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RG_APP }} \
-          #  -t ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id \
-          #  --file ${{ env.DOCKERFILE_PATH_API_GATEWAY }} \
-          #  ${{ github.workspace }}
-
           # https://learn.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli
           docker build --build-arg --no-cache -t ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id -f "./docker/petclinic-api-gateway/Dockerfile" .
           docker push "${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id"
-
-
-    # https://github.com/marketplace/actions/docker-build-push-action
-    #- name: Build and push
-    #  uses: docker/build-push-action@v5
-    #  with:
-    #    image: ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}
-    #    registry: ${{ env.REGISTRY_URL }}
-    #    directory: .
-    #    dockerfile: ./docker/petclinic-api-gateway/Dockerfile
-    #    pushImage: true
-    #    tags: ${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id
-    #    addLatest: true
 
     # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
     # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#hardening-for-self-hosted-runners
