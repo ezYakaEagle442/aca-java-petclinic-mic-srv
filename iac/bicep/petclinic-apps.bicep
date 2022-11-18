@@ -88,12 +88,6 @@ param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-admin-server:{{ github.sha }}')
 param imageNameAdminServer string
 
-@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-discovery-server:{{ github.sha }}')
-param imageNameDiscoveryServer string
-
-@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-api-gateway:{{ github.sha }}')
-param imageNameApiGateway string
-
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-config-server:{{ github.sha }}')
 param imageNameConfigServer string
 
@@ -150,9 +144,6 @@ module azurecontainerapp './modules/aca/aca.bicep' = {
     applicationInsightsAgentJarFilePath: applicationInsightsAgentJarFilePath
     springCloudAzureKeyVaultEndpoint: kv.getSecret('SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT')
     springCloudAzureTenantId: kv.getSecret('SPRING-CLOUD-AZURE-TENANT-ID')
-    springDataSourceUrl: kv.getSecret('SPRING-DATASOURCE-URL')
-    springDataSourceUsr: kv.getSecret('SPRING-DATASOURCE-USERNAME')
-    springDataSourcePwd: kv.getSecret('SPRING-DATASOURCE-PASSWORD')
     tenantId: tenantId
     subscriptionId: subscriptionId
     registryUrl: ACR.properties.loginServer
@@ -161,17 +152,13 @@ module azurecontainerapp './modules/aca/aca.bicep' = {
     // ghaSettingsCfgRuntimeStack: ghaSettingsCfgRuntimeStack
     // ghaSettingsCfgRuntimeVersion: ghaSettingsCfgRuntimeVersion
     adminServerContainerAppName: adminServerContainerAppName
-    discoveryServerContainerAppName: discoveryServerContainerAppName
     configServerContainerAppName: configServerContainerAppName
-    apiGatewayContainerAppName: apiGatewayContainerAppName
     customersServiceContainerAppName: customersServiceContainerAppName
     vetsServiceContainerAppName: vetsServiceContainerAppName
     visitsServiceContainerAppName: visitsServiceContainerAppName
     imageNameAdminServer: imageNameAdminServer
-    imageNameApiGateway: imageNameApiGateway
     imageNameConfigServer: imageNameConfigServer
     imageNameCustomersService: imageNameCustomersService
-    imageNameDiscoveryServer: imageNameDiscoveryServer
     imageNameVetsService: imageNameVetsService
     imageNameVisitsService: imageNameVisitsService
   }
