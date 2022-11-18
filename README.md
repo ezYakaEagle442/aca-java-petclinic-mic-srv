@@ -183,7 +183,7 @@ Finally Create a GH [PAT](https://docs.github.com/en/authentication/keeping-your
 ## Pipelines
 
 See GitHub Actions :
-- [Deploy the Azure Infra services workflow](./.github/workflows/deploy-iac.yml#L13)
+- [Deploy the Azure Infra services workflow](./.github/workflows/deploy-iac.yml)
 - [Maven Build workflow](./.github/workflows/maven-build.yml)
 - [Java Apps Deploy workflow](./.github/workflows/deploy-apps.yml)
 - [Delete ALL the Azure Infra services workflow, except KeyVault](./.github/workflows/delete-rg.yml)
@@ -192,21 +192,27 @@ See GitHub Actions :
 <span style="color:red">****</span>
 
 Workflow Design
+
+The Workflow run the steps in this in this order :
+
 ```
 ├── Deploy the Azure Infra services workflow ./.github/workflows/deploy-iac.yml
-│   ├── Authorize local IP to access the Azure Key Vault ./.github/workflows/deploy-iac.yml#L133
-│   ├── Create the secrets ./.github/workflows/deploy-iac.yml#L140
-│   ├── Disable local IP access to the Key Vault ./.github/workflows/deploy-iac.yml#L252
-│   ├── Deploy the pre-req ./.github/workflows/deploy-iac.yml#L285
-│   ├── Create REGISTRY-USR & REGISTRY-PWD secrets in Azure Key Vault ./.github/workflows/deploy-iac.yml#L313
-│   ├── Call Maven Build ./.github/workflows/deploy-iac.yml#L356
-│       ├── Maven Build ./.github/workflows/maven-build.yml#L118
-│       ├── Publish the Maven package ./.github/workflows/maven-build.yml#L141
-│       ├── Check all Jar artifacts ./.github/workflows/maven-build.yml#L152
-│       ├── Build image and push it to ACR ./.github/workflows/maven-build.yml#L176
-│   ├── Deploy Azure Container Apps ./.github/workflows/deploy-iac.yml#L375
-│   ├── Configure Diagnostic-Settings ./.github/workflows/deploy-iac.yml#L398
-│   ├── Configure GitHub-Action-Settings ./.github/workflows/deploy-iac.yml#405
+│   ├── Authorize local IP to access the Azure Key Vault ./.github/workflows/deploy-iac.yml#L143
+│   ├── Create the secrets ./.github/workflows/deploy-iac.yml#L150
+│   ├── Disable local IP access to the Key Vault ./.github/workflows/deploy-iac.yml#L262
+│   ├── Deploy the pre-req ./.github/workflows/deploy-iac.yml#L295
+│   ├── Whitelist ACA Env. OutboundIP to KV and MySQL ./.github/workflows/deploy-iac.yml#L322
+│   ├── Call Maven Build ./.github/workflows/deploy-iac.yml#L369
+│       ├── Maven Build ./.github/workflows/maven-build.yml#L128
+│       ├── Publish the Maven package ./.github/workflows/maven-build.yml#L166
+│       ├── Check all Jar artifacts ./.github/workflows/maven-build.yml#L177
+│       ├── Build image and push it to ACR ./.github/workflows/maven-build.yml#L200
+│   ├── Call Maven Build-UI ./.github/workflows/deploy-iac.yml#L376
+│   ├── Deploy Backend Services ./.github/workflows/deploy-iac.yml#L382
+│       ├── Deploy Backend services calling iac/bicep/petclinic-apps.bicep
+│       ├── Deploy the UI calling iac/bicep/modules/aca/apps/aca-ui.bicep
+│   ├── Configure Diagnostic-Settings ./.github/workflows/deploy-iac.yml#L453
+│   ├── Configure GitHub-Action-Settings ./.github/workflows/deploy-iac.yml#460
 ```
 
 You need to set your own param values in :
@@ -245,7 +251,20 @@ env:
   RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
 ```
 
-Once you commit, then push your code update to your repo, it will trigger a Maven build which you need to can CANCELL from https://github.com/USERNAME/aca-java-petclinic-mic-srv/actions/workflows/maven-build.yml the firs time you trigger the workflow
+
+- [Maven Build workflow for the UI](./.github/workflows/maven-build-ui.yml)
+```sh
+  AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
+  REGISTRY_URL: acrpetcliaca.azurecr.io  # set this to the URL of your registry
+  REPOSITORY: petclinic                  # set this to your ACR repository
+  PROJECT_NAME: petclinic                # set this to your project's name
+  KV_NAME: kv-petcliaca42               # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
+  
+  RG_KV: rg-iac-kv42 # RG where to deploy KV
+  RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
+```
+
+Once you commit, then push your code update to your repo, it will trigger a Maven build which you need to can CANCELL from https://github.com/USERNAME/aca-java-petclinic-mic-srv/actions/workflows/maven-build.yml the first time you trigger the workflow
 
 
 Note: the GH Hosted Runner / [Ubuntu latest image has already Azure CLI installed](https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md#cli-tools)
@@ -395,12 +414,12 @@ Quick local test just to verify that the jar files can be run (the routing will 
 
 ```sh
  mvn clean package -DskipTests -Denv=cloud
-java -jar spring-petclinic-config-server\target\aca-spring-petclinic-config-server-2.6.6.jar --server.port=8888
-java -jar spring-petclinic-admin-server\target\aca-spring-petclinic-admin-server-2.6.6.jar --server.port=9090
-java -jar spring-petclinic-visits-service\target\aca-spring-petclinic-visits-service-2.6.6.jar --server.port=8082 # --spring.profiles.active=docker
-java -jar spring-petclinic-vets-service\target\aca-spring-petclinic-vets-service-2.6.6.jar --server.port=8083
-java -jar spring-petclinic-customers-service\target\aca-spring-petclinic-customers-service-2.6.6.jar --server.port=8084
-java -jar spring-petclinic-api-gateway\target\aca-spring-petclinic-api-gateway-2.6.6.jar --server.port=8085
+java -jar spring-petclinic-config-server\target\aca-spring-petclinic-config-server-2.6.13.jar --server.port=8888
+java -jar spring-petclinic-admin-server\target\aca-spring-petclinic-admin-server-2.6.13.jar --server.port=9090
+java -jar spring-petclinic-visits-service\target\aca-spring-petclinic-visits-service-2.6.13.jar --server.port=8082 # --spring.profiles.active=docker
+java -jar spring-petclinic-vets-service\target\aca-spring-petclinic-vets-service-2.6.13.jar --server.port=8083
+java -jar spring-petclinic-customers-service\target\aca-spring-petclinic-customers-service-2.6.13.jar --server.port=8084
+java -jar spring-petclinic-api-gateway\target\aca-spring-petclinic-api-gateway-2.6.13.jar --server.port=8085
 ```
 
 Note: tip to verify the dependencies
@@ -473,8 +492,6 @@ The Spring Cloud Gateway routing is configured at [spring-petclinic-api-gateway/
 
 The API Gateway Controller is located at [spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/boundary/web/ApiGatewayController.java](spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/boundary/web/ApiGatewayController.java)
 
-
-
 Note: The Spring Cloud Discovery Server is NOT deployed as the underlying K8S/AKS discovery/DNS service is used.
 see :
 - [https://spring.io/guides/gs/service-registration-and-discovery](https://spring.io/guides/gs/service-registration-and-discovery/)
@@ -487,6 +504,11 @@ see :
 The Git repo URL used by Spring config is set in spring-petclinic-config-server/src/main/resources/application.yml
 
 If you want to know more about the Spring Boot Admin server, you might be interested in [https://github.com/codecentric/spring-boot-admin](https://github.com/codecentric/spring-boot-admin)
+
+
+<span style="color:red">For Learning purpose the App uses Key Vault to fetch secrets like the DB password but if would be even better using Passwordless Features: **[https://aka.ms/delete-passwords](https://learn.microsoft.com/en-us/azure/developer/intro/passwordless-overview)**</span>
+
+
 
 
 ## Understand the Spring Cloud Config
@@ -523,7 +545,7 @@ Dependency for Connector/J, the MySQL JDBC driver is already included in the `po
 ### Set MySql connection String
 
 You need to reconfigure the MySQL connection string with your own settings (you can get it from the Azure portal / petcliaks-mysql-server / Connection strings / JDBC):
-In the spring-petclinic-microservices-config/blob/main/application.yml :
+In the [spring-petclinic-microservices-config/blob/main/application.yml](https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml) :
 ```
 spring:
   config:
@@ -547,7 +569,7 @@ spring:
     platform: mysql
     #driver-class-name: com.mysql.jdbc.Driver
 ```
-In fact the spring.datasource.url, spring.datasource.username and spring.datasource.password will be automatically injected from KV secrets SPRING-DATASOURCE-URL, SPRING-DATASOURCE-USERNAME and SPRING-DATASOURCE-PASSWORD using the config below :
+In fact the spring.datasource.url, spring.datasource.username and spring.datasource.password will be automatically injected from KV secrets SPRING-DATASOURCE-URL, SPRING-DATASOURCE-USERNAME and SPRING-DATASOURCE-PASSWORD using the config below in each micro-service :
 
 ```
 spring:
@@ -562,14 +584,11 @@ spring:
         secret:
           enabled: true
           property-sources:
-            - name: kv-property-source-endpoint
-              endpoint: ${AZURE_KEY_VAULT_ENDPOINT}
-              credential.managed-identity-enabled: true # https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#configuration-17
-              # credential:
-              #  client-id: ${AZURE_CLIENT_ID}
-              #  client-secret: ${AZURE_CLIENT_SECRET}
-              # profile:
-              #  tenant-id: ${AZURE_TENANT_ID}
+            - name: kv-cfg-XXX # KV Config for each App XXX
+              endpoint: ${SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT}
+              credential:
+                managed-identity-enabled: true
+                client-id: ${XXXX_SVC_APP_IDENTITY_CLIENT_ID}
 ---
 ```
 
@@ -581,17 +600,68 @@ You can check the DB connection with this [sample project](https://github.com/Az
 To use a MySQL database, you have to start 3 microservices (`visits-service`, `customers-service` and `vets-services`)
 with the `mysql` Spring profile. Add the `--spring.profiles.active=mysql` as programm argument.
 
-By default, at startup, database schema will be created and data will be populated.
-You may also manually create the PetClinic database and data by executing the `"db/mysql/{schema,data}.sql"` scripts of each 3 microservices. 
-
-In the `application.yml` of the [Configuration repository], set the `initialization-mode` to `ALWAYS`  ( or `never`).
+In the `application.yml` of the [Configuration repository], set the `initialization-mode` to `never`  ( or `ALWAYS`).
 
 If you are running the microservices with Docker, you have to add the `mysql` profile into the (Dockerfile)[docker/Dockerfile]:
 ```
 ENV SPRING_PROFILES_ACTIVE docker,mysql
 ```
-In the `mysql section` of the `application.yml` from the [Configuration repository], you have to change 
-the host and port of your MySQL JDBC connection string. 
+
+Init & load the data into MySQL DB, you can use MySQL  Workbench to do so :
+```sh
+ // SUBSTITUTE values
+    mysql -u ${MYSQL_SERVER_ADMIN_LOGIN_NAME} \
+     -h ${MYSQL_SERVER_FULL_NAME} -P 3306 -p
+    
+    Enter password:
+    Welcome to the MySQL monitor.  Commands end with ; or \g.
+    Your MySQL connection id is 64379
+    Server version: 5.6.39.0 MySQL Community Server (GPL)
+    
+    Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+    
+    Oracle is a registered trademark of Oracle Corporation and/or its
+    affiliates. Other names may be trademarks of their respective
+    owners.
+    
+    Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+    
+    mysql> CREATE DATABASE petclinic;
+    Query OK, 1 row affected (0.10 sec)
+    
+    mysql> CREATE USER 'root' IDENTIFIED BY 'petclinic';
+    Query OK, 0 rows affected (0.11 sec)
+    
+    mysql> GRANT ALL PRIVILEGES ON petclinic.* TO 'root';
+    Query OK, 0 rows affected (1.29 sec)
+    
+    mysql> CALL mysql.az_load_timezone();
+    Query OK, 3179 rows affected, 1 warning (6.34 sec)
+    
+    mysql> SELECT name FROM mysql.time_zone_name;
+
+    # https://learn.microsoft.com/en-us/azure/mysql/single-server/how-to-configure-server-parameters-using-cli#working-with-the-time-zone-parameter
+    # SELECT @@global.time_zone;
+    SELECT NOW();
+    #sudo mysql -e "SET GLOBAL time_zone = ‘+1:00’;"
+
+    ...
+    
+    mysql> quit
+    Bye
+    
+    az mysql flexible-server parameter set -g ${RESOURCE_GROUP} \
+    -s ${MYSQL_SERVER_NAME}.mysql.database.azure.com --name time_zone --value "Europe/Paris"
+
+    @spring-petclinic-vets-service/src/main/resources/db/mysql/schema.sql
+    @spring-petclinic-vets-service/src/main/resources/db/mysql/data.sql
+
+    @spring-petclinic-visits-service/src/main/resources/db/mysql/schema.sql
+    @spring-petclinic-visits-service/src/main/resources/db/mysql/data.sql
+
+    @spring-petclinic-customers-service/src/main/resources/db/mysql/schema.sql
+    @spring-petclinic-customers-service/src/main/resources/db/mysql/data.sql
+```
 
 
 ## Observability
@@ -604,6 +674,7 @@ Read the Application Insights docs :
 - [https://techcommunity.microsoft.com/t5/apps-on-azure-blog/observability-with-azure-container-apps/ba-p/3627909](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/observability-with-azure-container-apps/ba-p/3627909)
 - [https://techcommunity.microsoft.com/t5/apps-on-azure-blog/bg-p/AppsonAzureBlog](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/bg-p/AppsonAzureBlog)
 - [https://github.com/microsoft/ApplicationInsights-Java](https://github.com/microsoft/ApplicationInsights-Java)
+- [https://github.com/microsoft/AzureMonitorCommunity](https://github.com/microsoft/AzureMonitorCommunity)
 
 The config files are located in each micro-service at src/main/resources/applicationinsights.json
 The Java agent is downloaded in the App container in /tmp/app, you can have a look at a Docker file, example at [./docker/petclinic-customers-service/Dockerfile](./docker/petclinic-customers-service/Dockerfile)
