@@ -331,14 +331,15 @@ jobs:
             --image mcr.microsoft.com/azuredocs/containerapps-helloworld:latest \
             --target-port 80 \
             --ingress 'external' \
-            --query properties.outboundIpAddresses)
+            --query properties | jq .outboundIpAddresses)
 
             echo "hello-test ACA test created"
 
+            # az containerapp show --name hello-test -g ${{ env.RG_APP }} --query properties | jq .outboundIpAddresses
+
             echo "About to Whitelist ACA Env. OutboundIP in KV & MySQL"
             echo $envOutboundIP
-            echo $envOutboundIP[0]            
-
+       
             az deployment group create --name aca-kv-mysql-set-ip-rules -f iac/bicep/set-ip-rules.bicep -g ${{ env.RG_APP }} \
               -p appName=${{ env.APP_NAME }} \
               -p location=${{ env.LOCATION }} \
