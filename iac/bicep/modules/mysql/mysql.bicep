@@ -1,4 +1,3 @@
-
 @description('A UNIQUE name')
 @maxLength(20)
 param appName string = 'iacdemo${uniqueString(resourceGroup().id)}'
