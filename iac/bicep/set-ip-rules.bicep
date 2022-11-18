@@ -76,8 +76,6 @@ resource kv 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   scope: kvRG
 }  
 
-var azureContainerAppsOutboundPubIP = string(ipRules[0])
-
 module mysqlPub './modules/mysql/mysql.bicep' = {
   name: 'mysqldbpub'
   params: {
@@ -90,6 +88,6 @@ module mysqlPub './modules/mysql/mysql.bicep' = {
     serverName: kv.getSecret('MYSQL-SERVER-NAME')
     administratorLogin: kv.getSecret('SPRING-DATASOURCE-USERNAME')
     administratorLoginPassword: kv.getSecret('SPRING-DATASOURCE-PASSWORD')
-    azureContainerAppsOutboundPubIP: azureContainerAppsOutboundPubIP
+    azureContainerAppsOutboundPubIP: ipRules
   }
 }
