@@ -346,7 +346,7 @@ jobs:
               -p kvName=${{ env.KV_NAME }} \
               -p kvRGName=${{ env.RG_KV }} \
               -p vNetRules=[] \
-              -p ipRules=$(az containerapp show --name hello-test -g ${{ env.RG_APP }} --query properties | jq .outboundIpAddresses) \
+              -p ipRules=[] \
               -p setFwRuleClient=false \
               -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
               -p clientIPAddress="10.0.0.0" \
