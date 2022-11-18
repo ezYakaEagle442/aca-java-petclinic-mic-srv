@@ -323,7 +323,7 @@ jobs:
       run: |
             # az provider register --namespace Microsoft.App
             az config set extension.use_dynamic_install=yes_without_prompt
-            
+
             envOutboundIP=$(az containerapp create \
             --name hello-test \
             --resource-group ${{ env.RG_APP }} \
@@ -336,7 +336,7 @@ jobs:
             echo "hello-test ACA test created"
             echo "About to Whitelist ACA Env. OutboundIP $envOutboundIP in KV & MySQL"
 
-            az deployment group create --name aca-petclinic-pre-req -f iac/bicep/set-ip-rules.bicep -g ${{ env.RG_APP }} \
+            az deployment group create --name aca-kv-mysql-set-ip-rules -f iac/bicep/set-ip-rules.bicep -g ${{ env.RG_APP }} \
               -p appName=${{ env.APP_NAME }} \
               -p location=${{ env.LOCATION }} \
               -p kvName=${{ env.KV_NAME }} \
