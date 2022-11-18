@@ -331,7 +331,7 @@ jobs:
             --image mcr.microsoft.com/azuredocs/containerapps-helloworld:latest \
             --target-port 80 \
             --ingress 'external' \
-            --query properties.outboundIpAddresses
+            --query properties.outboundIpAddresses)
 
             echo "hello-test ACA test created"
 
