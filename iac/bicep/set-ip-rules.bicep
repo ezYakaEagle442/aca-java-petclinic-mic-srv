@@ -38,13 +38,18 @@ resource kvRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
 // Now KV must Allow azureContainerAppsOutboundPubIP in the IP rules ...
 // Must allow ACA to access Existing KV
 
+
+resource HelloTestApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+  name: 'hello-test'
+}
+
 module kvsetiprules './modules/kv/kv.bicep' = {
   name: 'kv-set-iprules'
   scope: kvRG
   params: {
     kvName: kvName
     location: location
-    ipRules: ipRules
+    ipRules: HelloTestApp.properties.outboundIPAddresses
     vNetRules: vNetRules
   }
 }
@@ -66,6 +71,6 @@ module mysqlPub './modules/mysql/mysql.bicep' = {
     serverName: kv.getSecret('MYSQL-SERVER-NAME')
     administratorLogin: kv.getSecret('SPRING-DATASOURCE-USERNAME')
     administratorLoginPassword: kv.getSecret('SPRING-DATASOURCE-PASSWORD')
-    azureContainerAppsOutboundPubIP: ipRules
+    azureContainerAppsOutboundPubIP: HelloTestApp.properties.outboundIPAddresses
   }
 }
