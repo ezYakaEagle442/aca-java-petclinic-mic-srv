@@ -1,0 +1,368 @@
+# This workflow will deploy all the Azure services, including ACA, ACA Env., ACR, KV & secrets, MYSQL (eventually with a Firewall rule to allow your workstation IP)
+# eventually if DEPLOY_TO_VNET is set to true : also VNet, ACA Env. deployed to VNet, private DNS-Zone, client VM deployed to the VNet
+
+name: Deploy IaC Pre-Req with Azure Bicep
+
+env:
+  APP_NAME: petcliaca
+  LOCATION: francecentral # westeurope
+  RG_KV: rg-iac-kv29 # RG where to deploy KV
+  RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
+  
+  ACA_ENV_NAME: aca-env-pub # ACA Environment name. Ex 'aca-env-pub' or 'aca-env-corp' when deployed to your VNet
+  DEPLOY_TO_VNET: false
+
+  KV_NAME: kv-petcliaca29 # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
+  SET_KV_ACCESS_POLICIES: false # let it to false
+
+  AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
+  REPOSITORY: petclinic                  # set this to your ACR repository
+
+  # ==== APPS ====
+  API_GATEWAY: api-gateway
+  ADMIN_SERVER: admin-server
+  CUSTOMERS_SERVICE: customers-service
+  VETS_SERVICE: vets-service
+  VISITS_SERVICE: visits-service
+
+  CONFIG_SERVER: config-server
+  DISCOVERY_SERVER: discovery-server
+
+  # GitHub Actions settings
+  GHA_SETTINGS_CFG_REGISTRY_URL: acrpetcliaca.azurecr.io
+  GHA_SETTINGS_CFG_REPO_URL: https://github.com/ezYakaEagle442/aca-java-petclinic-mic-srv
+  GHA_REVISION_NAME: aca-poc-101
+
+  # https://github.com/Azure/actions-workflow-samples/blob/master/assets/create-secrets-for-GitHub-workflows.md#consume-secrets-in-your-workflow
+  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-secrets
+
+  # ==== Secrets ====
+
+  # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions
+  # Never use structured data as a secret
+  # Structured data can cause secret redaction within logs to fail, because redaction largely relies on finding an exact match for 
+  # the specific secret value. For example, do not use a blob of JSON, XML, or YAML (or similar) to encapsulate a secret value, 
+  # as this significantly reduces the probability the secrets will be properly redacted. Instead, create individual secrets for each sensitive value.
+
+  MYSQL_SERVER_FULL_NAME: ${{ secrets.MYSQL_SERVER_FULL_NAME }}
+  SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+  SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+  SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+  SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT: ${{ secrets.SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT }}
+  SPRING_CLOUD_AZURE_TENANT_ID: ${{ secrets.SPRING_CLOUD_AZURE_TENANT_ID }}
+
+  GHA_SETTINGS_CFG_CRD_CLIENT_ID: ${{ secrets.SPN_ID }}
+  GHA_SETTINGS_CFG_CRD_CLIENT_SECRET: ${{ secrets.SPN_PWD }}
+
+  VM_ADMIN_USER_NAME: ${{ secrets.VM_ADMIN_USER_NAME }}
+  VM_ADMIN_PASSWORD: ${{ secrets.VM_ADMIN_PASSWORD }}
+
+  # https://learn.microsoft.com/en-us/azure/key-vault/secrets/secrets-best-practices#secrets-rotation
+  # Because secrets are sensitive to leakage or exposure, it's important to rotate them often, at least every 60 days. 
+  # Expiry date in seconds since 1970-01-01T00:00:00Z. Ex: 1672444800 ==> 31/12/2022'
+  SECRET_EXPIRY_DATE: 1672444800
+
+  credentials: ${{ secrets.AZURE_CREDENTIALS }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  # ==== Versions ====
+  DEPLOYMENT_VERSION: 2.6.6
+  AZ_CLI_VERSION: 2.40.0
+  JAVA_VERSION: 11
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-kv:
+    runs-on: ubuntu-latest
+    steps:
+
+    # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files
+    # /!\ IMPORTANT: The step that creates or updates the environment variable does not have access to the new value, but all subsequent steps in a job will have access.
+    - name: Set Base environment variables
+      run: |
+        echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV     
+      shell: bash
+
+    - name: Login with GHA Runner SP
+      uses: azure/login@v1.4.6 # fails https://github.com/marketplace/actions/azure-login
+      with:
+        creds: ${{ env.credentials }} # ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Checkout
+      uses: actions/checkout@v3.0.2 # https://github.com/actions/checkout
+
+    - name: Deploy Azure Key Vault      
+      # uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
+      # with:
+        #azcliversion: ${{ env.AZ_CLI_VERSION }}
+        # inlineScript: |
+      shell: bash
+      run: |
+          echo  +++ START Step - Deploy Azure Key Vault
+          # leave this fake dummy accessPoliciesObject empty as anyway SET_KV_ACCESS_POLICIES is set to FALSE at this stage
+          # https://stackoverflow.com/questions/7316107/how-to-split-strings-over-multiple-lines-in-bash
+
+          apo=`cat <<-____HERE
+          {
+            "accessPolicies": [
+              {
+                "objectId":"fakeDummyAppIdentityId",
+                "tenantId":"fakeDummyTenantId",
+                "permissions": {
+                  "secrets": [
+                    "get",
+                    "list"
+                  ]
+                }
+              }
+            ]
+          }
+          ____HERE`
+
+          echo **************************************************
+          # https://github.com/twpayne/chezmoi/discussions/1706
+          apo="{\"accessPolicies\":\"foo\"}"
+          accessPoliciesObject="${apo}"
+          echo accessPoliciesObject = "${accessPoliciesObject}"
+          echo **************************************************
+          
+          pwd
+          ls -al
+          # /home/runner/work/aca-java-petclinic-mic-srv/aca-java-petclinic-mic-srv/.
+          
+          az deployment group create --name aca-petclinic-kv -f iac/bicep/modules/kv/kv.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p location=${{ env.LOCATION }}
+
+    # Allow GH Runner to access KV
+    # When Public access is disabled on KV, you need to add a network rule in the KV Firewall
+    - name: Authorize local IP to access the Azure Key Vault
+      run: |
+          az keyvault network-rule add --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
+          sleep 10
+      shell: bash
+
+    # Now that GH Runner is Allowed to access KV, create the secrets
+    - name: Create MYSQL-SERVER-NAME secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-server-name -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="MYSQL-SERVER-NAME" \
+            -p secretValue=${{ secrets.MYSQL_SERVER_NAME }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}          
+      shell: bash
+
+    - name: Create MYSQL-SERVER-FULL-NAME secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-server-full-name -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="MYSQL-SERVER-FULL-NAME" \
+            -p secretValue=${{ secrets.MYSQL_SERVER_FULL_NAME }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+      shell: bash
+
+    - name: Create SPRING-DATASOURCE-USERNAME secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-db-usr -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="SPRING-DATASOURCE-USERNAME" \
+            -p secretValue=${{ secrets.SPRING_DATASOURCE_USERNAME }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+      shell: bash
+
+    - name: Create SPRING-DATASOURCE-PASSWORD secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-db-pwd -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="SPRING-DATASOURCE-PASSWORD" \
+            -p secretValue=${{ secrets.SPRING_DATASOURCE_PASSWORD }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+      shell: bash
+
+    - name: Create SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-endpoint -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT" \
+            -p secretValue=${{ secrets.SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+      shell: bash
+
+    - name: Create SPRING-CLOUD-AZURE-TENANT-ID secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-tenant -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="SPRING-CLOUD-AZURE-TENANT-ID" \
+            -p secretValue=${{ secrets.SPRING_CLOUD_AZURE_TENANT_ID }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }} 
+      shell: bash
+
+    - name: Create SPRING-DATASOURCE-URL secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-db-url -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="SPRING-DATASOURCE-URL" \
+            -p secretValue=${{ secrets.SPRING_DATASOURCE_URL }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+      shell: bash
+
+    - name: Create SPN-ID secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-spn-id -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="SPN-ID" \
+            -p secretValue=${{ env.GHA_SETTINGS_CFG_CRD_CLIENT_ID }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+      shell: bash      
+      
+    - name: Create SPN-PWD secret in Azure Key Vault
+      run: |
+          az deployment group create --name aca-petclinic-kv-spn-pwd -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="SPN-PWD" \
+            -p secretValue=${{ env.GHA_SETTINGS_CFG_CRD_CLIENT_SECRET }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+      shell: bash    
+      
+    - name: Create VM-ADMIN-USER-NAME secret in Azure Key Vault
+      if: ${{ env.DEPLOY_TO_VNET }} 
+      run: |
+          az deployment group create --name aca-petclinic-kv-vm-usr -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="VM-ADMIN-USER-NAME" \
+            -p secretValue=${{ secrets.VM_ADMIN_USER_NAME }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+      shell: bash
+
+    - name: Create VM-ADMIN-PASSWORD secret in Azure Key Vault
+      if: ${{ env.DEPLOY_TO_VNET }}
+      run: |
+          az deployment group create --name aca-petclinic-kv-vm-pwd -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="VM-ADMIN-PASSWORD" \
+            -p secretValue=${{ secrets.VM_ADMIN_PASSWORD }} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+      shell: bash
+
+    - name: Disable local IP access to the Key Vault
+      if: ${{ always() }}
+      run: |
+          az keyvault network-rule remove --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
+      shell: bash
+
+  deploy-iac:
+    runs-on: ubuntu-latest
+    needs: deploy-kv
+    steps:
+
+    - name: Set Base environment variables
+      run: |
+        echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV     
+      shell: bash
+
+    - name: Login with GHA Runner SP
+      uses: azure/login@v1.4.6 # fails https://github.com/marketplace/actions/azure-login
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }} # ${{ env.credentials }}
+        
+    - name: Checkout
+      uses: actions/checkout@v3.0.2 # https://github.com/actions/checkout
+
+    - name: Deploy the pre-req
+      run: |
+          # --debug # --what-if to test like a dry-run
+
+          echo ""
+          echo "About ACR Authentication options read https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication?source=recommendations&tabs=azure-cli#authentication-options"
+          echo "ACR adminUserEnabled option : Single account per registry, not recommended for multiple users . This registry must have the Admin User enabled, or the integration with ACA will not work from the Azure portal."
+          echo ""
+
+          # https://github.com/Azure/bicep/issues/8006
+          curl -v -L https://aka.ms/BicepLatestRelease
+          az upgrade --yes
+          az bicep install
+          az bicep version
+          az bicep upgrade
+          az bicep version
+
+          az deployment group create --name aca-petclinic-pre-req -f iac/bicep/pre-req.bicep -g ${{ env.RG_APP }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p location=${{ env.LOCATION }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p kvRGName=${{ env.RG_KV }} \
+            -p acrName=${{ env.AZURE_CONTAINER_REGISTRY }} \
+            -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
+            -p setFwRuleClient=false \
+            -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
+            -p clientIPAddress="10.0.0.0" \
+            -p startIpAddress="10.0.0.0" \
+            -p endIpAddress="10.0.0.255"
+            
+            az deployment group show \
+              -g ${{ env.RG_APP }} \
+              -n aca-petclinic-pre-req \
+              --query properties.outputs.appInsightsConnectionString.value
+              
+      shell: bash
+
+    - name: Authorize local IP to access the Azure Key Vault
+      run: |
+          az keyvault network-rule add --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
+          sleep 10
+      shell: bash
+
+    - name: Create REGISTRY-USR secret in Azure Key Vault
+      run: |
+          # az acr show  -n acrpetcliaca -g ${{ env.RG_APP }} --query loginServer
+          # acr_usr=$(az acr credential show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }}  --query username)
+          # acr_usr value returned contains quotes "acrpetcliaca" ==> sed -i 's/\"//g' foo.txt
+          acr_usr=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryUsr.value | tr -d '"')
+          
+          az deployment group create --name aca-petclinic-kv-sec-acr-usr -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="REGISTRY-USR" \
+            -p secretValue=${acr_usr} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+      shell: bash
+
+    - name: Create REGISTRY-PWD secret in Azure Key Vault
+      run: |
+          # acr_pwd=$(az acr credential show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }}  --query passwords[0].value)
+          acr_pwd=$(az deployment group show -g ${{ env.RG_APP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query properties.outputs.acrRegistryPwd.value | tr -d '"')
+          
+          az deployment group create --name aca-petclinic-kv-sec-acr-pwd -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
+            -p appName=${{ env.APP_NAME }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p secretName="REGISTRY-PWD" \
+            -p secretValue=${acr_pwd} \
+            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
+      shell: bash
+
+    - name: Disable local IP access to the Key Vault
+      if: ${{ always() }}
+      run: |
+          az keyvault network-rule remove --ip-address $LOCAL_IP --name ${{ env.KV_NAME }} --only-show-errors
+      shell: bash
+
+    - name: Azure Logout security hardening
+      run: |
+          az logout
+          az cache purge
+          az account clear             
+      shell: bash
