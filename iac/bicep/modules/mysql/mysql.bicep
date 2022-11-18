@@ -18,8 +18,8 @@ param administratorLoginPassword string
 @description('The MySQL DB Server name.')
 param serverName string
 
-@description('Azure Container Apps Outbound Public IP')
-param azureContainerAppsOutboundPubIP string
+@description('Azure Container Apps Outbound Public IP as an Array')
+param azureContainerAppsOutboundPubIP array
 
 @description('Should a MySQL Firewall be set to allow client workstation for local Dev/Test only')
 param setFwRuleClient bool = false
@@ -91,8 +91,8 @@ resource fwRuleClientIPAddress 'Microsoft.DBforMySQL/flexibleServers/firewallRul
   name: 'Allow-Azure-Container-Apps-OutboundPubIP'
   parent: mysqlserver
   properties: {
-    startIpAddress: azureContainerAppsOutboundPubIP
-    endIpAddress: azureContainerAppsOutboundPubIP
+    startIpAddress: azureContainerAppsOutboundPubIP[0]
+    endIpAddress: azureContainerAppsOutboundPubIP[0]
   }
 }
 
