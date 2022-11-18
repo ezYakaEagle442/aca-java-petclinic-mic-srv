@@ -38,8 +38,8 @@ env:
   DOCKERFILE_PATH_VISITS_SERVICE: ./docker/petclinic-visits-service/Dockerfile
 
   # ==== Versions ====
-  DEPLOYMENT_VERSION: 2.6.6
-  AZ_CLI_VERSION: 2.40.0
+  DEPLOYMENT_VERSION: 2.6.13
+  AZ_CLI_VERSION: 2.42.0
   JAVA_VERSION: 11
 
   # https://github.com/Azure/actions-workflow-samples/blob/master/assets/create-secrets-for-GitHub-workflows.md#consume-secrets-in-your-workflow
