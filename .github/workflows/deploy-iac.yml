@@ -335,12 +335,13 @@ jobs:
 
             echo "hello-test ACA test created"
 
-            for ip in $(outboundIpAddresses)
+            for ip in $(envOutboundIP)
             do
               echo "Found outbound IP Address " $ip
             done
 
-            echo "About to Whitelist ACA Env. OutboundIP $envOutboundIP in KV & MySQL"
+            ipRules=$envOutboundIP[0]
+            echo "About to Whitelist ACA Env. OutboundIP $ipRules in KV & MySQL"
 
             az deployment group create --name aca-kv-mysql-set-ip-rules -f iac/bicep/set-ip-rules.bicep -g ${{ env.RG_APP }} \
               -p appName=${{ env.APP_NAME }} \
@@ -349,7 +350,7 @@ jobs:
               -p kvRGName=${{ env.RG_KV }} \
               -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
               -p vNetRules=[] \
-              -p ipRules=[$envOutboundIP] \
+              -p ipRules=$ipRules \
               -p setFwRuleClient=false \
               -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
               -p clientIPAddress="10.0.0.0" \
