@@ -6,13 +6,6 @@ param appName string = '101-${uniqueString(deployment().name)}'
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
 
-@maxLength(24)
-@description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
-param kvName string // = 'kv-${appName}'
-
-@description('The name of the KV RG')
-param kvRGName string
-
 @description('The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.')
 param acrName string = 'acr${appName}' // ==> $acr_registry_name.azurecr.io
 
@@ -22,7 +15,7 @@ param azureContainerAppEnvName string = 'aca-env-${appName}'
 param appInsightsName string = 'appi-${appName}'
 
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
-param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.1.jar'
+param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.4.jar'
 
 @description('The applicationinsights config file location')
 param applicationInsightsConfigFile string = 'BOOT-INF/classes/applicationinsights.json'
@@ -134,16 +127,6 @@ resource ACR 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
 
 resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing = {
   name: appInsightsName
-}
-
-resource kvRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
-  name: kvRGName
-  scope: subscription()
-}
-
-resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
-  name: kvName
-  scope: kvRG
 }
 
 resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {

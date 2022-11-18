@@ -22,7 +22,7 @@ param azureContainerAppEnvName string = 'aca-env-${appName}'
 param appInsightsName string = 'appi-${appName}'
 
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
-param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.1.jar'
+param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.4.jar'
 
 @description('The applicationinsights config file location')
 param applicationInsightsConfigFile string = 'BOOT-INF/classes/applicationinsights.json'
@@ -210,15 +210,6 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
             }
-            // /!\ ALL Identyties are REQUIRED because the KV settings in the Config-Server have 3 property-sources, each having its own Identity/ClientId
-            {
-              name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
-              value: vetsServiceAppIdentity.properties.clientId
-            }                         
-            {
-              name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
-              value: visitsServiceIdentity.properties.clientId
-            }            
             {
               name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
               value: customersServicedentity.properties.clientId
@@ -297,6 +288,8 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' =
   }
   dependsOn:  [
     ConfigServerContainerApp
+    VetsServiceContainerApp
+    VisitsServiceContainerApp
   ]  
 }
 
@@ -385,19 +378,10 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
             }
-            // /!\ ALL Identyties are REQUIRED because the KV settings in the Config-Server have 3 property-sources, each having its own Identity/ClientId
             {
               name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
               value: vetsServiceAppIdentity.properties.clientId
             }                         
-            {
-              name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
-              value: visitsServiceIdentity.properties.clientId
-            }            
-            {
-              name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
-              value: customersServicedentity.properties.clientId
-            }
             {
               // https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-standalone-config#configuration-file-path
               name: 'APPLICATIONINSIGHTS_CONFIGURATION_FILE'
@@ -546,19 +530,10 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               name: 'CFG_SRV_URL'
               value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
             }
-            // /!\ ALL Identyties are REQUIRED because the KV settings in the Config-Server have 3 property-sources, each having its own Identity/ClientId
-            {
-              name: 'VETS_SVC_APP_IDENTITY_CLIENT_ID'
-              value: vetsServiceAppIdentity.properties.clientId
-            }                         
             {
               name: 'VISITS_SVC_APP_IDENTITY_CLIENT_ID'
               value: visitsServiceIdentity.properties.clientId
             }            
-            {
-              name: 'CUSTOMERS_SVC_APP_IDENTITY_CLIENT_ID'
-              value: customersServicedentity.properties.clientId
-            }
             {
               // https://learn.microsoft.com/en-us/azure/azure-monitor/app/java-standalone-config#configuration-file-path
               name: 'APPLICATIONINSIGHTS_CONFIGURATION_FILE'

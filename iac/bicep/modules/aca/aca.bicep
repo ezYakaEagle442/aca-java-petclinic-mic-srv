@@ -44,23 +44,10 @@ param springCloudAzureTenantId string
 @description('The Azure Key Vault EndPoint that should be used by Key Vault in the Spring Config. Ex: https://<key-vault-name>.vault.azure.net')
 param springCloudAzureKeyVaultEndpoint string
 
-@secure()
-@description('The Spring Datasource / MySQL DB admin user name  - this is a secret stored in Key Vault')
-param springDataSourceUsr string
-@secure()
-@description('The Spring Datasource / MySQL DB admin user password  - this is a secret stored in Key Vault')
-param springDataSourcePwd string
-@secure()
-@description('The Spring Datasource / MySQL DB URL - this is a secret stored in Key Vault')
-param springDataSourceUrl string
-
-
 // https://docs.microsoft.com/en-us/azure/container-apps/managed-identity?tabs=portal%2Cjava#configure-managed-identities
 @description('The Azure Active Directory tenant ID that should be used to store the GH Actions SPN credentials and to manage Azure Container Apps Identities.')
 param tenantId string = subscription().tenantId
 param subscriptionId string = subscription().id
-
-
 
 @allowed([
   '0.25'
@@ -92,26 +79,11 @@ param containerResourcesMemory string = '1.0Gi'
 @description('The Application Insights Intrumention Key. see https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string')
 param appInsightsInstrumentationKey string
 
-/*
-@description('The Container Registry Username')
-param registryUsr string
-
-@secure()
-@description('The Container Registry Password')
-param registryPassword string
-*/
 @description('The Container Registry URL')
 param registryUrl string
 
-
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-admin-server:{{ github.sha }}')
 param imageNameAdminServer string
-
-@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-discovery-server:{{ github.sha }}')
-param imageNameDiscoveryServer string
-
-@description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-api-gateway:{{ github.sha }}')
-param imageNameApiGateway string
 
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-config-server:{{ github.sha }}')
 param imageNameConfigServer string
@@ -125,19 +97,11 @@ param imageNameVetsService string
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-visits-service:{{ github.sha }}')
 param imageNameVisitsService string
 
-
 @description('The Azure Container App instance name for admin-server')
 param adminServerContainerAppName string = 'aca-${appName}-admin-server'
 
 @description('The Azure Container App instance name for config-server')
 param configServerContainerAppName string = 'aca-${appName}-config-server'
-
-// should be useless as we rely on tha ACA/AKS/K8S native discovery services
-@description('The Azure Container App instance name for discovery-server')
-param discoveryServerContainerAppName string = 'aca-${appName}-discovery-server'
-
-@description('The Azure Container App instance name for api-gateway')
-param apiGatewayContainerAppName string = 'aca-${appName}-api-gateway'
 
 @description('The Azure Container App instance name for customers-service')
 param customersServiceContainerAppName string = 'aca-${appName}-customers-service'
@@ -165,9 +129,6 @@ param vetsServiceAppIdentityName string = 'id-aca-petclinic-vets-service-dev-wes
 
 @description('The visits-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param visitsServiceAppIdentityName string = 'id-aca-petclinic-visits-service-dev-westeurope-101'
-
-@description('The discovery-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param discoveryServerAppIdentityName string = 'id-aca-petclinic-discovery-server-dev-westeurope-101'
 
 resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-preview' existing = {
   name: azureContainerAppEnvName
@@ -730,7 +691,8 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-pr
     }
   }
   dependsOn:  [
-    ConfigServerContainerApp
+    VetsServiceContainerApp
+    VisitsServiceContainerApp
   ]  
 }
 
@@ -887,10 +849,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview
         ]
       }
     }
-  }
-  dependsOn:  [
-    ConfigServerContainerApp
-  ]  
+  } 
 }
 
 //output vetsServiceContainerAppNameContainerAppIdentity string = VetsServiceContainerApp.identity.principalId
@@ -1048,9 +1007,6 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-previ
       }
     }
   }
-  dependsOn:  [
-    ConfigServerContainerApp
-  ]  
 }
 
 //output visitsServiceContainerAppIdentity string = VisitsServiceContainerApp.identity.principalId
@@ -1059,162 +1015,3 @@ output visitsServiceContainerAppLatestRevisionName string = VisitsServiceContain
 output visitsServiceContainerAppLatestRevisionFqdn string = VisitsServiceContainerApp.properties.latestRevisionFqdn
 output visitsServiceContainerAppIngressFqdn string = VisitsServiceContainerApp.properties.configuration.ingress.fqdn
 output visitsServiceContainerAppConfigSecrets array = VisitsServiceContainerApp.properties.configuration.secrets
-
-
-resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
-  name: apiGatewayContainerAppName
-  location: location
-  identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${apiGatewayIdentity.id}': {}
-    }    
-  }
-  properties: {
-    managedEnvironmentId: corpManagedEnvironment.id 
-    configuration: {
-      activeRevisionsMode: 'Multiple'
-      ingress: {
-        allowInsecure: true
-        external: true
-        targetPort: 8080
-        traffic: [
-          {
-            latestRevision: true
-            // revisionName: revisionName Traffic weight cannot use "LatestRevision: true" and "RevisionName" at the same time
-            weight: 100
-          }
-        ]
-        transport: 'auto'
-      }
-      registries: [
-        {
-          // Managedidentity is enabled on ACR
-          server: registryUrl
-          identity: apiGatewayIdentity.id
-          //username: registryUsr
-          // passwordSecretRef: 'registrypassword'
-        }
-      ]
-      secrets: [
-        {
-          name: 'appinscon'
-          value: appInsightsInstrumentationKey
-        }
-        {
-          name: 'springcloudazuretenantid'
-          value: springCloudAzureTenantId
-        }
-        {
-          name: 'springcloudazurekvendpoint'
-          value: springCloudAzureKeyVaultEndpoint
-        }            
-      ]
-    }
-    template: {
-      containers: [
-        { 
-          command: [
-            'java', '-javaagent:"${applicationInsightsAgentJarFilePath}"', 'org.springframework.boot.loader.JarLauncher', '--server.port=8080', '-Xms512m -Xmx1024m', '--spring.cloud.azure.keyvault.secret.enabled=false', '--spring.cloud.azure.keyvault.secret.property-source-enabled=false'
-          ]
-          env: [
-            {
-              name: 'SPRING_PROFILES_ACTIVE'
-              value: 'docker,mysql'
-            }
-            {
-              // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
-              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-              secretRef: 'appinscon'
-            }
-            {
-              name: 'SPRING_CLOUD_AZURE_TENANT_ID'
-              secretRef: 'springcloudazuretenantid'
-            }   
-            {
-              name: 'SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT'
-              secretRef: 'springcloudazurekvendpoint'
-            }
-            {
-              name: 'CFG_SRV_URL'
-              value: ConfigServerContainerApp.properties.configuration.ingress.fqdn
-            }
-            {
-              name: 'CUSTOMERS_SVC_URL'
-              value: CustomersServiceContainerApp.properties.configuration.ingress.fqdn
-            }    
-            {
-              name: 'VETS_SVC_URL'
-              value: VetsServiceContainerApp.properties.configuration.ingress.fqdn
-            } 
-            {
-              name: 'VISITS_SVC_URL'
-              value: VisitsServiceContainerApp.properties.configuration.ingress.fqdn
-            }
-          ]
-          image: imageNameApiGateway
-          name: apiGatewayContainerAppName
-          probes: [
-            {
-              failureThreshold: 5
-              httpGet: {
-                path: '/manage/health/liveness' /* /actuator */
-                port: 8081
-                scheme: 'HTTP'
-              }
-              initialDelaySeconds: 30
-              periodSeconds: 60
-              successThreshold: 1 
-              timeoutSeconds: 30
-              type: 'Liveness'
-            }
-            {
-              failureThreshold: 5
-              httpGet: {
-                path: '/manage/health/readiness' /* /actuator */
-                port: 8081
-                scheme: 'HTTP'
-              }
-              initialDelaySeconds: 30
-              periodSeconds: 60
-              successThreshold: 1
-              timeoutSeconds: 30
-              type: 'Readiness'
-            }            
-          ]
-          resources: {
-            cpu: any(containerResourcesCpu)
-            memory: containerResourcesMemory
-          }
-        }
-      ]
-      scale: {
-        maxReplicas: 10
-        minReplicas: 1
-        rules: [
-          {
-            http: {
-              metadata: {
-                concurrentRequests: '10'
-              }
-            }
-            name: 'http-scale'
-          }
-        ]
-      }
-    }
-  }
-  dependsOn:  [
-    ConfigServerContainerApp
-    CustomersServiceContainerApp
-    VetsServiceContainerApp
-    VisitsServiceContainerApp
-  ]
-}
-
-//output apiGatewayContainerAppIdentity string = ApiGatewayContainerApp.identity.principalId
-output apiGatewayContainerAppOutboundIPAddresses array = ApiGatewayContainerApp.properties.outboundIPAddresses
-output apiGatewayContainerAppLatestRevisionName string = ApiGatewayContainerApp.properties.latestRevisionName
-output apiGatewayContainerAppLatestRevisionFqdn string = ApiGatewayContainerApp.properties.latestRevisionFqdn
-output apiGatewayContainerAppIngressFqdn string = ApiGatewayContainerApp.properties.configuration.ingress.fqdn
-output apiGatewayContainerAppConfigSecrets array = ApiGatewayContainerApp.properties.configuration.secrets

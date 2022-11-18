@@ -18,7 +18,7 @@ param azureContainerAppEnvName string = 'aca-env-${appName}'
 
 
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
-param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.1.jar'
+param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.4.jar'
 
 // Spring Cloud for Azure params required to get secrets from Key Vault.
 // https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#basic-usage-3
@@ -196,7 +196,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           env: [
             {
               name: 'SPRING_PROFILES_ACTIVE'
-              value: 'docker,mysql'
+              value: 'docker'
             }
             {
               // https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-in-process-agent#set-the-application-insights-connection-string
@@ -212,7 +212,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               secretRef: 'springcloudazurekvendpoint'
             }                                 
           ]
-          image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest' // imageNameAdminServer
+          image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: 'hello-test'
           resources: {
             cpu: any(containerResourcesCpu)
