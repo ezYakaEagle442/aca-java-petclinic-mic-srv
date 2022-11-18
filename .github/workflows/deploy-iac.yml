@@ -335,7 +335,7 @@ jobs:
 
             echo "hello-test ACA test created"
 
-            echo "About to Whitelist ACA Env. OutboundIP $envOutboundIP[0] in KV & MySQL"
+            echo "About to Whitelist ACA Env. OutboundIP $envOutboundIP in KV & MySQL"
 
             az deployment group create --name aca-kv-mysql-set-ip-rules -f iac/bicep/set-ip-rules.bicep -g ${{ env.RG_APP }} \
               -p appName=${{ env.APP_NAME }} \
