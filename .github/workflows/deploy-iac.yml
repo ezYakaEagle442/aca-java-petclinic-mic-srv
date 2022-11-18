@@ -348,15 +348,11 @@ jobs:
               -p vNetRules=[] \
               -p ipRules=[] \
               -p setFwRuleClient=false \
-              -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
               -p clientIPAddress="10.0.0.0" \
               -p startIpAddress="10.0.0.0" \
               -p endIpAddress="10.0.0.255"
 
-            az containerapp delete \
-            --name hello-test \
-            --resource-group ${{ env.RG_APP }}
-
+            az containerapp delete --name hello-test -g ${{ env.RG_APP }}
             echo "hello-test ACA test deleted"
 
       shell: bash
