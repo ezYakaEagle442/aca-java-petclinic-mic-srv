@@ -47,6 +47,7 @@ param kvRGName string
 
 @description('The VNet rules to whitelist for the KV')
 param  vNetRules array = []
+
 @description('The IP rules to whitelist for the KV & MySQL')
 param  ipRules array = []
 
@@ -54,7 +55,6 @@ resource kvRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
   name: kvRGName
   scope: subscription()
 }
-
 
 // see https://github.com/microsoft/azure-container-apps/issues/469
 // Now KV must Allow azureContainerAppsOutboundPubIP in the IP rules ...
