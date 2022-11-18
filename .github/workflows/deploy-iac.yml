@@ -331,9 +331,15 @@ jobs:
             --image mcr.microsoft.com/azuredocs/containerapps-helloworld:latest \
             --target-port 80 \
             --ingress 'external' \
-            --query properties.configuration.ingress.fqdn)
+            --query properties.outboundIpAddresses)
 
             echo "hello-test ACA test created"
+
+            for ip in $(outboundIpAddresses)
+            do
+              echo "Found outbound IP Address " $ip
+            done
+
             echo "About to Whitelist ACA Env. OutboundIP $envOutboundIP in KV & MySQL"
 
             az deployment group create --name aca-kv-mysql-set-ip-rules -f iac/bicep/set-ip-rules.bicep -g ${{ env.RG_APP }} \
