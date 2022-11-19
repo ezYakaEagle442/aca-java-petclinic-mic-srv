@@ -23,6 +23,7 @@ RUN curl -SL --output ${APP_INSIGHTS_AGENT_JAR_FILE_PATH} https://github.com/mic
 FROM mcr.microsoft.com/openjdk/jdk:11-mariner
 ENV APPI_VERSION="3.4.4"
 ENV APP_INSIGHTS_AGENT_JAR_FILE_PATH="/tmp/app/applicationinsights-agent-${APPI_VERSION}.jar"
+ENV APPLICATIONINSIGHTS_CONFIGURATION_FILE="BOOT-INF/classes/applicationinsights.json"
 ENV SPRING_PROFILES_ACTIVE = "docker,mysql"
 WORKDIR /tmp/app
 # https://github.com/Azure/azure-cli/issues/20413
