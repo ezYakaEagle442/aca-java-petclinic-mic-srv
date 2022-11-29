@@ -140,7 +140,7 @@ jobs:
         echo "*                                                                                      *"
         echo "****************************************************************************************"
 
-        mvn -B clean package --file pom.xml -DskipTests -Denv=cloud
+        mvn -B clean package --file pom.xml -DskipTests -Denv=cloud --projects spring-petclinic-config-server,spring-petclinic-customers-service,spring-petclinic-vets-service,spring-petclinic-visits-service
         echo "github.workspace = ${{ github.workspace }}"
         
         ls -al

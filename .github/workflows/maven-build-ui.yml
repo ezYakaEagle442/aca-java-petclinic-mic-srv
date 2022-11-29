@@ -116,7 +116,7 @@ jobs:
         echo "*                                                                                      *"
         echo "****************************************************************************************"
 
-        mvn -B clean package --file pom.xml -DskipTests
+        mvn -B clean package --file pom.xml -DskipTests --projects spring-petclinic-api-gateway -rf :asa-spring-petclinic-api-gateway
         echo "github.workspace = ${{ github.workspace }}"
         
         ls -al
