@@ -168,13 +168,13 @@ module roleAssignments './modules/aca/roleAssignments.bicep' = {
   params: {
     acrName: acrName
     acrRoleType: 'AcrPull'
-    acaCustomersServicePrincipalId: identities.outputs.customersServicePrincipalId
-    acaVetsServicePrincipalId: identities.outputs.vetsServicePrincipalId
-    acaVisitsServicePrincipalId: identities.outputs.visitsServicePrincipalId
-    acaAdminServerPrincipalId: identities.outputs.adminServerPrincipalId
-    acaApiGatewayPrincipalId: identities.outputs.apiGatewayPrincipalId
-    acaConfigServerPrincipalId: identities.outputs.configServerPrincipalId
-    //acaDiscoveryServerPrincipalId: identities.outputs.discoveryServerPrincipalId
+    acaCustomersServicePrincipalId: identities.outputs.customersServiceIdentityId
+    acaVetsServicePrincipalId: identities.outputs.vetsServiceIdentityId
+    acaVisitsServicePrincipalId: identities.outputs.visitsServiceIdentityId
+    acaAdminServerPrincipalId: identities.outputs.adminServerIdentityId
+    acaApiGatewayPrincipalId: identities.outputs.apiGatewayIdentityId
+    acaConfigServerPrincipalId: identities.outputs.configServerIdentityId
+    //acaDiscoveryServerPrincipalId: identities.outputs.discoveryServerIdentityId
     kvName: kvName
     kvRGName: kvRGName
     kvRoleType: 'KeyVaultSecretsUser'
