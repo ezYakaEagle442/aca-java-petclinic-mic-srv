@@ -167,6 +167,17 @@ vim .profile # PATH="$PATH:/usr/share/PowerShell"
 pwsh
 
 ```
+## DB Tools
+
+```sh
+choco install mysql-cli --Yes --confirm --accept-license
+choco install mysql.workbench --Yes --confirm --accept-license
+choco install psql --Yes --confirm --accept-license
+
+# in WSl Terminal : 
+sudo apt install mysql-client-core-8.0
+```
+
 
 
 ## How to install Kubectl client into Subsystem for Linux (WSL)
