@@ -328,7 +328,7 @@ Read :
 - [https://github.com/Azure/azure-sdk-for-java/issues/28310](https://github.com/Azure/azure-sdk-for-java/issues/28310)
 - [Maven Project parent pom.xml](pom.xml#L168)
 
-The Config-server does **NOT** use the config declared on the repo at [https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml](https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml) and need uses a [User-Assigned Managed Identity](https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview#managed-identity-types) to be able to read secrets from KeyVault.
+The Config-server does use the config declared on the repo at [https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml](https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml) and uses a [User-Assigned Managed Identity](https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview#managed-identity-types) to be able to read secrets from KeyVault.
 
 If you face any issue, see the [troubleshoot section](#key-vault-troubleshoot-with-USER-Assigned-MI)
 
@@ -546,7 +546,7 @@ Dependency for Connector/J, the MySQL JDBC driver is already included in the `po
 
 ### Set MySql connection String
 
-You need to reconfigure the MySQL connection string with your own settings (you can get it from the Azure portal / petcliaks-mysql-server / Connection strings / JDBC):
+You need to reconfigure the MySQL connection string with your own settings (you can get it from the Azure portal / petcliaca-mysql-server / Connection strings / JDBC):
 In the [spring-petclinic-microservices-config/blob/main/application.yml](https://github.com/ezYakaEagle442/aca-cfg-srv/blob/main/application.yml) :
 ```
 spring:
@@ -556,13 +556,14 @@ spring:
   datasource:
     schema: classpath*:db/mysql/schema.sql
     data: classpath*:db/mysql/data.sql
+
     # url: jdbc:mysql://localhost:3306/petclinic?useSSL=false
     # url: jdbc:mysql://petclinic.mysql.database.azure.com:3306/petclinic?useSSL=true
     # https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-using-ssl.html
     # url: jdbc:mysql://petclinic.mysql.database.azure.com:3306/petclinic?useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.2&verifyServerCertificate=true
     # https://learn.spring.io/spring-boot/docs/2.7.3/reference/html/application-properties.html#appendix.application-properties.data
     
-    # spring.datasource.url, spring.datasource.username and spring.datasource.password will be automatically injected from KV secrets SPRING-DATASOURCE-URL, SPRING-DATASOURCE-USERNAME and SPRING-DATASOURCE-PASSWORD
+    # spring.datasource.password will be automatically injected from KV secrets SPRING-DATASOURCE-PASSWORD
     # url: jdbc:mysql://${SPRING-DATASOURCE-URL}:3306/${MYSQL-DATABASE-NAME}?useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.2&verifyServerCertificate=true    
     # username: ${SPRING-DATASOURCE-USERNAME}
     # password: ${SPRING-DATASOURCE-PASSWORD}  
@@ -571,7 +572,8 @@ spring:
     platform: mysql
     #driver-class-name: com.mysql.jdbc.Driver
 ```
-In fact the spring.datasource.url, spring.datasource.username and spring.datasource.password will be automatically injected from KV secrets SPRING-DATASOURCE-URL, SPRING-DATASOURCE-USERNAME and SPRING-DATASOURCE-PASSWORD using the config below in each micro-service :
+In fact the spring.datasource.password will be automatically injected from KV secrets SPRING-DATASOURCE-PASSWORD using the config below in each micro-service :
+example for Customers-Service [spring-petclinic-customers-service/src/main/resources/application.yml](spring-petclinic-customers-service/src/main/resources/application.yml)
 
 ```
 spring:
@@ -608,63 +610,9 @@ If you are running the microservices with Docker, you have to add the `mysql` pr
 ```
 ENV SPRING_PROFILES_ACTIVE docker,mysql
 ```
+ 
 
-Init & load the data into MySQL DB, you can use MySQL  Workbench to do so :
-```sh
- // SUBSTITUTE values
-    mysql -u ${MYSQL_SERVER_ADMIN_LOGIN_NAME} \
-     -h ${MYSQL_SERVER_FULL_NAME} -P 3306 -p
-    
-    Enter password:
-    Welcome to the MySQL monitor.  Commands end with ; or \g.
-    Your MySQL connection id is 64379
-    Server version: 5.6.39.0 MySQL Community Server (GPL)
-    
-    Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
-    
-    Oracle is a registered trademark of Oracle Corporation and/or its
-    affiliates. Other names may be trademarks of their respective
-    owners.
-    
-    Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-    
-    mysql> CREATE DATABASE petclinic;
-    Query OK, 1 row affected (0.10 sec)
-    
-    mysql> CREATE USER 'root' IDENTIFIED BY 'petclinic';
-    Query OK, 0 rows affected (0.11 sec)
-    
-    mysql> GRANT ALL PRIVILEGES ON petclinic.* TO 'root';
-    Query OK, 0 rows affected (1.29 sec)
-    
-    mysql> CALL mysql.az_load_timezone();
-    Query OK, 3179 rows affected, 1 warning (6.34 sec)
-    
-    mysql> SELECT name FROM mysql.time_zone_name;
-
-    # https://learn.microsoft.com/en-us/azure/mysql/single-server/how-to-configure-server-parameters-using-cli#working-with-the-time-zone-parameter
-    # SELECT @@global.time_zone;
-    SELECT NOW();
-    #sudo mysql -e "SET GLOBAL time_zone = ‘+1:00’;"
-
-    ...
-    
-    mysql> quit
-    Bye
-    
-    az mysql flexible-server parameter set -g ${RESOURCE_GROUP} \
-    -s ${MYSQL_SERVER_NAME}.mysql.database.azure.com --name time_zone --value "Europe/Paris"
-
-    @spring-petclinic-vets-service/src/main/resources/db/mysql/schema.sql
-    @spring-petclinic-vets-service/src/main/resources/db/mysql/data.sql
-
-    @spring-petclinic-visits-service/src/main/resources/db/mysql/schema.sql
-    @spring-petclinic-visits-service/src/main/resources/db/mysql/data.sql
-
-    @spring-petclinic-customers-service/src/main/resources/db/mysql/schema.sql
-    @spring-petclinic-customers-service/src/main/resources/db/mysql/data.sql
-```
-
+ All MySQL flexible-server parameters are set in the [sql-load workflow](./.github/workflows/sql-load.yml) called by the [IaC deployment workflow](./.github/workflows/deploy-iac.yml#L484)
 
 ## Observability
 
