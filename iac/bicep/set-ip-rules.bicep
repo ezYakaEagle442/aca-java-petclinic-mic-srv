@@ -29,6 +29,12 @@ param vNetRules array = []
 @description('The IP rules to whitelist for the KV & MySQL')
 param ipRules array
 
+@description('The MySQL DB Admin Login.')
+param administratorLogin string = 'mys_adm'
+
+@description('The MySQL DB Server name.')
+param dbServerName string = 'petcliaca'
+
 resource kvRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
   name: kvRGName
   scope: subscription()
@@ -68,8 +74,8 @@ module mysqlPub './modules/mysql/mysql.bicep' = {
     clientIPAddress: clientIPAddress
     startIpAddress: startIpAddress
     endIpAddress: endIpAddress
-    serverName: kv.getSecret('MYSQL-SERVER-NAME')
-    administratorLogin: kv.getSecret('SPRING-DATASOURCE-USERNAME')
+    serverName: dbServerName
+    administratorLogin: administratorLogin
     administratorLoginPassword: kv.getSecret('SPRING-DATASOURCE-PASSWORD')
     azureContainerAppsOutboundPubIP: HelloTestApp.properties.outboundIPAddresses
   }
