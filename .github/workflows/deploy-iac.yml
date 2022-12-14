@@ -20,7 +20,7 @@ env:
   REPOSITORY: petclinic                  # set this to your ACR repository
 
   VM_ADMIN_USER_NAME: adm_aca
-  
+
   MYSQL_SERVER_NAME: petcliaca
   MYSQL_DB_NAME: petclinic
   MYSQL_ADM_USR: mys_adm
@@ -433,5 +433,6 @@ jobs:
 
   call-db-init-workflow:
     name: Load Data to DB
+    needs: [deploy-apps]
     uses: ./.github/workflows/sql-load.yml
     secrets: inherit
