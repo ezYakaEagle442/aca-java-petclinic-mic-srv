@@ -23,7 +23,8 @@ env:
 
 on:
   workflow_dispatch:
-
+  workflow_call:
+  
 jobs:
 
   sql-load:
