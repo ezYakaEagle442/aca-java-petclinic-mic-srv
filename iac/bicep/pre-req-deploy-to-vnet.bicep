@@ -71,6 +71,8 @@ param autoShutdownNotificationEmail string
 @description('Windows client VM deployed to the VNet. Computer name cannot be more than 15 characters long')
 param windowsVMName string = 'vm-win-aca-petcli'
 
+param windowsVMUserName string = 'adm_aca'
+
 @description('The CIDR or source IP range. Asterisk "*" can also be used to match all source IPs. Default tags such as "VirtualNetwork", "AzureLoadBalancer" and "Internet" can also be used. If this is an ingress rule, specifies where network traffic originates from.')
 param nsgRuleSourceAddressPrefix string
 param nsgName string = 'nsg-aca-${appName}-app-client'
@@ -230,7 +232,7 @@ module clientVM './modules/aca/client-vm.bicep' = if (deployToVNet) {
      infrastructureSubnetID: vnet.properties.subnets[0].id
      windowsVMName: windowsVMName
      autoShutdownNotificationEmail: autoShutdownNotificationEmail
-     adminUsername: kv.getSecret('VM-ADMIN-USER-NAME')
+     adminUsername: windowsVMUserName
      adminPassword: kv.getSecret('VM-ADMIN-PASSWORD')
      nsgRuleSourceAddressPrefix: nsgRuleSourceAddressPrefix
      nicName: nicName
@@ -241,4 +243,26 @@ module clientVM './modules/aca/client-vm.bicep' = if (deployToVNet) {
     vnetModule
     dnsprivatezone    
   ]  
+}
+
+module identities './modules/aca/identity.bicep' = {
+  name: 'aca-identities'
+  params: {
+    location: location
+  }
+}
+
+// https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scope-extension-resources
+module roleAssignments './modules/aca/roleAssignments.bicep' = {
+  name: 'role-assignments'
+  params: {
+    acrName: acrName
+    acrRoleType: 'AcrPull'
+    acaCustomersServicePrincipalId: identities.outputs.customersServiceIdentityId
+    acaVetsServicePrincipalId: identities.outputs.vetsServiceIdentityId
+    acaVisitsServicePrincipalId: identities.outputs.visitsServiceIdentityId
+    acaAdminServerPrincipalId: identities.outputs.adminServerIdentityId
+    acaApiGatewayPrincipalId: identities.outputs.apiGatewayIdentityId
+    acaConfigServerPrincipalId: identities.outputs.configServerIdentityId
+  }
 }
