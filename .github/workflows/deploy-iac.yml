@@ -11,6 +11,7 @@ env:
   
   ACA_ENV_NAME: aca-env-pub # ACA Environment name. Ex 'aca-env-pub' or 'aca-env-corp' when deployed to your VNet
   DEPLOY_TO_VNET: false
+  ACA_ENV_DNS_DUFFIX: petclinic
 
   KV_NAME: kv-petcliaca29 # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
   SET_KV_ACCESS_POLICIES: false # let it to false
@@ -257,6 +258,7 @@ jobs:
             -p kvRGName=${{ env.RG_KV }} \
             -p acrName=${{ env.AZURE_CONTAINER_REGISTRY }} \
             -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
+            -p dnsSuffix=${{ env.ACA_ENV_DNS_DUFFIX }} \
             -p setFwRuleClient=false \
             -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
             -p clientIPAddress="10.0.0.0" \
