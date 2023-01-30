@@ -60,14 +60,8 @@ Add the App secrets used by the Spring Config to your GH repo secrets / Actions 
 
 Secret Name	| Secret Value example
 -------------:|:-------:
-MYSQL_SERVER_NAME | petclinic777
-MYSQL_SERVER_FULL_NAME | petclinic777.mysql.database.azure.com
-SPRING_DATASOURCE_URL | jdbc:mysql://petcliaca777.mysql.database.azure.com:3306/petclinic?useSSL=true\&requireSSL=true\&enabledTLSProtocols=TLSv1.2\&verifyServerCertificate=true
-SPRING_DATASOURCE_USERNAME | dolphin_adm
 SPRING_DATASOURCE_PASSWORD | PUT YOUR PASSWORD HERE
-SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT | https://kv-petclinic777.vault.azure.net/
 SPRING_CLOUD_AZURE_TENANT_ID | PUT YOUR AZURE TENANT ID HERE
-VM_ADMIN_USER_NAME | PUT YOUR AZURE Windows client VM JumpOff Admin User Name HERE
 VM_ADMIN_PASSWORD | PUT YOUR PASSWORD HERE
 
 ```bash
@@ -101,46 +95,65 @@ Read [https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azur
 In the GitHub Action Runner, to allow the Service Principal used to access the Key Vault, execute the command below:
 ```sh
 # SPN_PWD=$(az ad sp create-for-rbac --name $SPN_APP_NAME --skip-assignment --query password --output tsv)
-az ad sp create-for-rbac --name $SPN_APP_NAME
-```
+# az ad sp create-for-rbac --name $SPN_APP_NAME --skip-assignment --sdk-auth
 
-```console
-{
-  "clientId": "<GUID>",
-  "clientSecret": "<GUID>",
-  "subscriptionId": "<GUID>",
-  "tenantId": "<GUID>",
-  "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
-  "resourceManagerEndpointUrl": "https://management.azure.com/",
-  "activeDirectoryGraphResourceId": "https://graph.windows.net/",
-  "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
-  "galleryEndpointUrl": "https://gallery.azure.com/",
-  "managementEndpointUrl": "https://management.core.windows.net/"
-}
+az ad app create --display-name $SPN_APP_NAME > aad_app.json
+
+# Enterprise Application
+
+# This is the unique ID of the Service Principal object associated with this application.
+SPN_OBJECT_ID=$(az ad app list --show-mine --query "[?displayName=='${SPN_APP_NAME}'].{objectId:id}" -o tsv)
+
+APPLICATION_ID=$(az ad app list --show-mine --query "[?displayName=='${SPN_APP_NAME}'].{appId:appId}" -o tsv)
 ```
 
 Troubleshoot:
 If you hit _["Error: : No subscriptions found for ***."](https://learn.microsoft.com/en-us/answers/questions/738782/no-subscription-found-for-function-during-azure-cl.html)_ , this is related to an IAM privilege in the subscription.
 
+
 ```sh
-#SPN_ID=$(az ad sp list --all --query "[?appDisplayName=='${SPN_APP_NAME}'].{appId:appId}" --output tsv)
-SPN_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME}'].{id:appId}" --output tsv)
-TENANT_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME}'].{t:appOwnerOrganizationId}" --output tsv)
+az ad sp create --id $APPLICATION_ID
+
+
+SPN_APP_ID=$(az ad sp list --all --query "[?appDisplayName=='${SPN_APP_NAME}'].{appId:appId}" --output tsv)
+#SPN_APP_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME}'].{appId:appId}" --output tsv)
+# TENANT_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME}'].{t:appOwnerOrganizationId}" --output tsv)
+
+az ad sp show --id $SPN_OBJECT_ID
+
+
 
 # the assignee is an appId
-az role assignment create --assignee $SPN_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV} --role contributor
+az role assignment create --assignee $SPN_APP_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV} --role contributor
+
+# https://learn.microsoft.com/en-us/azure/key-vault/general/rbac-guide?tabs=azure-cli#azure-built-in-roles-for-key-vault-data-plane-operations
 
 # "Key Vault Secrets User"
-az role assignment create --assignee $SPN_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV} --role 4633458b-17de-408a-b874-0445c86b69e6
+az role assignment create --assignee $SPN_APP_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV} --role 4633458b-17de-408a-b874-0445c86b69e6
 
+# "Key Vault Secrets Officer"
+az role assignment create --assignee $SPN_APP_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV} --role b86a8fe4-44ce-4948-aee5-eccb2c155cd7
+
+
+# "DNS Zone Contributor"
+# https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#dns-zone-contributor
+az role assignment create --assignee $SPN_APP_ID --scope /subscriptions/${SUBSCRIPTION_ID} --role befefa01-2a29-4197-83a8-272ff33ce314
+
+# https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#virtual-machine-contributor
+# Virtual Machine Contributor has permission 'Microsoft.Network/publicIPAddresses/read'
+#az role assignment create --assignee $SPN_APP_ID --scope /subscriptions/${SUBSCRIPTION_ID} --role 9980e02c-c2be-4d73-94e8-173b1dc7cf3c
+#az role assignment create --assignee $SPN_OBJECT_ID --scope /subscriptions/${SUBSCRIPTION_ID} --role 9980e02c-c2be-4d73-94e8-173b1dc7cf3c
+
+# Network-contributor: https://learn.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations#microsoftnetwork
+az role assignment create --assignee $SPN_APP_ID --scope /subscriptions/${SUBSCRIPTION_ID} --role 4d97b98b-1d4f-4787-a291-c67834d212e7
 
 # https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-portal#prerequisites
 # /!\ To assign Azure roles, you must have: requires to have Microsoft.Authorization/roleAssignments/write and Microsoft.Authorization/roleAssignments/delete permissions, 
 # such as User Access Administrator or Owner.
-az role assignment create --assignee $SPN_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV} --role Owner
-az role assignment create --assignee $SPN_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_APP} --role Owner
+az role assignment create --assignee $SPN_APP_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV} --role Owner
+az role assignment create --assignee $SPN_APP_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_APP} --role Owner
 
-az role assignment create --assignee $SPN_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_APP} --role contributor
+```
 ```
 
 <span style="color:red">**RBAC Permission model is set on KV, the [pre-req](https://learn.microsoft.com/en-us/azure/key-vault/general/rbac-guide?tabs=azure-cli#prerequisites) requires to have Microsoft.Authorization/roleAssignments/write and Microsoft.Authorization/roleAssignments/delete permissions, such as User Access Administrator or Owner.
@@ -180,6 +193,44 @@ Finally Create a GH [PAT](https://docs.github.com/en/authentication/keeping-your
 
 <span style="color:red">**Your GitHub personal access token needs to have the workflow scope selected. You need at least delete:packages and read:packages scopes to delete a package. You need contents: read and packages: write permissions to publish and download artifacts**</span>
 
+
+To avoid to hit the error below : 
+```console
+"The subscription is not registered to use namespace 'Microsoft.KeyVault'. See https://aka.ms/rps-not-found for how to register subscriptions.\",\r\n    \"details\": [\r\n      ***\r\n        \"code\": \"MissingSubscriptionRegistration\"
+```
+
+Read the [docs](https://learn.microsoft.com/en-us/azure/azure-resource-manager/troubleshooting/error-register-resource-provider?tabs=azure-cli)
+Just run :
+```sh
+
+az provider list --output table
+az provider list --query "[?registrationState=='Registered']" --output table
+az provider list --query "[?namespace=='Microsoft.KeyVault']" --output table
+az provider list --query "[?namespace=='Microsoft.OperationsManagement']" --output table
+
+az provider register --namespace Microsoft.KeyVault
+az provider register --namespace Microsoft.ContainerRegistry
+az provider register --namespace Microsoft.ContainerService
+az provider register --namespace Microsoft.OperationalInsights 
+az provider register --namespace Microsoft.DBforMySQL
+az provider register --namespace Microsoft.DBforPostgreSQL
+az provider register --namespace Microsoft.Compute 
+az provider register --namespace Microsoft.AppConfiguration       
+az provider register --namespace Microsoft.AppPlatform
+az provider register --namespace Microsoft.EventHub  
+az provider register --namespace Microsoft.Kubernetes 
+az provider register --namespace Microsoft.KubernetesConfiguration
+az provider register --namespace Microsoft.Kusto  
+az provider register --namespace Microsoft.ManagedIdentity
+az provider register --namespace Microsoft.Monitor
+az provider register --namespace Microsoft.OperationsManagement
+az provider register --namespace Microsoft.Network  
+az provider register --namespace Microsoft.ServiceBus
+az provider register --namespace Microsoft.Storage
+az provider register --namespace Microsoft.Subscription
+
+```
+
 ## Pipelines
 
 See GitHub Actions :
@@ -200,22 +251,22 @@ The Workflow run the steps in this in this order :
 
 ```
 ├── Deploy the Azure Infra services workflow ./.github/workflows/deploy-iac.yml
-│   ├── Authorize local IP to access the Azure Key Vault ./.github/workflows/deploy-iac.yml#L143
-│   ├── Create the secrets ./.github/workflows/deploy-iac.yml#L150
-│   ├── Disable local IP access to the Key Vault ./.github/workflows/deploy-iac.yml#L262
-│   ├── Deploy the pre-req ./.github/workflows/deploy-iac.yml#L295
-│   ├── Whitelist ACA Env. OutboundIP to KV and MySQL ./.github/workflows/deploy-iac.yml#L322
-│   ├── Call Maven Build ./.github/workflows/deploy-iac.yml#L369
-│       ├── Maven Build ./.github/workflows/maven-build.yml#L128
+│   ├── Authorize local IP to access the Azure Key Vault ./.github/workflows/deploy-iac.yml#L151
+│   ├── Create the secrets ./.github/workflows/deploy-iac.yml#L155
+│   ├── Disable local IP access to the Key Vault ./.github/workflows/deploy-iac.yml#L206
+│   ├── Deploy the pre-req ./.github/workflows/deploy-iac.yml#L239
+│       ├── Apply Apps Identity Role Asssignments for KV ./.github/workflows/deploy-iac.yml#L272
+│   ├── Whitelist ACA Env. OutboundIP to KV and MySQL ./.github/workflows/deploy-iac.yml#L289
+│   ├── Call Maven Build ./.github/workflows/deploy-iac.yml#L339
+│       ├── Maven Build ./.github/workflows/maven-build.yml#L143
 │       ├── Publish the Maven package ./.github/workflows/maven-build.yml#L166
 │       ├── Check all Jar artifacts ./.github/workflows/maven-build.yml#L177
-│       ├── Build image and push it to ACR ./.github/workflows/maven-build.yml#L200
-│   ├── Call Maven Build-UI ./.github/workflows/deploy-iac.yml#L376
-│   ├── Deploy Backend Services ./.github/workflows/deploy-iac.yml#L382
-│       ├── Deploy Backend services calling iac/bicep/petclinic-apps.bicep
-│       ├── Deploy the UI calling iac/bicep/modules/aca/apps/aca-ui.bicep
-│   ├── Configure Diagnostic-Settings ./.github/workflows/deploy-iac.yml#L453
-│   ├── Configure GitHub-Action-Settings ./.github/workflows/deploy-iac.yml#460
+│       ├── Build image and push it to ACR ./.github/workflows/maven-build.yml#L246
+│   ├── Call Maven Build-UI ./.github/workflows/deploy-iac.yml#L346
+│   ├── Deploy Backend Services ./.github/workflows/deploy-iac.yml#L352
+│       ├── Deploy Config-server calling ./.github/workflows/deploy-app-cfg-srv.yml
+│       ├── Deploy Backend services calling ./.github/workflows/deploy-app-svc.yml
+│       ├── Deploy the UI calling ./.github/workflows/deploy-app-ui.yml
 ```
 
 You need to set your own param values in :
