@@ -399,7 +399,7 @@ jobs:
 
   call-deploy-ui-workflow:
     name: Trigger UI Deployment
-    needs:  [deploy-iac, call-maven-build-ui-workflow]
+    needs:  [deploy-iac, call-maven-build-ui-workflow, call-deploy-apps-svc-workflow]
     uses: ./.github/workflows/deploy-app-ui.yml
     with:
       tag_id: ${{ needs.call-maven-build-ui-workflow.outputs.tag_id }}
