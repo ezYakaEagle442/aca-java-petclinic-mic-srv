@@ -9,6 +9,9 @@ param acrName string = 'acr${appName}'
 @description('The Azure Container App Environment name')
 param azureContainerAppEnvName string = 'aca-env-${appName}'
 
+@description('The Custom DNS suffix used for all apps in this environment')
+param dnsSuffix string = 'petclinic'
+
 @description('The Log Analytics workspace name used by Azure Container App instance')
 param logAnalyticsWorkspaceName string = 'log-${appName}'
 
@@ -120,6 +123,7 @@ module defaultPublicManagedEnvironment './modules/aca/acaPublicEnv.bicep' = if (
     appInsightsName: appInsightsName
     logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
     logDestination: logDestination
+    dnsSuffix: dnsSuffix
   }
   dependsOn: [
     logAnalyticsWorkspace
@@ -168,11 +172,11 @@ module roleAssignments './modules/aca/roleAssignments.bicep' = {
   params: {
     acrName: acrName
     acrRoleType: 'AcrPull'
-    acaCustomersServicePrincipalId: identities.outputs.customersServiceIdentityId
-    acaVetsServicePrincipalId: identities.outputs.vetsServiceIdentityId
-    acaVisitsServicePrincipalId: identities.outputs.visitsServiceIdentityId
-    acaAdminServerPrincipalId: identities.outputs.adminServerIdentityId
-    acaApiGatewayPrincipalId: identities.outputs.apiGatewayIdentityId
-    acaConfigServerPrincipalId: identities.outputs.configServerIdentityId
+    acaCustomersServicePrincipalId: identities.outputs.customersServicePrincipalId
+    acaVetsServicePrincipalId: identities.outputs.vetsServicePrincipalId
+    acaVisitsServicePrincipalId: identities.outputs.visitsServicePrincipalId
+    acaAdminServerPrincipalId: identities.outputs.adminServerPrincipalId
+    acaApiGatewayPrincipalId: identities.outputs.apiGatewayPrincipalId
+    acaConfigServerPrincipalId: identities.outputs.configServerPrincipalId
   }
 }
