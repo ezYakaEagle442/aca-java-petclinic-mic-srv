@@ -194,7 +194,7 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-previe
   }
 }
 
-output configServerContainerAppOutboundIPAddresses array = ConfigServerContainerApp.properties.outboundIPAddresses
+output configServerContainerAppoutboundIpAddresses array = ConfigServerContainerApp.properties.outboundIpAddresses
 output configServerContainerAppLatestRevisionName string = ConfigServerContainerApp.properties.latestRevisionName
 output configServerContainerAppLatestRevisionFqdn string = ConfigServerContainerApp.properties.latestRevisionFqdn
 output configServerContainerAppIngressFqdn string = ConfigServerContainerApp.properties.configuration.ingress.fqdn

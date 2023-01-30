@@ -33,6 +33,9 @@ param kvName string // = 'kv-${appName}'
 @description('The name of the KV RG')
 param kvRGName string
 
+@description('The name of the KV Endpoint')
+param springCloudAzureKeyVaultEndpoint string = 'https://${kvName}.vault.azure.net'
+
 param setKVAccessPolicies bool = true
 
 @description('The Azure Active Directory tenant ID that should be used for authenticating requests to the Key Vault.')
@@ -142,7 +145,7 @@ module azurecontainerapp './modules/aca/aca.bicep' = {
     azureContainerAppEnvName: azureContainerAppEnvName
     appInsightsInstrumentationKey: appInsights.properties.ConnectionString
     applicationInsightsAgentJarFilePath: applicationInsightsAgentJarFilePath
-    springCloudAzureKeyVaultEndpoint: kv.getSecret('SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT')
+    springCloudAzureKeyVaultEndpoint: springCloudAzureKeyVaultEndpoint
     springCloudAzureTenantId: kv.getSecret('SPRING-CLOUD-AZURE-TENANT-ID')
     tenantId: tenantId
     subscriptionId: subscriptionId

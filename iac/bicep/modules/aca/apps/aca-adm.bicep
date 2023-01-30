@@ -200,7 +200,7 @@ resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview
   }
 }
 
-output adminServerContainerAppOutboundIPAddresses array = AdminServerContainerApp.properties.outboundIPAddresses
+output adminServerContainerAppoutboundIpAddresses array = AdminServerContainerApp.properties.outboundIpAddresses
 output adminServerContainerAppLatestRevisionName string = AdminServerContainerApp.properties.latestRevisionName
 output adminServerContainerAppLatestRevisionFqdn string = AdminServerContainerApp.properties.latestRevisionFqdn
 output adminServerContainerAppIngressFqdn string = AdminServerContainerApp.properties.configuration.ingress.fqdn

@@ -308,7 +308,7 @@ resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-06-01-preview'
   ]
 }
 
-output apiGatewayContainerAppOutboundIPAddresses array = ApiGatewayContainerApp.properties.outboundIPAddresses
+output apiGatewayContainerAppoutboundIpAddresses array = ApiGatewayContainerApp.properties.outboundIpAddresses
 output apiGatewayContainerAppLatestRevisionName string = ApiGatewayContainerApp.properties.latestRevisionName
 output apiGatewayContainerAppLatestRevisionFqdn string = ApiGatewayContainerApp.properties.latestRevisionFqdn
 output apiGatewayContainerAppIngressFqdn string = ApiGatewayContainerApp.properties.configuration.ingress.fqdn

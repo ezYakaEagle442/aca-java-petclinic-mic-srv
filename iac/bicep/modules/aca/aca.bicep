@@ -308,7 +308,7 @@ resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-previe
 }
 
 //output configServerContainerAppIdentity string = ConfigServerContainerApp.identity.principalId
-output configServerContainerAppOutboundIPAddresses array = ConfigServerContainerApp.properties.outboundIPAddresses
+output configServerContainerAppoutboundIpAddresses array = ConfigServerContainerApp.properties.outboundIpAddresses
 output configServerContainerAppLatestRevisionName string = ConfigServerContainerApp.properties.latestRevisionName
 output configServerContainerAppLatestRevisionFqdn string = ConfigServerContainerApp.properties.latestRevisionFqdn
 output configServerContainerAppIngressFqdn string = ConfigServerContainerApp.properties.configuration.ingress.fqdn
@@ -470,7 +470,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-pr
 }
 
 //output customersServiceContainerAppIdentity string = CustomersServiceContainerApp.identity.principalId
-output customersServiceContainerAppOutboundIPAddresses array = CustomersServiceContainerApp.properties.outboundIPAddresses
+output customersServiceContainerAppoutboundIpAddresses array = CustomersServiceContainerApp.properties.outboundIpAddresses
 output customersServiceContainerAppLatestRevisionName string = CustomersServiceContainerApp.properties.latestRevisionName
 output customersServiceContainerAppLatestRevisionFqdn string = CustomersServiceContainerApp.properties.latestRevisionFqdn
 output customersServiceContainerAppIngressFqdn string = CustomersServiceContainerApp.properties.configuration.ingress.fqdn
@@ -619,7 +619,7 @@ resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview
 }
 
 //output vetsServiceContainerAppNameContainerAppIdentity string = VetsServiceContainerApp.identity.principalId
-output vetsServiceContainerAppOutboundIPAddresses array = VetsServiceContainerApp.properties.outboundIPAddresses
+output vetsServiceContainerAppoutboundIpAddresses array = VetsServiceContainerApp.properties.outboundIpAddresses
 output vetsServiceContainerAppLatestRevisionName string = VetsServiceContainerApp.properties.latestRevisionName
 output vetsServiceContainerAppLatestRevisionFqdn string = VetsServiceContainerApp.properties.latestRevisionFqdn
 output vetsServiceContainerAppIngressFqdn string = VetsServiceContainerApp.properties.configuration.ingress.fqdn
@@ -769,7 +769,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-previ
 }
 
 //output visitsServiceContainerAppIdentity string = VisitsServiceContainerApp.identity.principalId
-output visitsServiceContainerAppOutboundIPAddresses array = VisitsServiceContainerApp.properties.outboundIPAddresses
+output visitsServiceContainerAppoutboundIpAddresses array = VisitsServiceContainerApp.properties.outboundIpAddresses
 output visitsServiceContainerAppLatestRevisionName string = VisitsServiceContainerApp.properties.latestRevisionName
 output visitsServiceContainerAppLatestRevisionFqdn string = VisitsServiceContainerApp.properties.latestRevisionFqdn
 output visitsServiceContainerAppIngressFqdn string = VisitsServiceContainerApp.properties.configuration.ingress.fqdn

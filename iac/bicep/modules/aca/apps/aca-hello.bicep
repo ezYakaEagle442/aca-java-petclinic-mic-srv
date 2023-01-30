@@ -157,7 +157,7 @@ resource HelloContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
 }
 
 // output helloContainerAppIdentity string = HelloContainerApp.identity.principalId
-output helloContainerAppOutboundIPAddresses array = HelloContainerApp.properties.outboundIPAddresses
+output helloContainerAppoutboundIpAddresses array = HelloContainerApp.properties.outboundIpAddresses
 output helloContainerAppLatestRevisionName string = HelloContainerApp.properties.latestRevisionName
 output helloContainerAppLatestRevisionFqdn string = HelloContainerApp.properties.latestRevisionFqdn
 output helloContainerAppIngressFqdn string = HelloContainerApp.properties.configuration.ingress.fqdn
