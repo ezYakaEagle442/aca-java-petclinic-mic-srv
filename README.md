@@ -43,14 +43,8 @@ Read :
 - [Overview of federated identity credentials in Azure Active Directory](https://learn.microsoft.com/en-us/graph/api/resources/federatedidentitycredentials-overview?view=graph-rest-1.0)
 
 You have to specify all [KV secrets](./iac/bicep/modules/kv/kv_sec_key.bicep#L25) that will be then created in the GitHub Action [Azure Infra services deployment workflow](./.github/workflows/deploy-iac.yml#L140) :
-- MYSQL-SERVER-NAME
-- MYSQL-SERVER-FULL-NAME
-- SPRING-DATASOURCE-URL
-- SPRING-DATASOURCE-USERNAME
 - SPRING-DATASOURCE-PASSWORD
-- SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT
 - SPRING-CLOUD-AZURE-TENANT-ID
-- VM-ADMIN-USER-NAME
 - VM-ADMIN-PASSWORD
 
 dash '-' are not supported in GH secrets, so the secrets must be named in GH with underscore '_'.
@@ -89,7 +83,10 @@ TENANT_ID=$(az account show --query tenantId -o tsv)
 
 Add your AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID to your GH repo secrets / Actions secrets / Repository secrets
 
-Read [https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Cwindows#create-a-service-principal-and-add-it-as-a-github-secret)
+Read :
+- [https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Cwindows#create-a-service-principal-and-add-it-as-a-github-secret)
+- [https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Cwindows#use-the-azure-login-action-with-openid-connect](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Cwindows#use-the-azure-login-action-with-openid-connect)
+- [https://learn.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation-create-trust?pivots=identity-wif-apps-methods-azp](https://learn.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation-create-trust?pivots=identity-wif-apps-methods-azp)
 
 
 In the GitHub Action Runner, to allow the Service Principal used to access the Key Vault, execute the command below:
@@ -120,8 +117,6 @@ SPN_APP_ID=$(az ad sp list --all --query "[?appDisplayName=='${SPN_APP_NAME}'].{
 # TENANT_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME}'].{t:appOwnerOrganizationId}" --output tsv)
 
 az ad sp show --id $SPN_OBJECT_ID
-
-
 
 # the assignee is an appId
 az role assignment create --assignee $SPN_APP_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV} --role contributor
@@ -154,7 +149,6 @@ az role assignment create --assignee $SPN_APP_ID --scope /subscriptions/${SUBSCR
 az role assignment create --assignee $SPN_APP_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_APP} --role Owner
 
 ```
-```
 
 <span style="color:red">**RBAC Permission model is set on KV, the [pre-req](https://learn.microsoft.com/en-us/azure/key-vault/general/rbac-guide?tabs=azure-cli#prerequisites) requires to have Microsoft.Authorization/roleAssignments/write and Microsoft.Authorization/roleAssignments/delete permissions, such as User Access Administrator or Owner.
 
@@ -165,20 +159,18 @@ To assign Azure roles, you must have: requires to have Microsoft.Authorization/r
 <span style="color:red">**"Key Vault Secrets User" [built-in role](https://learn.microsoft.com/en-us/azure/key-vault/general/rbac-guide?tabs=azure-cli#azure-built-in-roles-for-key-vault-data-plane-operations) read secret contents including secret portion of a certificate with private key. Only works for key vaults that use the 'Azure role-based access control' permission model.**
 </span>
 
-Read :
-- [Use GitHub Actions to connect to Azure documentation](https://docs.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Cwindows).
-- [https://github.com/Azure/login#configure-a-service-principal-with-a-secret](https://github.com/Azure/login#configure-a-service-principal-with-a-secret)
 
-Paste in your JSON object for your service principal with the name **AZURE_CREDENTIALS** as secrets to your GH repo secrets / Actions secrets / Repository secrets.
-
-You can test your connection with CLI :
 ```sh
-az login --service-principal -u $SPN_ID -p $SPN_PWD --tenant $TENANT_ID
+export CREDENTIAL_NAME="gha_aca_run"
+export GH_USER_NAME="yourGitHubAccount"
+export SUBJECT="repo:$GH_USER_NAME/aca-java-petclinic-mic-srv:ref:refs/heads/main" # "repo:organization/repository:environment:Production"
+export DESCRIPTION="GitHub Action Runner for Petclinic ACA demo"
+
+az rest --method POST --uri 'https://graph.microsoft.com/beta/applications/$SPN_OBJECT_ID/federatedIdentityCredentials' --body '{"name":"$CREDENTIAL_NAME","issuer":"https://token.actions.githubusercontent.com","subject":"$SUBJECT","description":"$DESCRIPTION","audiences":["api://AzureADTokenExchange"]}'
+
 ```
 
-
-
-Add SUBSCRIPTION_ID, TENANT_ID, SPN_ID and SPN_PWD as secrets to your GH repo secrets / Actions secrets / Repository secrets
+Add AZURE_CLIENT_ID (value of $SPN_APP_ID), AZURE_TENANT_ID, and AZURE_SUBSCRIPTION_ID as secrets to your GH repo secrets / Actions secrets / Repository secrets
 
 <span style="color:red">**Be aware that at this stage KV is not created yet, it must exist first to set-policy**
 [enableRbacAuthorization is true in KV](./iac/bicep/modules/kv/kv.bicep#L61), the key vault will use RBAC for authorization of data actions, and the [access policies specified in vault properties](https://docs.microsoft.com/en-us/azure/templates/microsoft.keyvault/vaults/accesspolicies?tabs=bicep) will be ignored</span>

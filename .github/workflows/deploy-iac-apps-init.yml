@@ -29,7 +29,7 @@ env:
   DISCOVERY_SERVER: discovery-server
 
   # ==== Secrets ====
-  credentials: ${{ secrets.AZURE_CREDENTIALS }}
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
@@ -57,7 +57,9 @@ jobs:
     - name: Azure Login
       uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
       with:
-        creds: ${{ env.credentials }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     - name: Deploy Azure Container Apps
       run: |

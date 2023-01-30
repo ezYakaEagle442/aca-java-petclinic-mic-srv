@@ -16,7 +16,9 @@ env:
   # ==== Secrets ====
 
   MYSQL_ADM_PWD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-  credentials: ${{ secrets.AZURE_CREDENTIALS }}
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
   # ==== Versions ====
   AZ_CLI_VERSION: 2.44.1
@@ -34,7 +36,9 @@ jobs:
     - name: Login with GHA Runner SP
       uses: azure/login@v1.4.6 # fails https://github.com/marketplace/actions/azure-login
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }} # ${{ env.credentials }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     - name: Checkout
       uses: actions/checkout@v3.1.0 # https://github.com/actions/checkout
