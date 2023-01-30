@@ -11,7 +11,7 @@ env:
   
   ACA_ENV_NAME: aca-env-pub # ACA Environment name. Ex 'aca-env-pub' or 'aca-env-corp' when deployed to your VNet
   DEPLOY_TO_VNET: false
-  ACA_ENV_DNS_DUFFIX: petclinic
+  ACA_ENV_DNS_DUFFIX: acarocks.com
 
   KV_NAME: kv-petcliaca29 # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
   SET_KV_ACCESS_POLICIES: false # let it to false

@@ -8,7 +8,7 @@ param location string = 'westeurope'
 param azureContainerAppEnvName string = 'aca-env-${appName}'
 
 @description('The Custom DNS suffix used for all apps in this environment')
-param dnsSuffix string = 'petclinic'
+param dnsSuffix string = 'acarocks.com'
 
 @description('The Log Analytics workspace name used by Azure Container App instance')
 param logAnalyticsWorkspaceName string = 'log-${appName}'
@@ -52,9 +52,11 @@ resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-pr
     zoneRedundant: zoneRedundant
     daprAIInstrumentationKey: appInsights.properties.InstrumentationKey
     daprAIConnectionString: appInsights.properties.ConnectionString
+    /*
     customDomainConfiguration: {
       dnsSuffix: dnsSuffix
     }
+    */
   }
 }
 
