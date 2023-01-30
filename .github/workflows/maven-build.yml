@@ -63,7 +63,12 @@ on:
   pull_request:
     branches:
       - main
-      
+
+# required for https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Clinux#set-up-azure-login-with-openid-connect-authentication
+permissions:
+  id-token: write
+  contents: read
+        
 jobs:
 
   maven-build:

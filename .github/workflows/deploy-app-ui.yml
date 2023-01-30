@@ -53,6 +53,11 @@ on:
         required: true
         type: string
 
+# required for https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Clinux#set-up-azure-login-with-openid-connect-authentication
+permissions:
+  id-token: write
+  contents: read
+  
 jobs:
   deploy-ui:
     runs-on: ubuntu-latest
