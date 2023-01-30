@@ -146,11 +146,11 @@ jobs:
         echo "github.workspace = ${{ github.workspace }}"
         
         ls -al
-        ls -al spring-petclinic-${{ env.API_GATEWAY }}/target/*.jar
+        ls -al spring-petclinic-${{ env.CONFIG_SERVER }}/target/*.jar
         ls -al spring-petclinic-${{ env.CUSTOMERS_SERVICE }}/target/*.jar
         ls -al spring-petclinic-${{ env.VETS_SERVICE }}/target/*.jar
         ls -al spring-petclinic-${{ env.VISITS_SERVICE }}/target/*.jar
-        ls -al spring-petclinic-${{ env.CONFIG_SERVER }}/target/*.jar
+        #ls -al spring-petclinic-${{ env.API_GATEWAY }}/target/*.jar
         # ls -al spring-petclinic-${{ env.DISCOVERY_SERVER }}/target/*.jar
         # ls -al spring-petclinic-${{ env.ADMIN_SERVER }}/target/*.jar
 
@@ -182,13 +182,13 @@ jobs:
         ls -al
 
         echo "Checking all artifacts Jar files :"
-        ls -al spring-petclinic-${{ env.ADMIN_SERVER }}/target/*.jar
-        ls -al spring-petclinic-${{ env.API_GATEWAY }}/target/*.jar
+        ls -al spring-petclinic-${{ env.CONFIG_SERVER }}/target/*.jar
         ls -al spring-petclinic-${{ env.CUSTOMERS_SERVICE }}/target/*.jar
         ls -al spring-petclinic-${{ env.VETS_SERVICE }}/target/*.jar
         ls -al spring-petclinic-${{ env.VISITS_SERVICE }}/target/*.jar
-        ls -al spring-petclinic-${{ env.CONFIG_SERVER }}/target/*.jar
+        # ls -al spring-petclinic-${{ env.API_GATEWAY }}/target/*.jar
         # ls -al spring-petclinic-${{ env.DISCOVERY_SERVER }}/target/*.jar
+        # ls -al spring-petclinic-${{ env.ADMIN_SERVER }}/target/*.jar
 
     # https://github.com/marketplace/actions/docker-setup-buildx
     - name: Set up Docker Buildx
