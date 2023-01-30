@@ -219,6 +219,11 @@ jobs:
   deploy-iac:
     runs-on: ubuntu-latest
     needs: deploy-kv
+    # required for https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Clinux#set-up-azure-login-with-openid-connect-authentication
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
 
     - name: Set Base environment variables
@@ -353,7 +358,7 @@ jobs:
       id-token: write
       contents: read
       packages: write
-      
+
   call-maven-build-ui-workflow:
     name: Trigger Maven for the UI
     needs: deploy-iac
@@ -371,6 +376,10 @@ jobs:
     with:
       tag_id: ${{ needs.call-maven-build-workflow.outputs.tag_id }}
     secrets: inherit
+    # required for https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Clinux#set-up-azure-login-with-openid-connect-authentication
+    permissions:
+      id-token: write
+      contents: read
 
   call-deploy-apps-svc-workflow:
     name: Trigger App Deployment for the Backend services
@@ -379,6 +388,10 @@ jobs:
     with:
       tag_id: ${{ needs.call-maven-build-workflow.outputs.tag_id }}
     secrets: inherit
+    # required for https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Clinux#set-up-azure-login-with-openid-connect-authentication
+    permissions:
+      id-token: write
+      contents: read
 
   call-deploy-ui-workflow:
     name: Trigger UI Deployment
@@ -387,9 +400,17 @@ jobs:
     with:
       tag_id: ${{ needs.call-maven-build-ui-workflow.outputs.tag_id }}
     secrets: inherit
+    # required for https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Clinux#set-up-azure-login-with-openid-connect-authentication
+    permissions:
+      id-token: write
+      contents: read
 
   call-db-init-workflow:
     name: Load Data to DB
     needs: [deploy-iac, call-deploy-apps-svc-workflow, call-deploy-ui-workflow]
     uses: ./.github/workflows/sql-load.yml
     secrets: inherit
+    # required for https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Clinux#set-up-azure-login-with-openid-connect-authentication
+    permissions:
+      id-token: write
+      contents: read    
