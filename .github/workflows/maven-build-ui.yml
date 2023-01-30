@@ -68,14 +68,12 @@ on:
 permissions:
   id-token: write
   contents: read
-        
+  packages: write    
+
 jobs:
 
   maven-build:
     runs-on: ubuntu-latest
-    permissions: 
-      contents: read
-      packages: write    
 
     outputs:
       tag_id: ${{ steps.acr_build.outputs.tag_id }}
