@@ -8,7 +8,7 @@ name: Deploy IaC to VNet with Azure Bicep
 
 env:
   APP_NAME: petcliaca
-  LOCATION: westeurope
+  LOCATION: francecentral
   RG_KV: rg-iac-kv42 # RG where to deploy KV
   RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
   

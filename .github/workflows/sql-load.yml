@@ -3,7 +3,7 @@ name: Load SQL scripts to DB
 
 env:
   APP_NAME: petcliaca
-  LOCATION: westeurope
+  LOCATION: francecentral
   RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ASA, MySQL, etc.
   
   MYSQL_SERVER_NAME: petcliaca
