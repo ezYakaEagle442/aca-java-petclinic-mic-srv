@@ -18,7 +18,7 @@ param azureContainerAppEnvName string = 'aca-env-${appName}'
 
 
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
-param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.4.jar'
+param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.8.jar'
 
 @description('The applicationinsights config file location')
 param applicationInsightsConfigFile string = 'BOOT-INF/classes/applicationinsights.json'
