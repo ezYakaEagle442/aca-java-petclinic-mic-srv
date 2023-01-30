@@ -18,7 +18,7 @@ env:
   RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
 
   # ==== APPS ====
-  PRJ_PREFIX: aca-spring-petclinic
+  PRJ_PREFIX: spring-petclinic
 
   API_GATEWAY: api-gateway
   ADMIN_SERVER: admin-server
