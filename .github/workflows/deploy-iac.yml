@@ -56,7 +56,6 @@ env:
 
 
   SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-  SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT: ${{ secrets.SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT }}
   SPRING_CLOUD_AZURE_TENANT_ID: ${{ secrets.SPRING_CLOUD_AZURE_TENANT_ID }}
 
   GHA_SETTINGS_CFG_CRD_CLIENT_ID: ${{ secrets.SPN_ID }}
@@ -67,7 +66,7 @@ env:
   # https://learn.microsoft.com/en-us/azure/key-vault/secrets/secrets-best-practices#secrets-rotation
   # Because secrets are sensitive to leakage or exposure, it's important to rotate them often, at least every 60 days. 
   # Expiry date in seconds since 1970-01-01T00:00:00Z. Ex: 1672444800 ==> 31/12/2022'
-  SECRET_EXPIRY_DATE: 1672444800
+  SECRET_EXPIRY_DATE: 1703980800 # ==> 31/12/2023
 
   credentials: ${{ secrets.AZURE_CREDENTIALS }}
   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -99,7 +98,7 @@ jobs:
         creds: ${{ env.credentials }} # ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Checkout
-      uses: actions/checkout@v3.0.2 # https://github.com/actions/checkout
+      uses: actions/checkout@v3 # https://github.com/actions/checkout
 
     - name: Deploy Azure Key Vault      
       # uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
@@ -163,16 +162,6 @@ jobs:
             -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
       shell: bash
 
-    - name: Create SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT secret in Azure Key Vault
-      run: |
-          az deployment group create --name aca-petclinic-kv-endpoint -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
-            -p appName=${{ env.APP_NAME }} \
-            -p kvName=${{ env.KV_NAME }} \
-            -p secretName="SPRING-CLOUD-AZURE-KEY-VAULT-ENDPOINT" \
-            -p secretValue=${{ secrets.SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT }} \
-            -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }}
-      shell: bash
-
     - name: Create SPRING-CLOUD-AZURE-TENANT-ID secret in Azure Key Vault
       run: |
           az deployment group create --name aca-petclinic-kv-tenant -f iac/bicep/modules/kv/kv_sec_key.bicep -g ${{ env.RG_KV }} \
@@ -182,7 +171,6 @@ jobs:
             -p secretValue=${{ secrets.SPRING_CLOUD_AZURE_TENANT_ID }} \
             -p secretExpiryDate=${{ env.SECRET_EXPIRY_DATE }} 
       shell: bash
-
 
     - name: Create SPN-ID secret in Azure Key Vault
       run: |
@@ -237,7 +225,7 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }} # ${{ env.credentials }}
         
     - name: Checkout
-      uses: actions/checkout@v3.0.2 # https://github.com/actions/checkout
+      uses: actions/checkout@v3 # https://github.com/actions/checkout
 
     - name: Deploy the pre-req
       run: |
@@ -265,7 +253,30 @@ jobs:
               -g ${{ env.RG_APP }} \
               -n aca-petclinic-pre-req \
               --query properties.outputs.appInsightsConnectionString.value
-              
+
+          vetsServicePrincipalId=$(az deployment group show --name aca-identities -g ${{ env.RG_APP }} --query properties.outputs.vetsServicePrincipalId.value -o tsv)
+          vetsServiceClientId=$(az deployment group show --name aca-identities -g ${{ env.RG_APP }} --query properties.outputs.vetsServiceClientId.value -o tsv)
+
+          visitsServicePrincipalId=$(az deployment group show --name aca-identities -g ${{ env.RG_APP }} --query properties.outputs.visitsServicePrincipalId.value -o tsv)
+          visitsServiceClientId=$(az deployment group show --name aca-identities -g ${{ env.RG_APP }} --query properties.outputs.visitsServiceClientId.value -o tsv)
+
+          configServerPrincipalId=$(az deployment group show --name aca-identities -g ${{ env.RG_APP }} --query properties.outputs.configServerPrincipalId.value -o tsv)
+          configServerClientId=$(az deployment group show --name aca-identities -g ${{ env.RG_APP }} --query properties.outputs.configServerClientId.value -o tsv)
+
+          customersServicePrincipalId=$(az deployment group show --name aca-identities -g ${{ env.RG_APP }} --query properties.outputs.customersServicePrincipalId.value -o tsv)
+          customersServiceClientId=$(az deployment group show --name aca-identities -g ${{ env.RG_APP }} --query properties.outputs.customersServiceClientId.value -o tsv)
+
+          aksClusterPrincipalId=$(az deployment group show --name aca-identities -g ${{ env.RG_APP }} --query properties.outputs.aksIdentityPrincipalId.value -o tsv)
+          aksClusterClientId=$(az deployment group show --name aca-identities -g ${{ env.RG_APP }} --query properties.outputs.aksIdentityClientId.value -o tsv)
+
+          az deployment group create --name kv-role-assignments -f iac/bicep/modules/kv/kvRoleAssignments.bicep -g ${{ env.RG_KV }} \
+            -p kvName=${{ env.KV_NAME }} \
+            -p configServerIdentityId=$configServerPrincipalId \
+            -p vetsIdentityId=$vetsServicePrincipalId \
+            -p visitsIdentityId=$visitsServicePrincipalId \
+            -p customersIdentityId=$customersServicePrincipalId \
+            -p kvRoleType=KeyVaultSecretsUser
+
       shell: bash
 
       # TODO
@@ -273,7 +284,7 @@ jobs:
       # today the the outboundIP can be got ONLY from the Apps NOT yet from the Env., they all share the same the outboundIP
       # KV must Allow azureContainerAppsOutboundPubIP in the IP rules ...
       # MySQL DB Must allow azureContainerAppsOutboundPubIP to access in the IP rules ...
-      # workaround : deploy a hello world App and get MyApp.properties.outboundIPAddresses 
+      # workaround : deploy a hello world App and get MyApp.properties.outboundIpAddresses 
       # see https://github.com/microsoft/azure-container-apps/issues/469
     - name: Whitelist ACA Env. OutboundIP
       run: |
@@ -338,98 +349,29 @@ jobs:
     uses: ./.github/workflows/maven-build-ui.yml
     secrets: inherit
 
-  deploy-apps:
-    needs: [call-maven-build-workflow, call-maven-build-ui-workflow]
-    runs-on: ubuntu-latest
-    steps:
+  call-deploy-cfg-srv-workflow:
+    name: Trigger Deployment for the Config-Server
+    needs: [deploy-iac, call-maven-build-workflow]
+    uses: ./.github/workflows/deploy-app-cfg-srv.yml
+    with:
+      tag_id: ${{ needs.call-maven-build-workflow.outputs.tag_id }}
+    secrets: inherit
 
-    - name: Login with GHA Runner SP
-      uses: azure/login@v1.4.6 # fails https://github.com/marketplace/actions/azure-login
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }} # ${{ env.credentials }}
-        
-    - name: Checkout
-      uses: actions/checkout@v3.0.2 # https://github.com/actions/checkout
+  call-deploy-apps-svc-workflow:
+    name: Trigger App Deployment for the Backend services
+    needs: [deploy-iac, call-maven-build-workflow, call-deploy-cfg-srv-workflow]
+    uses: ./.github/workflows/deploy-app-svc.yml
+    with:
+      tag_id: ${{ needs.call-maven-build-workflow.outputs.tag_id }}
+    secrets: inherit
 
-    - name: Deploy Backend services
-      run: |
-          # https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs
-          echo "Checking tag_id output ... : " ${{ needs.call-maven-build-workflow.outputs.tag_id }}
-          tag_id=${{ needs.call-maven-build-workflow.outputs.tag_id }}
-          echo "Image Build tag ID:"$tag_id
-
-          imageNameAdminServer="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.ADMIN_SERVER }}:$tag_id"
-          imageNameDiscoveryServer="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.DISCOVERY_SERVER }}:$tag_id"
-          imageNameConfigServer="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.CONFIG_SERVER }}:$tag_id"
-         
-          imageNameVetsService="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.VETS_SERVICE }}:$tag_id"
-          imageNameVisitsService="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.VISITS_SERVICE }}:$tag_id"
-          imageNameCustomersService="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.CUSTOMERS_SERVICE }}:$tag_id"
-
-          echo "imageNameConfigServer= " $imageNameConfigServer
-          echo "imageNameCustomersService= " $imageNameCustomersService
-          echo "imageNameVetsService= " $imageNameVetsService
-          echo "imageNameVisitsService= " $imageNameVisitsService
-
-          az deployment group create --name aca-petclinic-apps -f iac/bicep/petclinic-apps.bicep -g ${{ env.RG_APP }} \
-            -p appName=${{ env.APP_NAME }} \
-            -p location=${{ env.LOCATION }} \
-            -p acrName=${{ env.AZURE_CONTAINER_REGISTRY }} \
-            -p acrRepository=${{ env.REPOSITORY }} \
-            -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
-            -p kvName=${{ env.KV_NAME }} \
-            -p kvRGName=${{ env.RG_KV }} \
-            -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
-            -p imageNameAdminServer=$imageNameAdminServer \
-            -p imageNameConfigServer=$imageNameConfigServer \
-            -p imageNameCustomersService=$imageNameCustomersService \
-            -p imageNameVetsService=$imageNameVetsService \
-            -p imageNameVisitsService=$imageNameVisitsService
-
-      shell: bash
-
-    - name: Deploy UI
-      run: |
-          echo "Checking tag_id output for the UI ... : " ${{ needs.call-maven-build-ui-workflow.outputs.tag_id }}
-          tag_id=${{ needs.call-maven-build-ui-workflow.outputs.tag_id }}
-          echo "Image Build tag ID:"$tag_id
-
-          imageNameApiGateway="${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id"
-          echo "imageNameApiGateway= " $imageNameApiGateway
-
-          echo "About to deploy the UI calling iac/bicep/modules/aca/apps/aca-ui.bicep" 
-          az deployment group create --name aca-petclinic-ui -f iac/bicep/modules/aca/apps/aca-ui.bicep -g ${{ env.RG_APP }} \
-            -p appName=${{ env.APP_NAME }} \
-            -p location=${{ env.LOCATION }} \
-            -p acrName=${{ env.AZURE_CONTAINER_REGISTRY }} \
-            -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
-            -p imageNameApiGateway=$imageNameApiGateway \
-            -p springCloudAzureKeyVaultEndpoint=${{ env.SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT }} \
-            -p springCloudAzureTenantId=${{ env.SPRING_CLOUD_AZURE_TENANT_ID }} 
-
-      shell: bash
-
-    - name: Configure Diagnostic-Settings
-      run: |
-          echo "ACA does not yet support diagnostic settings, see https://github.com/microsoft/azure-container-apps/issues/382" 
-          
-          # az deployment group create --name aca-petclinic-apps -f iac/bicep/modules/aca/diagnostic-settings.bicep -g ${{ env.RG_APP }} \
-      shell: bash
-
-    - name: Configure GitHub-Action-Settings
-      run: |   
-          echo "To be tested ..."       
-          # az deployment group create --name aca-petclinic-apps -f iac/bicep/modules/aca/gha-settings.bicep -g ${{ env.RG_APP }} \
-
-    # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
-    # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#hardening-for-self-hosted-runners
-    # if the runner is self-hosted which is not github provided it is recommended to manually logout at the end of the workflow as shown below.
-    - name: Azure Logout security hardening
-      run: |
-          az logout
-          az cache purge
-          az account clear
-      shell: bash
+  call-deploy-ui-workflow:
+    name: Trigger UI Deployment
+    needs:  [deploy-iac, call-maven-build-ui-workflow]
+    uses: ./.github/workflows/deploy-app-ui.yml
+    with:
+      tag_id: ${{ needs.call-maven-build-ui-workflow.outputs.tag_id }}
+    secrets: inherit
 
   call-db-init-workflow:
     name: Load Data to DB
