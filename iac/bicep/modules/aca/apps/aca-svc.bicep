@@ -112,7 +112,7 @@ resource visitsServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities
   name: visitsServiceAppIdentityName
 }
 
-resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: configServerContainerAppName
 }
 
@@ -132,7 +132,7 @@ param springCloudAzureTenantId string
 @description('The Azure Key Vault EndPoint that should be used by Key Vault in the Spring Config. Ex: https://<key-vault-name>.vault.azure.net')
 param springCloudAzureKeyVaultEndpoint string
 
-resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: customersServiceContainerAppName
   location: location
   identity: {
@@ -300,7 +300,7 @@ output customersServiceContainerAppLatestRevisionFqdn string = CustomersServiceC
 output customersServiceContainerAppIngressFqdn string = CustomersServiceContainerApp.properties.configuration.ingress.fqdn
 output customersServiceContainerAppConfigSecrets array = CustomersServiceContainerApp.properties.configuration.secrets
 
-resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: vetsServiceContainerAppName
   location: location
   identity: {
@@ -451,7 +451,7 @@ output vetsServiceContainerAppLatestRevisionFqdn string = VetsServiceContainerAp
 output vetsServiceContainerAppIngressFqdn string = VetsServiceContainerApp.properties.configuration.ingress.fqdn
 output vetsServiceContainerAppConfigSecrets array = VetsServiceContainerApp.properties.configuration.secrets
 
-resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: visitsServiceContainerAppName
   location: location
   identity: {

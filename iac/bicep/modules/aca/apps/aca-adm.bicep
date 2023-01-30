@@ -55,7 +55,7 @@ param adminServerContainerAppName string = 'aca-${appName}-admin-server'
 @description('The admin-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param adminServerAppIdentityName string = 'id-aca-petclinic-admin-server-dev-westeurope-101'
 
-resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' existing = {
+resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-preview' existing = {
   name: azureContainerAppEnvName
 }
 
@@ -63,15 +63,15 @@ resource adminServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2
   name: adminServerAppIdentityName
 }
 
-resource ACR 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
+resource ACR 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' existing = {
   name: acrName
 }
 
-resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing = {
+resource appInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: appInsightsName
 }
 
-resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: adminServerContainerAppName
   location: location
   identity: {

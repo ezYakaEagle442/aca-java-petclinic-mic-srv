@@ -7,7 +7,7 @@ param appName string = '101-${uniqueString(deployment().location)}'
 param location string = deployment().location
 param rgName string  = 'rg-${appName}'
 
-resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+resource rg 'Microsoft.Resources/resourceGroups@2022-09-01' = {
   location: location
   name: rgName
 }

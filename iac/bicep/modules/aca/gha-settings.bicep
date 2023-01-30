@@ -124,31 +124,31 @@ param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
 param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
 
 // https://learn.microsoft.com/en-us/azure/templates/microsoft.app/containerapps?pivots=deployment-language-bicep
-resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: adminServerContainerAppName
 }
 
-resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: apiGatewayContainerAppName
 }
 
-resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: configServerContainerAppName
 }
 
-resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: customersServiceContainerAppName
 }
 
-resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: vetsServiceContainerAppName
 }
 
-resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: visitsServiceContainerAppName
 }
 
-resource githubActionSettingsCustomers 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
+resource githubActionSettingsCustomers 'Microsoft.App/containerApps/sourcecontrols@2022-06-01-preview' = {
   name: 'aca-gha-set-customers-svc'
   parent: CustomersServiceContainerApp
   properties: {
@@ -174,7 +174,7 @@ resource githubActionSettingsCustomers 'Microsoft.App/containerApps/sourcecontro
   }
 }
 
-resource githubActionSettingsVets 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
+resource githubActionSettingsVets 'Microsoft.App/containerApps/sourcecontrols@2022-06-01-preview' = {
   name: 'aca-gha-set-vets-svc'
   parent: VetsServiceContainerApp
   properties: {
@@ -200,7 +200,7 @@ resource githubActionSettingsVets 'Microsoft.App/containerApps/sourcecontrols@20
   }
 }
 
-resource githubActionSettingsVisits 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
+resource githubActionSettingsVisits 'Microsoft.App/containerApps/sourcecontrols@2022-06-01-preview' = {
   name: 'aca-gha-set-visits-svc'
   parent: VisitsServiceContainerApp
   properties: {
@@ -226,7 +226,7 @@ resource githubActionSettingsVisits 'Microsoft.App/containerApps/sourcecontrols@
   }
 }
 
-resource githubActionSettingsAPI 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
+resource githubActionSettingsAPI 'Microsoft.App/containerApps/sourcecontrols@2022-06-01-preview' = {
   name: 'aca-gha-set-api-gw'
   parent: ApiGatewayContainerApp
   properties: {
@@ -252,7 +252,7 @@ resource githubActionSettingsAPI 'Microsoft.App/containerApps/sourcecontrols@202
   }
 }
 
-resource githubActionSettingsConfigServer 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
+resource githubActionSettingsConfigServer 'Microsoft.App/containerApps/sourcecontrols@2022-06-01-preview' = {
   name: 'aca-gha-set-cfg-srv'
   parent: ConfigServerContainerApp
   properties: {
@@ -279,7 +279,7 @@ resource githubActionSettingsConfigServer 'Microsoft.App/containerApps/sourcecon
 }
 
 
-resource githubActionSettingsAdminServer 'Microsoft.App/containerApps/sourcecontrols@2022-03-01' = {
+resource githubActionSettingsAdminServer 'Microsoft.App/containerApps/sourcecontrols@2022-06-01-preview' = {
   name: 'aca-gha-set-admin-srv'
   parent: AdminServerContainerApp
   properties: {

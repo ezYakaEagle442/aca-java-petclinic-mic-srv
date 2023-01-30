@@ -16,7 +16,7 @@ var infrastructureSubnet = {
   cidr: infrastructureSubnetCidr
 }
 
-resource vnet 'Microsoft.Network/virtualNetworks@2022-05-01' = {
+resource vnet 'Microsoft.Network/virtualNetworks@2022-07-01' = {
   name: vnetName
   location: location
   properties: {

@@ -127,7 +127,7 @@ module defaultPublicManagedEnvironment './modules/aca/acaPublicEnv.bicep' = if (
   ]
 }
 
-resource kvRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
+resource kvRG 'Microsoft.Resources/resourceGroups@2022-09-01' existing = {
   name: kvRGName
   scope: subscription()
 }
@@ -174,9 +174,5 @@ module roleAssignments './modules/aca/roleAssignments.bicep' = {
     acaAdminServerPrincipalId: identities.outputs.adminServerIdentityId
     acaApiGatewayPrincipalId: identities.outputs.apiGatewayIdentityId
     acaConfigServerPrincipalId: identities.outputs.configServerIdentityId
-    //acaDiscoveryServerPrincipalId: identities.outputs.discoveryServerIdentityId
-    kvName: kvName
-    kvRGName: kvRGName
-    kvRoleType: 'KeyVaultSecretsUser'
   }
 }

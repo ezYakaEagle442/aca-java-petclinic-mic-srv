@@ -105,19 +105,19 @@ resource apiGatewayIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@20
   name: apiGatewayAppIdentityName
 }
 
-resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: configServerContainerAppName
 }
 
-resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: customersServiceContainerAppName
 }
 
-resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: vetsServiceContainerAppName
 }
 
-resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
   name: visitsServiceContainerAppName
 }
 
@@ -129,7 +129,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing
   name: appInsightsName
 }
 
-resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: apiGatewayContainerAppName
   location: location
   identity: {

@@ -70,7 +70,7 @@ resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' e
 }
 
 // https://learn.microsoft.com/en-us/azure/templates/microsoft.app/containerapps?pivots=deployment-language-bicep
-resource HelloContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+resource HelloContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: 'aca-hello-test'
   location: location
   properties: {

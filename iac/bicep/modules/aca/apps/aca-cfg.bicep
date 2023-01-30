@@ -71,7 +71,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing
   name: appInsightsName
 }
 
-resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: configServerContainerAppName
   location: location
   identity: {

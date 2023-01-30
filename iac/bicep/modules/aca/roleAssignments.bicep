@@ -30,21 +30,6 @@ param subnetName string
 param networkRoleType string
 */
 
-@allowed([
-  'KeyVaultAdministrator'
-  'KeyVaultReader'
-  'KeyVaultSecretsUser'  
-])
-@description('KV Built-in role to assign')
-param kvRoleType string = 'KeyVaultSecretsUser'
-
-param kvName string
-
-@description('The name of the KV RG')
-param kvRGName string
-
-
-
 
 // https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 var role = {
@@ -141,52 +126,6 @@ resource appSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-02-01' existi
 
 */
 
-resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
-  name: kvName
-  scope: resourceGroup(kvRGName)
-}
-
-// https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-portal#prerequisites
-// /!\ To assign Azure roles, you must have: requires to have Microsoft.Authorization/roleAssignments/write and Microsoft.Authorization/roleAssignments/delete permissions, 
-// such as User Access Administrator or Owner.
-
-// You need Key Vault Administrator permission to be able to see the Keys/Secrets/Certificates in the Azure Portal
-resource kvSecretsUserRoleAssignmentCustomersService 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(kv.id, kvRoleType , acaCustomersServicePrincipalId)
-  // scope: kv to be fixed
-  properties: {
-    roleDefinitionId: role[kvRoleType]
-    principalId: acaCustomersServicePrincipalId
-    principalType: 'ServicePrincipal'
-  }
-}
-output customersServiceRoleAssignmentUpdatedOn string = kvSecretsUserRoleAssignmentCustomersService.properties.updatedOn
-output customersServiceRoleAssignmentId string = kvSecretsUserRoleAssignmentCustomersService.id
-output customersServiceRoleAssignmentName string = kvSecretsUserRoleAssignmentCustomersService.name
-
-resource kvSecretsUserRoleAssignmentVetsService 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(kv.id, kvRoleType , acaVetsServicePrincipalId)
-  properties: {
-    roleDefinitionId: role[kvRoleType]
-    principalId: acaVetsServicePrincipalId
-    principalType: 'ServicePrincipal'
-  }
-}
-output vetsServiceRoleAssignmentUpdatedOn string = kvSecretsUserRoleAssignmentVetsService.properties.updatedOn
-output vetsServiceRoleAssignmentId string = kvSecretsUserRoleAssignmentVetsService.id
-output vetsServiceRoleAssignmentName string = kvSecretsUserRoleAssignmentVetsService.name
-
-resource kvSecretsUserRoleAssignmentVisitsService 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(kv.id, kvRoleType , acaVisitsServicePrincipalId)
-  properties: {
-    roleDefinitionId: role[kvRoleType]
-    principalId: acaVisitsServicePrincipalId
-    principalType: 'ServicePrincipal'
-  }
-}
-output visitsServiceRoleAssignmentUpdatedOn string = kvSecretsUserRoleAssignmentVisitsService.properties.updatedOn
-output visitsServiceRoleAssignmentId string = kvSecretsUserRoleAssignmentVisitsService.id
-output visitsServiceRoleAssignmentName string = kvSecretsUserRoleAssignmentVisitsService.name
 
 // https://github.com/Azure/azure-quickstart-templates/blob/master/modules/Microsoft.ManagedIdentity/user-assigned-identity-role-assignment/1.0/main.bicep
 // https://github.com/Azure/bicep/discussions/5276
