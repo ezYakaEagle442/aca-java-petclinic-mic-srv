@@ -18,7 +18,7 @@ env:
   RG_APP: rg-iac-aca-petclinic-mic-srv # RG where to deploy the other Azure services: ACA, ACA Env., MySQL, etc.
 
   # ==== APPS ====
-  PRJ_PREFIX: aca-spring-petclinic
+  PRJ_PREFIX: spring-petclinic
 
   API_GATEWAY: api-gateway
   ADMIN_SERVER: admin-server
@@ -91,6 +91,7 @@ jobs:
         echo "GH_WORKSPACE=${{ github.workspace }}" >> $GITHUB_ENV # "/github/workspace"
       shell: bash
 
+
     - name: Checkout
       uses: actions/checkout@v3
       
@@ -116,7 +117,7 @@ jobs:
         echo "*                                                                                      *"
         echo "****************************************************************************************"
 
-        mvn -B clean package --file pom.xml -DskipTests --projects spring-petclinic-api-gateway -rf :asa-spring-petclinic-api-gateway
+        mvn -B clean package --file pom.xml -DskipTests --projects spring-petclinic-api-gateway -rf :spring-petclinic-api-gateway
         echo "github.workspace = ${{ github.workspace }}"
         
         ls -al
@@ -176,7 +177,10 @@ jobs:
           az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
           # https://learn.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli
           docker build --build-arg --no-cache -t ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id -f "./docker/petclinic-api-gateway/Dockerfile" .
+          docker tag ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id ${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:latest
           docker push "${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id"
+          docker push "${{ env.REGISTRY_URL }}/${{ env.REPOSITORY }}/${{ env.API_GATEWAY }}:$tag_id"
+
 
     # security hardening for self-hosted agents: https://github.com/marketplace/actions/azure-login
     # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#hardening-for-self-hosted-runners
