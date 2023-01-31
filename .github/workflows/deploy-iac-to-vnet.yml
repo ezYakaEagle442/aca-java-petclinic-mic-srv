@@ -17,7 +17,7 @@ env:
 
   KV_NAME: kv-petcliaca42 # The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters
   SET_KV_ACCESS_POLICIES: false # let it to false
-  SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT: https:/kv-petcliaca29.vault.azure.net
+  SPRING_CLOUD_AZURE_KEY_VAULT_ENDPOINT: https://kv-petcliaca29.vault.azure.net
 
   AZURE_CONTAINER_REGISTRY: acrpetcliaca # The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
   REPOSITORY: petclinic                  # set this to your ACR repository
