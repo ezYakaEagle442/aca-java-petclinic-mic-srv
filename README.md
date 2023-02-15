@@ -166,7 +166,12 @@ export GH_USER_NAME="yourGitHubAccount"
 export SUBJECT="repo:$GH_USER_NAME/aca-java-petclinic-mic-srv:ref:refs/heads/main" # "repo:organization/repository:environment:Production"
 export DESCRIPTION="GitHub Action Runner for Petclinic ACA demo"
 
+# https://github.com/Azure/azure-cli/issues/25291
 az rest --method POST --uri 'https://graph.microsoft.com/beta/applications/$SPN_OBJECT_ID/federatedIdentityCredentials' --body '{"name":"$CREDENTIAL_NAME","issuer":"https://token.actions.githubusercontent.com","subject":"$SUBJECT","description":"$DESCRIPTION","audiences":["api://AzureADTokenExchange"]}'
+
+az role assignment create --role contributor --subscription ${SUBSCRIPTION_ID} --assignee-object-id $SPN_OBJECT_ID --assignee-principal-type ServicePrincipal --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV}
+
+az role assignment create --role contributor --subscription ${SUBSCRIPTION_ID} --assignee-object-id $SPN_OBJECT_ID --assignee-principal-type ServicePrincipal --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_APP}
 
 ```
 
@@ -199,16 +204,19 @@ az provider list --output table
 az provider list --query "[?registrationState=='Registered']" --output table
 az provider list --query "[?namespace=='Microsoft.KeyVault']" --output table
 az provider list --query "[?namespace=='Microsoft.OperationsManagement']" --output table
+az provider list --query "[?namespace=='Microsoft.App']" --output table
 
 az provider register --namespace Microsoft.KeyVault
 az provider register --namespace Microsoft.ContainerRegistry
 az provider register --namespace Microsoft.ContainerService
 az provider register --namespace Microsoft.OperationalInsights 
+az provider register --namespace Microsoft.Insights 
 az provider register --namespace Microsoft.DBforMySQL
 az provider register --namespace Microsoft.DBforPostgreSQL
 az provider register --namespace Microsoft.Compute 
 az provider register --namespace Microsoft.AppConfiguration       
 az provider register --namespace Microsoft.AppPlatform
+az provider register --namespace Microsoft.App
 az provider register --namespace Microsoft.EventHub  
 az provider register --namespace Microsoft.Kubernetes 
 az provider register --namespace Microsoft.KubernetesConfiguration
