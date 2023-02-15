@@ -21,7 +21,7 @@ env:
   AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
   # ==== Versions ====
-  AZ_CLI_VERSION: 2.44.1
+  AZ_CLI_VERSION: 2.45.0
 
 on:
   workflow_dispatch:
