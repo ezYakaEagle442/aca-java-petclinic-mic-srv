@@ -1,6 +1,6 @@
 @description('A UNIQUE name')
 @maxLength(23)
-param appName string = 'iacdemo${uniqueString(resourceGroup().id)}'
+param appName string = 'petcliaca${uniqueString(resourceGroup().id)}'
 
 @description('The location of the MySQL DB.')
 param location string = resourceGroup().location
@@ -15,14 +15,34 @@ param administratorLoginPassword string
 
 @secure()
 @description('The MySQL DB Server name.')
-param serverName string
+param serverName string = appName
 
 @description('Azure Container Apps Outbound Public IP as an Array')
 param azureContainerAppsOutboundPubIP array
 
-var databaseSkuName = 'Standard_B1ms' //  'GP_Gen5_2' for single server
-var databaseSkuTier = 'Burstable' // 'GeneralPurpose'
-var mySqlVersion = '5.7' // https://docs.microsoft.com/en-us/azure/mysql/concepts-supported-versions
+// https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-deploy-on-azure-free-account
+@description('Azure database for MySQL SKU')
+@allowed([
+  'Standard_D4s_v3'
+  'Standard_D2s_v3'
+  'Standard_B1ms'
+])
+param databaseSkuName string = 'Standard_B1ms' //  'GP_Gen5_2' for single server
+
+@description('Azure database for PostgreSQL pricing tier')
+@allowed([
+  'Burstable'
+  'GeneralPurpose'
+  'MemoryOptimized'
+])
+param databaseSkuTier string = 'Burstable'
+
+@description('PostgreSQL version see https://learn.microsoft.com/en-us/azure/mysql/concepts-version-policy')
+@allowed([
+  '8.0'
+  '5.7'
+])
+param mySqlVersion string = '5.7' // https://docs.microsoft.com/en-us/azure/mysql/concepts-supported-versions
 
 resource mysqlserver 'Microsoft.DBforMySQL/flexibleServers@2021-12-01-preview' = {
   name: serverName
@@ -62,16 +82,6 @@ resource fwRuleAzureContainerApps 'Microsoft.DBforMySQL/flexibleServers/firewall
   }
 }
 */
-
-// Allow client workstation with IP 'clientIPAddress' for local Dev/Test only
-resource fwRuleClientIPAddress 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-12-01-preview' = if (setFwRuleClient) {
-  name: 'ClientIPAddress'
-  parent: mysqlserver
-  properties: {
-    startIpAddress: clientIPAddress
-    endIpAddress: clientIPAddress
-  }
-}
 
  // Allow Azure Container Apps
  resource fwRuleAllowAzureContainerApps 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-12-01-preview' = {

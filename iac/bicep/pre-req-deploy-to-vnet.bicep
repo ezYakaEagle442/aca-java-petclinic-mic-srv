@@ -45,21 +45,6 @@ param dockerBridgeCidr string = '10.42.42.0/28' // 172.17.0.1/16
 param infrastructureSubnetName string = 'snet-infra' // used for the AKS nodes
 param infrastructureSubnetCidr string = '10.42.2.0/23' // The CIDR prefix must be smaller than or equal to 23
 
-/*
-@description('The “runtime subnet” field is currently deprecated and not used. If you provide a value there during creation of your container apps environment it will be ignored. Only the infrastructure subnet is required if you wish to provide your own VNET. Resource ID of a subnet that Container App containers are injected into. This subnet must be in the same VNET as the subnet defined in infrastructureSubnetId. Must not overlap with any other provided IP ranges.')
-param runtimeSubnetCidr string = '10.42.4.0/23'
-param runtimeSubnetName string = 'snet-run' // used to deploy the Apps to Pods
-*/
-
-@description('Should a MySQL Firewall be set to allow client workstation for local Dev/Test only')
-param setFwRuleClient bool = false
-
-@description('Allow Azure Container App subnet to access MySQL DB')
-param startIpAddress string
-
-@description('Allow Azure Container App subnet to access MySQL DB')
-param endIpAddress string
-
 param zoneRedundant bool = false
 
 @description('emailRecipient informed before the VM shutdown')

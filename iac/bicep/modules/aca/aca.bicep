@@ -116,27 +116,26 @@ param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
 param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
 
 @description('The admin-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param adminServerAppIdentityName string = 'id-aca-petclinic-admin-server-dev-westeurope-101'
+param adminServerAppIdentityName string = 'id-aca-${appName}-petclinic-admin-server-dev-${location}-101'
 
 @description('The config-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param configServerAppIdentityName string = 'id-aca-petclinic-config-server-dev-westeurope-101'
+param configServerAppIdentityName string = 'id-aca-${appName}-petclinic-config-server-dev-${location}-101'
 
 @description('The api-gateway Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param apiGatewayAppIdentityName string = 'id-aca-petclinic-api-gateway-dev-westeurope-101'
+param apiGatewayAppIdentityName string = 'id-aca-${appName}-petclinic-api-gateway-dev-${location}-101'
 
 @description('The customers-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param customersServiceAppIdentityName string = 'id-aca-petclinic-customers-service-dev-westeurope-101'
+param customersServiceAppIdentityName string = 'id-aca-${appName}-petclinic-customers-service-dev-${location}-101'
 
 @description('The vets-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param vetsServiceAppIdentityName string = 'id-aca-petclinic-vets-service-dev-westeurope-101'
+param vetsServiceAppIdentityName string = 'id-aca-${appName}-petclinic-vets-service-dev-${location}-101'
 
 @description('The visits-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param visitsServiceAppIdentityName string = 'id-aca-petclinic-visits-service-dev-westeurope-101'
+param visitsServiceAppIdentityName string = 'id-aca-${appName}-petclinic-visits-service-dev-${location}-101'
 
 resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-preview' existing = {
   name: azureContainerAppEnvName
 }
-
 
 resource configServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
   name: configServerAppIdentityName
@@ -162,7 +161,7 @@ resource adminServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2
   name: adminServerAppIdentityName
 }
 
-resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
+resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-10-01' = {
   name: configServerContainerAppName
   location: location
   identity: {
@@ -315,7 +314,7 @@ output configServerContainerAppIngressFqdn string = ConfigServerContainerApp.pro
 output configServerContainerAppConfigSecrets array = ConfigServerContainerApp.properties.configuration.secrets
 
 
-resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
+resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-10-01' = {
   name: customersServiceContainerAppName
   location: location
   identity: {
@@ -476,7 +475,7 @@ output customersServiceContainerAppLatestRevisionFqdn string = CustomersServiceC
 output customersServiceContainerAppIngressFqdn string = CustomersServiceContainerApp.properties.configuration.ingress.fqdn
 output customersServiceContainerAppConfigSecrets array = CustomersServiceContainerApp.properties.configuration.secrets
 
-resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
+resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-10-01' = {
   name: vetsServiceContainerAppName
   location: location
   identity: {
@@ -625,7 +624,7 @@ output vetsServiceContainerAppLatestRevisionFqdn string = VetsServiceContainerAp
 output vetsServiceContainerAppIngressFqdn string = VetsServiceContainerApp.properties.configuration.ingress.fqdn
 output vetsServiceContainerAppConfigSecrets array = VetsServiceContainerApp.properties.configuration.secrets
 
-resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
+resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-10-01' = {
   name: visitsServiceContainerAppName
   location: location
   identity: {

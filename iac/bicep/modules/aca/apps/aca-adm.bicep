@@ -53,7 +53,7 @@ param imageNameAdminServer string
 param adminServerContainerAppName string = 'aca-${appName}-admin-server'
 
 @description('The admin-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param adminServerAppIdentityName string = 'id-aca-petclinic-admin-server-dev-westeurope-101'
+param adminServerAppIdentityName string = 'id-aca-${appName}-petclinic-admin-server-dev-${location}-101'
 
 resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-preview' existing = {
   name: azureContainerAppEnvName

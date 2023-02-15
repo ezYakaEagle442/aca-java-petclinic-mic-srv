@@ -53,9 +53,9 @@ param imageNameConfigServer string
 param configServerContainerAppName string = 'aca-${appName}-config-server'
 
 @description('The config-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param configServerAppIdentityName string = 'id-aca-petclinic-config-server-dev-westeurope-101'
+param configServerAppIdentityName string = 'id-aca-${appName}-petclinic-config-server-dev-${location}-101'
 
-resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' existing = {
+resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-10-01' existing = {
   name: azureContainerAppEnvName
 }
 
@@ -67,11 +67,11 @@ resource ACR 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
   name: acrName
 }
 
-resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing = {
+resource appInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: appInsightsName
 }
 
-resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
+resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-10-01' = {
   name: configServerContainerAppName
   location: location
   identity: {

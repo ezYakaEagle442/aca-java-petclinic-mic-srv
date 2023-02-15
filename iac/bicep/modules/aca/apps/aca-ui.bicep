@@ -86,18 +86,9 @@ param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
 param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
   
 @description('The api-gateway Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param apiGatewayAppIdentityName string = 'id-aca-petclinic-api-gateway-dev-westeurope-101'
+param apiGatewayAppIdentityName string = 'id-aca-${appName}-petclinic-api-gateway-dev-${location}-101'
 
-@description('The customers-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param customersServiceAppIdentityName string = 'id-aca-petclinic-customers-service-dev-westeurope-101'
-
-@description('The vets-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param vetsServiceAppIdentityName string = 'id-aca-petclinic-vets-service-dev-westeurope-101'
-
-@description('The visits-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param visitsServiceAppIdentityName string = 'id-aca-petclinic-visits-service-dev-westeurope-101'
-
-resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' existing = {
+resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-10-01' existing = {
   name: azureContainerAppEnvName
 }
 
@@ -105,31 +96,31 @@ resource apiGatewayIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@20
   name: apiGatewayAppIdentityName
 }
 
-resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
+resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-10-01' existing = {
   name: configServerContainerAppName
 }
 
-resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
+resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-10-01' existing = {
   name: customersServiceContainerAppName
 }
 
-resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
+resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-10-01' existing = {
   name: vetsServiceContainerAppName
 }
 
-resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
+resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-10-01' existing = {
   name: visitsServiceContainerAppName
 }
 
-resource ACR 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
+resource ACR 'Microsoft.ContainerRegistry/registries@2021-12-01-preview' existing = {
   name: acrName
 }
 
-resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing = {
+resource appInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: appInsightsName
 }
 
-resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
+resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-10-01' = {
   name: apiGatewayContainerAppName
   location: location
   identity: {

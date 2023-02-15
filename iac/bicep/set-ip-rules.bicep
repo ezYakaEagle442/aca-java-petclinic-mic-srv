@@ -4,12 +4,6 @@
 param appName string = 'petcliaca${uniqueString(resourceGroup().id)}'
 param location string = resourceGroup().location
 
-@description('Should a MySQL Firewall be set to allow client workstation for local Dev/Test only')
-param setFwRuleClient bool = false
-
-@description('Allow client workstation IP adress for local Dev/Test only, requires setFwRuleClient=true')
-param clientIPAddress string
-
 @description('Allow Azure Container App subnet to access MySQL DB')
 param startIpAddress string
 
@@ -71,10 +65,6 @@ module mysqlPub './modules/mysql/mysql.bicep' = {
   params: {
     appName: appName
     location: location
-    setFwRuleClient: setFwRuleClient
-    clientIPAddress: clientIPAddress
-    startIpAddress: startIpAddress
-    endIpAddress: endIpAddress
     serverName: dbServerName
     administratorLogin: administratorLogin
     administratorLoginPassword: kv.getSecret('SPRING-DATASOURCE-PASSWORD')
