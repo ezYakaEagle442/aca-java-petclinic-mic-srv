@@ -60,7 +60,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Azure Login
-      uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
+      uses: azure/login@v1 # https://github.com/marketplace/actions/azure-login
       with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -68,6 +68,7 @@ jobs:
 
     - name: Deploy Azure Container Apps
       run: |
+
           echo "About to call ACA, roleAssignments and KV Module iac/bicep/petclinic-apps.bicep#284" 
           tag_id=${{ inputs.tag_id }} 
           echo "Image Build tag ID:"$tag_id
@@ -123,13 +124,15 @@ jobs:
 
     - name: Configure Diagnostic-Settings
       run: |
+
           echo "ACA does not yet support diagnostic settings, see https://github.com/microsoft/azure-container-apps/issues/382" 
-          
           # az deployment group create --name aca-petclinic-apps -f iac/bicep/modules/aca/diagnostic-settings.bicep -g ${{ env.RG_APP }} \
+
       shell: bash
 
     - name: Configure GitHub-Action-Settings
-      run: |   
+      run: |
+
           echo "To be tested ..."       
           # az deployment group create --name aca-petclinic-apps -f iac/bicep/modules/aca/gha-settings.bicep -g ${{ env.RG_APP }} \
 

@@ -77,6 +77,7 @@ jobs:
     - name: Deploy Config-Server to ACA
       # with: # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepswith
       run: |
+
           echo "About to deploy Config-Server ..." 
           tag_id=${{ inputs.tag_id }}
           echo "Image Build tag ID:"$tag_id
@@ -95,13 +96,15 @@ jobs:
 
     - name: Configure Diagnostic-Settings
       run: |
-          echo "ACA does not yet support diagnostic settings, see https://github.com/microsoft/azure-container-apps/issues/382" 
-          
-          # az deployment group create --name aca-petclinic-apps -f iac/bicep/modules/aca/diagnostic-settings.bicep -g ${{ env.RG_APP }} \
+
+          echo "ACA does not yet support diagnostic settings, see https://github.com/microsoft/azure-container-apps/issues/382"           
+          # az deployment group create --name aca-petclinic-apps -f iac/bicep/modules/aca/diagnostic-settings.bicep -g ${{ env.RG_APP }}
+
       shell: bash
 
     - name: Configure GitHub-Action-Settings
-      run: |   
+      run: |
+
           echo "To be tested ..."       
           # az deployment group create --name aca-petclinic-apps -f iac/bicep/modules/aca/gha-settings.bicep -g ${{ env.RG_APP }} \
 

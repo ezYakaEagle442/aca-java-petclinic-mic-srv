@@ -83,6 +83,7 @@ jobs:
     # /!\ IMPORTANT:  The step that creates or updates the environment variable does not have access to the new value, but all subsequent steps in a job will have access.
     - name: Set Base environment variables
       run: |
+
         echo "LOCAL_IP=$(curl whatismyip.akamai.com)" >> $GITHUB_ENV
         
         echo "API_GATEWAY_JAR_ARTIFACT=${{ env.PRJ_PREFIX }}-${{ env.API_GATEWAY }}-${{ env.DEPLOYMENT_VERSION }}.jar" >> $GITHUB_ENV
@@ -130,6 +131,7 @@ jobs:
     - name: Build with Maven
       id: mvn_build
       run: |
+
         pwd
         ls -al
 
@@ -167,6 +169,7 @@ jobs:
     # https://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html#altDeploymentRepository
     - name:  Publish the Maven package
       run: |
+
         mkdir -p ~/.m2
         echo "<settings><servers><server><id>github-aca</id><username>$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')</username><password>\${env.GITHUB_TOKEN}</password></server></servers></settings>" > ~/.m2/settings.xml
         REPO="github-aca::default::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
@@ -175,9 +178,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
     - name: Check all Jar artifacts
       run: |
+
         pwd
         ls -al
 
@@ -195,7 +198,7 @@ jobs:
       uses: docker/setup-buildx-action@v2.0.0
 
     - name: Azure Login
-      uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
+      uses: azure/login@v1 # https://github.com/marketplace/actions/azure-login
       with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}

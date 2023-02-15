@@ -25,7 +25,7 @@ env:
   AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
   # ==== Versions ====
-  AZ_CLI_VERSION: 2.44.1
+  AZ_CLI_VERSION: 2.45.0
 
 on:
   workflow_dispatch:
@@ -42,17 +42,18 @@ jobs:
     steps:
 
     - name: Azure Login
-      uses: azure/login@v1.4.6 # https://github.com/marketplace/actions/azure-login
+      uses: azure/login@v1 # https://github.com/marketplace/actions/azure-login
       with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     - name: Delete Apps
-      uses: azure/CLI@v1.0.6 # https://github.com/marketplace/actions/azure-cli-action
+      uses: azure/CLI@v1 # https://github.com/marketplace/actions/azure-cli-action
       with:
         azcliversion: ${{ env.AZ_CLI_VERSION }}
         inlineScript: |
+
           az config set extension.use_dynamic_install=yes_without_prompt
           
           az containerapp list -g ${{ env.RG_APP }}
