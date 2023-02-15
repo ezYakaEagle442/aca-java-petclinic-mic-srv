@@ -1,7 +1,7 @@
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.appplatform/spring?tabs=bicep
 @description('A UNIQUE name')
 @maxLength(20)
-param appName string = '101-${uniqueString(deployment().name)}'
+param appName string = 'petcliaca${uniqueString(deployment().name)}'
 
 @description('The Log Analytics workspace name used by Azure Container App instance')
 param logAnalyticsWorkspaceName string = 'log-${appName}'
@@ -36,27 +36,27 @@ resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-pr
 }
 
 // https://learn.microsoft.com/en-us/azure/templates/microsoft.app/containerapps?pivots=deployment-language-bicep
-resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
+resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-10-01' existing = {
   name: adminServerContainerAppName
 }
 
-resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
+resource ApiGatewayContainerApp 'Microsoft.App/containerApps@2022-10-01' existing = {
   name: apiGatewayContainerAppName
 }
 
-resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
+resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-10-01' existing = {
   name: configServerContainerAppName
 }
 
-resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
+resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-10-01' existing = {
   name: customersServiceContainerAppName
 }
 
-resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
+resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-10-01' existing = {
   name: vetsServiceContainerAppName
 }
 
-resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
+resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-10-01' existing = {
   name: visitsServiceContainerAppName
 }
 

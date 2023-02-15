@@ -1,8 +1,8 @@
 // Check the REST API : https://docs.microsoft.com/en-us/rest/api/containerapps/
-@maxLength(20)
+@maxLength(23)
 // to get a unique name each time ==> param appName string = 'demo${uniqueString(resourceGroup().id, deployment().name)}'
 param appName string = 'petcliaca${uniqueString(resourceGroup().id)}'
-param location string = 'westeurope'
+param location string = resourceGroup().location
 
 @description('Should a MySQL Firewall be set to allow client workstation for local Dev/Test only')
 param setFwRuleClient bool = false
@@ -45,7 +45,7 @@ resource kvRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
 // Must allow ACA to access Existing KV
 
 
-resource HelloTestApp 'Microsoft.App/containerApps@2022-03-01' existing = {
+resource HelloTestApp 'Microsoft.App/containerApps@2022-10-01' existing = {
   name: 'hello-test'
 }
 
@@ -53,6 +53,7 @@ module kvsetiprules './modules/kv/kv.bicep' = {
   name: 'kv-set-iprules'
   scope: kvRG
   params: {
+    appName: appName
     kvName: kvName
     location: location
     ipRules: HelloTestApp.properties.outboundIPAddresses

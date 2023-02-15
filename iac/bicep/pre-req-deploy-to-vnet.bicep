@@ -1,9 +1,9 @@
 // Check the REST API : https://docs.microsoft.com/en-us/rest/api/containerapps/
 
-@maxLength(20)
+@maxLength(23)
 // to get a unique name each time ==> param appName string = 'demo${uniqueString(resourceGroup().id, deployment().name)}'
 param appName string = 'petcliaca${uniqueString(resourceGroup().id)}'
-param location string = 'westeurope'
+param location string = resourceGroup().location
 param acrName string = 'acr${appName}'
 
 @description('The Azure Container App Environment name')
@@ -54,9 +54,6 @@ param runtimeSubnetName string = 'snet-run' // used to deploy the Apps to Pods
 @description('Should a MySQL Firewall be set to allow client workstation for local Dev/Test only')
 param setFwRuleClient bool = false
 
-@description('Allow client workstation IP adress for local Dev/Test only, requires setFwRuleClient=true')
-param clientIPAddress string
-
 @description('Allow Azure Container App subnet to access MySQL DB')
 param startIpAddress string
 
@@ -90,7 +87,7 @@ param kvName string = 'kv-${appName}'
 @description('The name of the KV RG')
 param kvRGName string
 
-resource kvRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
+resource kvRG 'Microsoft.Resources/resourceGroups@2022-09-01' existing = {
   name: kvRGName
   scope: subscription()
 }
@@ -166,7 +163,7 @@ module vnetModule './modules/aca/vnet.bicep' = if (deployToVNet) {
 // should apply only when deployToVNet=true
 //
 
-resource vnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = if (deployToVNet) {
+resource vnet 'Microsoft.Network/virtualNetworks@2022-07-01' existing = if (deployToVNet) {
   name: vnetName
 }
 
@@ -200,14 +197,10 @@ module mysqlWithCorpEnv './modules/mysql/mysql.bicep' = if (deployToVNet) {
   params: {
     appName: appName
     location: location
-    setFwRuleClient: setFwRuleClient
-    clientIPAddress: clientIPAddress
-    startIpAddress: startIpAddress
-    endIpAddress: endIpAddress
     serverName: kv.getSecret('MYSQL-SERVER-NAME')
     administratorLogin: kv.getSecret('SPRING-DATASOURCE-USERNAME')
     administratorLoginPassword: kv.getSecret('SPRING-DATASOURCE-PASSWORD')
-    azureContainerAppsOutboundPubIP: corpManagedEnvironment.outputs.corpManagedEnvironmentStaticIp
+    azureContainerAppsOutboundPubIP: [corpManagedEnvironment.outputs.corpManagedEnvironmentStaticIp]
   }
 }
 

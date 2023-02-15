@@ -1,9 +1,9 @@
 // Check the REST API : https://docs.microsoft.com/en-us/rest/api/containerapps/
 
-@maxLength(20)
+@maxLength(23)
 // to get a unique name each time ==> param appName string = 'demo${uniqueString(resourceGroup().id, deployment().name)}'
 param appName string = 'petcliaca${uniqueString(resourceGroup().id)}'
-param location string = 'westeurope'
+param location string = resourceGroup().location
 param acrName string = 'acr${appName}'
 
 @description('The Azure Container App Environment name')

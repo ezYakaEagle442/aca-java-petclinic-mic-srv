@@ -1,5 +1,5 @@
 @description('A UNIQUE name')
-@maxLength(20)
+@maxLength(23)
 param appName string = 'iacdemo${uniqueString(resourceGroup().id)}'
 
 @description('The location of the MySQL DB.')
@@ -19,18 +19,6 @@ param serverName string
 
 @description('Azure Container Apps Outbound Public IP as an Array')
 param azureContainerAppsOutboundPubIP array
-
-@description('Should a MySQL Firewall be set to allow client workstation for local Dev/Test only')
-param setFwRuleClient bool = false
-
-@description('Allow client workstation IP adress for local Dev/Test only, requires setFwRuleClient=true')
-param clientIPAddress string
-
-@description('Allow Azure Container Apps from Apps subnet to access MySQL DB')
-param startIpAddress string
-
-@description('Allow Azure Container Apps from Apps subnet to access MySQL DB')
-param endIpAddress string
 
 var databaseSkuName = 'Standard_B1ms' //  'GP_Gen5_2' for single server
 var databaseSkuTier = 'Burstable' // 'GeneralPurpose'

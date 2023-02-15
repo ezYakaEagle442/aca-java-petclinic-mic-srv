@@ -1,8 +1,8 @@
 
-@maxLength(20)
+@maxLength(23)
 // to get a unique name each time ==> param appName string = 'demo${uniqueString(resourceGroup().id, deployment().name)}'
 param appName string = 'petcliaca${uniqueString(resourceGroup().id)}'
-param location string = 'westeurope'
+param location string = resourceGroup().location
 
 @description('The Azure Container App Environment name')
 param azureContainerAppEnvName string = 'aca-env-${appName}'
@@ -64,11 +64,11 @@ module vnetModule 'vnet.bicep' = {
   }   
 }
 
-resource vnet 'Microsoft.Network/virtualNetworks@2022-05-01' existing = {
+resource vnet 'Microsoft.Network/virtualNetworks@2022-07-01' existing = {
   name: vnetName
 }
 
-resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-preview' =  {
+resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-10-01' =  {
   name: azureContainerAppEnvName
   location: location
   properties: {

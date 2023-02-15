@@ -19,11 +19,11 @@
 // Check the REST API : https://docs.microsoft.com/en-us/rest/api/containerapps/
 
 
-@maxLength(20)
+@maxLength(23)
 // to get a unique name each time ==> param appName string = 'demo${uniqueString(resourceGroup().id, deployment().name)}'
 param appName string = 'petcliaca${uniqueString(resourceGroup().id)}'
 
-param location string = 'westeurope'
+param location string = resourceGroup().location
 // param rgName string = 'rg-${appName}'
 
 @maxLength(24)
@@ -103,11 +103,11 @@ param imageNameVetsService string
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-visits-service:{{ github.sha }}')
 param imageNameVisitsService string
 
-resource vnet 'Microsoft.Network/virtualNetworks@2022-05-01' existing = if (deployToVNet) {
+resource vnet 'Microsoft.Network/virtualNetworks@2022-07-01' existing = if (deployToVNet) {
   name: vnetName
 }
 
-resource ACR 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' existing = {
+resource ACR 'Microsoft.ContainerRegistry/registries@2022-12-01' existing = {
   name: acrName
 }
 
@@ -115,7 +115,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: appInsightsName
 }
 
-resource kvRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
+resource kvRG 'Microsoft.Resources/resourceGroups@2022-09-01' existing = {
   name: kvRGName
   scope: subscription()
 }
@@ -167,29 +167,6 @@ module azurecontainerapp './modules/aca/aca.bicep' = {
   }
 }
 
-// https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/scope-extension-resources
-/*
-module roleAssignments './modules/aca/roleAssignments.bicep' = {
-  name: 'role-assignments'
-  params: {
-    acrName: acrName
-    acrRoleType: 'AcrPull'
-    acaAdminServerPrincipalId: azurecontainerapp.outputs.adminServerContainerAppIdentity
-    acaCustomersServicePrincipalId: azurecontainerapp.outputs.customersServiceContainerAppIdentity
-    acaVetsServicePrincipalId: azurecontainerapp.outputs.vetsServiceContainerAppNameContainerAppIdentity
-    acaVisitsServicePrincipalId: azurecontainerapp.outputs.visitsServiceContainerAppIdentity
-    acaApiGatewayPrincipalId: azurecontainerapp.outputs.apiGatewayContainerAppIdentity
-    acaConfigServerPrincipalId: azurecontainerapp.outputs.configServerContainerAppIdentity
-    kvName: kvName
-    kvRGName: kvRGName
-    kvRoleType: 'KeyVaultSecretsUser'
-    //vnetName: vnetName
-    //subnetName: infrastructureSubnetName
-    //networkRoleType: 'Owner'
-    //
-  }
-}
-*/
 
 // https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/key-vault-parameter?tabs=azure-cli
 /*
