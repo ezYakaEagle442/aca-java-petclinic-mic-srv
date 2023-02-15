@@ -261,11 +261,7 @@ jobs:
             -p acrName=${{ env.AZURE_CONTAINER_REGISTRY }} \
             -p azureContainerAppEnvName=${{ env.ACA_ENV_NAME }} \
             -p dnsSuffix=${{ env.ACA_ENV_DNS_DUFFIX }} \
-            -p setFwRuleClient=false \
-            -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
-            -p clientIPAddress="10.0.0.0" \
-            -p startIpAddress="10.0.0.0" \
-            -p endIpAddress="10.0.0.255"
+            -p deployToVNet=${{ env.DEPLOY_TO_VNET }}
             
             az deployment group show \
               -g ${{ env.RG_APP }} \
@@ -334,11 +330,7 @@ jobs:
               -p administratorLogin=${{ env.MYSQL_ADM_USR }} \
               -p dbServerName=${{ env.MYSQL_SERVER_NAME }} \
               -p vNetRules=[] \
-              -p ipRules=[] \
-              -p setFwRuleClient=false \
-              -p clientIPAddress="10.0.0.0" \
-              -p startIpAddress="10.0.0.0" \
-              -p endIpAddress="10.0.0.255"
+              -p ipRules=[]
 
             az containerapp delete --name hello-test -g ${{ env.RG_APP }} --yes
             echo "hello-test ACA test deleted"

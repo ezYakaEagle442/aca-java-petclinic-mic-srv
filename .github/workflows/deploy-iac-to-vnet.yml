@@ -186,9 +186,6 @@ jobs:
             -p setFwRuleClient=false \
             -p deployToVNet=${{ env.DEPLOY_TO_VNET }} \
             -p autoShutdownNotificationEmail="toto@groland.grd" \
-            -p clientIPAddress=$LOCAL_IP \
-            -p startIpAddress="10.42.2.0" \
-            -p endIpAddress="10.42.3.255" \
             -p nsgRuleSourceAddressPrefix="10.0.0.0/16"
             
             az deployment group show \

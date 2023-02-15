@@ -4,12 +4,6 @@
 param appName string = 'petcliaca${uniqueString(resourceGroup().id)}'
 param location string = resourceGroup().location
 
-@description('Allow Azure Container App subnet to access MySQL DB')
-param startIpAddress string
-
-@description('Allow Azure Container App subnet to access MySQL DB')
-param endIpAddress string
-
 @maxLength(24)
 @description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
 param kvName string = 'kv-${appName}'
