@@ -1,6 +1,6 @@
 @description('A UNIQUE name')
 @maxLength(23)
-param appName string = 'petcliaca${uniqueString(resourceGroup().id)}'
+param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The location of the MySQL DB.')
 param location string = resourceGroup().location
@@ -69,6 +69,9 @@ resource mysqlserver 'Microsoft.DBforMySQL/flexibleServers@2021-12-01-preview' =
 }
 
 output mySQLResourceID string = mysqlserver.id
+output mySQLServerName string = mysqlserver.name
+output mySQLServerFQDN string = mysqlserver.properties.fullyQualifiedDomainName
+output mySQLServerAdminLogin string = mysqlserver.properties.administratorLogin
 
 // Add firewall config to allow Azure Container Apps :
 // virtualNetwork FirewallRules to Allow public access from Azure services 

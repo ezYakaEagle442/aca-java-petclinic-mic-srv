@@ -1,11 +1,17 @@
+@description('A UNIQUE name')
+@maxLength(23)
+param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+
 @allowed([
   'AcrPull'
   'AcrPush'
 ])
 @description('ACR Built-in role to assign')
-param acrRoleType string
+param acrRoleType string = 'AcrPull'
 
-param acrName string
+// https://docs.microsoft.com/en-us/rest/api/containerregistry/registries/check-name-availability
+@description('The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.')
+param acrName string = 'acr${appName}' // ==> $acr_registry_name.azurecr.io
 
 param acaCustomersServicePrincipalId string
 param acaVetsServicePrincipalId string

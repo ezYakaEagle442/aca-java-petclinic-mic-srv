@@ -2,7 +2,7 @@
 
 @description('A UNIQUE name')
 @maxLength(23)
-param appName string = 'petcliaca${uniqueString(deployment().name)}'
+param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The Identity location')
 param location string = resourceGroup().location

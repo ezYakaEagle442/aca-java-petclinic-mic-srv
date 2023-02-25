@@ -1,7 +1,7 @@
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.appplatform/spring?tabs=bicep
 @description('A UNIQUE name')
 @maxLength(23)
-param appName string = 'petcliaca${uniqueString(deployment().name)}'
+param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
@@ -112,7 +112,7 @@ resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-10-01' exis
   name: visitsServiceContainerAppName
 }
 
-resource ACR 'Microsoft.ContainerRegistry/registries@2021-12-01-preview' existing = {
+resource ACR 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existing = {
   name: acrName
 }
 

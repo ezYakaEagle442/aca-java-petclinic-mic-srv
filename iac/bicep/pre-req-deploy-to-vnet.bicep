@@ -1,8 +1,9 @@
 // Check the REST API : https://docs.microsoft.com/en-us/rest/api/containerapps/
 
+@description('A UNIQUE name')
 @maxLength(23)
-// to get a unique name each time ==> param appName string = 'demo${uniqueString(resourceGroup().id, deployment().name)}'
-param appName string = 'petcliaca${uniqueString(resourceGroup().id)}'
+param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+
 param location string = resourceGroup().location
 param acrName string = 'acr${appName}'
 
@@ -116,6 +117,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 output appInsightsId string = appInsights.id
+output appInsightsName string = appInsights.name
 output appInsightsConnectionString string = appInsights.properties.ConnectionString
 output appInsightsInstrumentationKey string = appInsights.properties.InstrumentationKey
 

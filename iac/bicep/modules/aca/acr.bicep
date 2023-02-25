@@ -1,6 +1,6 @@
 @description('A UNIQUE name')
-@maxLength(20)
-param appName string = 'petcliaca${uniqueString(deployment().name)}'
+@maxLength(23)
+param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
 
 // https://docs.microsoft.com/en-us/rest/api/containerregistry/registries/check-name-availability
 @description('The name of the ACR, must be UNIQUE. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.')
@@ -46,6 +46,7 @@ resource acr 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' = {
 }
 
 output acrId string = acr.id
+output acrName string = acr.name
 output acrIdentity string = acr.identity.principalId
 output acrType string = acr.type
 output acrRegistryUrl string = acr.properties.loginServer

@@ -1,7 +1,9 @@
 
-@maxLength(20)
 // to get a unique name each time ==> param appName string = 'demo${uniqueString(resourceGroup().id, deployment().name)}'
-param appName string = 'petcliaca${uniqueString(resourceGroup().id)}'
+@description('A UNIQUE name')
+@maxLength(23)
+param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+
 param location string = resourceGroup().location
 
 @description('The Azure Container App Environment name')
@@ -61,6 +63,7 @@ resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-pr
 }
 
 output corpManagedEnvironmentId string = corpManagedEnvironment.id 
+output corpManagedEnvironmentName string = corpManagedEnvironment.name
 output corpManagedEnvironmentDefaultDomain string = corpManagedEnvironment.properties.defaultDomain
 output corpManagedEnvironmentStaticIp string = corpManagedEnvironment.properties.staticIp
 

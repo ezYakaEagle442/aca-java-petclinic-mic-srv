@@ -1,8 +1,8 @@
 // https://github.com/cwe1ss/msa-template/blob/main/infrastructure/environment/monitoring.bicep
 
-@maxLength(20)
-// to get a unique name each time ==> param appName string = 'demo${uniqueString(resourceGroup().id, deployment().name)}'
-param appName string = 'petcliaca${uniqueString(resourceGroup().id)}'
+@description('A UNIQUE name')
+@maxLength(23)
+param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The location')
 param location string = resourceGroup().location

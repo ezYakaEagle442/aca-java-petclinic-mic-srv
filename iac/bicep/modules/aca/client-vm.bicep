@@ -1,8 +1,8 @@
 // See https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.compute/vm-simple-windows/main.bicep
 
 @description('A UNIQUE name')
-@maxLength(20)
-param appName string = 'petcliaca${uniqueString(deployment().name)}'
+@maxLength(23)
+param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
@@ -34,7 +34,7 @@ param nicName string = 'nic-aca-${appName}-client-vm'
 @description('emailRecipient informed before the VM shutdown')
 param autoShutdownNotificationEmail string
 
-resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing =  {
+resource vnet 'Microsoft.Network/virtualNetworks@2022-07-01' existing =  {
   name: vnetName
 }
 output vnetId string = vnet.id
@@ -126,7 +126,7 @@ var unattendSetLocalRegionFirstRunXML = '<FirstLogonCommands><SynchronousCommand
 var customScript = 'Set-WinSystemLocale fr-FR\\r\\nSet-WinUserLanguageList -LanguageList fr-FR -Force\\r\\nSet-Culture -CultureInfo fr-FR\\r\\nSet-WinHomeLocation -GeoId 84\\r\\nRestart-Computer -Force'
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.compute/virtualmachines?tabs=bicep
-resource windowsVM 'Microsoft.Compute/virtualMachines@2022-08-01' = {
+resource windowsVM 'Microsoft.Compute/virtualMachines@2022-11-01' = {
   name: windowsVMName
   location: location
   properties: {
@@ -195,6 +195,8 @@ resource windowsVM 'Microsoft.Compute/virtualMachines@2022-08-01' = {
   }
 }
 
+output windowsVMName string = windowsVM.name
+output windowsVMId string = windowsVM.id
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.devtestlab/schedules?tabs=bicep
 resource AutoShutdownSchedule 'Microsoft.DevTestLab/schedules@2018-09-15' = {

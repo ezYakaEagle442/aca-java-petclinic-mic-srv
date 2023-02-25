@@ -97,6 +97,7 @@ resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-10-01' =
   ]
 }
 
-output corpManagedEnvironmentId string = corpManagedEnvironment.id 
+output corpManagedEnvironmentId string = corpManagedEnvironment.id
+output corpManagedEnvironmentName string = corpManagedEnvironment.name
 output corpManagedEnvironmentDefaultDomain string = corpManagedEnvironment.properties.defaultDomain
 output corpManagedEnvironmentStaticIp string = corpManagedEnvironment.properties.staticIp

@@ -1,7 +1,7 @@
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.appplatform/spring?tabs=bicep
 @description('A UNIQUE name')
 @maxLength(23)
-param appName string = 'petcliaca${uniqueString(deployment().name)}'
+param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
@@ -87,9 +87,6 @@ param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
 @description('The Azure Container App instance name for visits-service')
 param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
 
-@description('The api-gateway Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
-param apiGatewayAppIdentityName string = 'id-aca-${appName}-petclinic-api-gateway-dev-${location}-101'
-
 @description('The customers-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param customersServiceAppIdentityName string = 'id-aca-${appName}-petclinic-customers-service-dev-${location}-101'
 
@@ -99,8 +96,7 @@ param vetsServiceAppIdentityName string = 'id-aca-${appName}-petclinic-vets-serv
 @description('The visits-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param visitsServiceAppIdentityName string = 'id-aca-${appName}-petclinic-visits-service-dev-${location}-101'
 
-
-resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' existing = {
+resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-10-01' existing = {
   name: azureContainerAppEnvName
 }
 
@@ -116,11 +112,11 @@ resource visitsServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities
   name: visitsServiceAppIdentityName
 }
 
-resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' existing = {
+resource ConfigServerContainerApp 'Microsoft.App/containerApps@2022-10-01' existing = {
   name: configServerContainerAppName
 }
 
-resource ACR 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
+resource ACR 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existing = {
   name: acrName
 }
 
@@ -136,7 +132,7 @@ param springCloudAzureTenantId string
 @description('The Azure Key Vault EndPoint that should be used by Key Vault in the Spring Config. Ex: https://<key-vault-name>.vault.azure.net')
 param springCloudAzureKeyVaultEndpoint string
 
-resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
+resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-10-01' = {
   name: customersServiceContainerAppName
   location: location
   identity: {
@@ -304,7 +300,7 @@ output customersServiceContainerAppLatestRevisionFqdn string = CustomersServiceC
 output customersServiceContainerAppIngressFqdn string = CustomersServiceContainerApp.properties.configuration.ingress.fqdn
 output customersServiceContainerAppConfigSecrets array = CustomersServiceContainerApp.properties.configuration.secrets
 
-resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
+resource VetsServiceContainerApp 'Microsoft.App/containerApps@2022-10-01' = {
   name: vetsServiceContainerAppName
   location: location
   identity: {
@@ -455,7 +451,7 @@ output vetsServiceContainerAppLatestRevisionFqdn string = VetsServiceContainerAp
 output vetsServiceContainerAppIngressFqdn string = VetsServiceContainerApp.properties.configuration.ingress.fqdn
 output vetsServiceContainerAppConfigSecrets array = VetsServiceContainerApp.properties.configuration.secrets
 
-resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
+resource VisitsServiceContainerApp 'Microsoft.App/containerApps@2022-10-01' = {
   name: visitsServiceContainerAppName
   location: location
   identity: {

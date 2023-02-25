@@ -1,7 +1,7 @@
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.appplatform/spring?tabs=bicep
 @description('A UNIQUE name')
 @maxLength(23)
-param appName string = 'petcliaca${uniqueString(deployment().name)}'
+param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
@@ -55,7 +55,7 @@ param adminServerContainerAppName string = 'aca-${appName}-admin-server'
 @description('The admin-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param adminServerAppIdentityName string = 'id-aca-${appName}-petclinic-admin-server-dev-${location}-101'
 
-resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-preview' existing = {
+resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-10-01' existing = {
   name: azureContainerAppEnvName
 }
 
@@ -63,7 +63,7 @@ resource adminServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2
   name: adminServerAppIdentityName
 }
 
-resource ACR 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' existing = {
+resource ACR 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existing = {
   name: acrName
 }
 
@@ -71,7 +71,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: appInsightsName
 }
 
-resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
+resource AdminServerContainerApp 'Microsoft.App/containerApps@2022-10-01' = {
   name: adminServerContainerAppName
   location: location
   identity: {
