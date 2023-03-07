@@ -22,7 +22,18 @@ param ipRules array
 param administratorLogin string = 'mys_adm'
 
 @description('The MySQL DB Server name.')
-param dbServerName string = 'petcliaca'
+param dbServerName string = appName
+
+@description('The MySQL DB name.')
+param dbName string = 'petclinic'
+
+param charset string = 'utf8'
+
+@allowed( [
+  'utf8_general_ci'
+
+])
+param collation string = 'utf8_general_ci' // SELECT @@character_set_database, @@collation_database;
 
 resource kvRG 'Microsoft.Resources/resourceGroups@2022-09-01' existing = {
   name: kvRGName
@@ -61,6 +72,9 @@ module mysqlPub './modules/mysql/mysql.bicep' = {
     appName: appName
     location: location
     serverName: dbServerName
+    dbName: dbName
+    charset: charset
+    collation: collation
     administratorLogin: administratorLogin
     administratorLoginPassword: kv.getSecret('SPRING-DATASOURCE-PASSWORD')
     azureContainerAppsOutboundPubIP: HelloTestApp.properties.outboundIPAddresses

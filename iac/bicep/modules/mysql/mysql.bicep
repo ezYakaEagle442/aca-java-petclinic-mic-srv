@@ -5,17 +5,18 @@ param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription
 @description('The location of the MySQL DB.')
 param location string = resourceGroup().location
 
-@secure()
 @description('The MySQL DB Admin Login.')
-param administratorLogin string
+param administratorLogin string = 'mys_adm'
 
 @secure()
 @description('The MySQL DB Admin Password.')
 param administratorLoginPassword string
 
-@secure()
 @description('The MySQL DB Server name.')
 param serverName string = appName
+
+@description('The MySQL DB name.')
+param dbName string = 'petclinic'
 
 @description('Azure Container Apps Outbound Public IP as an Array')
 param azureContainerAppsOutboundPubIP array
@@ -43,6 +44,14 @@ param databaseSkuTier string = 'Burstable'
   '5.7'
 ])
 param mySqlVersion string = '5.7' // https://docs.microsoft.com/en-us/azure/mysql/concepts-supported-versions
+
+param charset string = 'utf8'
+
+@allowed( [
+  'utf8_general_ci'
+
+])
+param collation string = 'utf8_general_ci' // SELECT @@character_set_database, @@collation_database;
 
 resource mysqlserver 'Microsoft.DBforMySQL/flexibleServers@2021-12-01-preview' = {
   name: serverName
@@ -73,18 +82,17 @@ output mySQLServerName string = mysqlserver.name
 output mySQLServerFQDN string = mysqlserver.properties.fullyQualifiedDomainName
 output mySQLServerAdminLogin string = mysqlserver.properties.administratorLogin
 
-// Add firewall config to allow Azure Container Apps :
-// virtualNetwork FirewallRules to Allow public access from Azure services 
-/*
-resource fwRuleAzureContainerApps 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-05-01' = {
-  name: 'Allow-Azure-Container-AppsIpRange'
+resource mysqlDB 'Microsoft.DBforMySQL/flexibleServers/databases@2021-12-01-preview' = {
+  name: dbName
   parent: mysqlserver
   properties: {
-    startIpAddress: startIpAddress
-    endIpAddress: endIpAddress
+    charset: charset
+    collation: collation
   }
 }
-*/
+
+output mysqlDBResourceId string = mysqlDB.id
+output mysqlDBName string = mysqlDB.name
 
  // Allow Azure Container Apps
  resource fwRuleAllowAzureContainerApps 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2021-12-01-preview' = {
