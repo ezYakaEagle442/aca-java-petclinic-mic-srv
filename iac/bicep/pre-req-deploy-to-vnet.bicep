@@ -1,8 +1,8 @@
 // Check the REST API : https://docs.microsoft.com/en-us/rest/api/containerapps/
 
 @description('A UNIQUE name')
-@maxLength(23)
-param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+@maxLength(21)
+param appName string = 'petcli${uniqueString(resourceGroup().id, subscription().id)}'
 
 param location string = resourceGroup().location
 param acrName string = 'acr${appName}'
@@ -78,7 +78,7 @@ resource kvRG 'Microsoft.Resources/resourceGroups@2022-09-01' existing = {
   scope: subscription()
 }
 
-resource kv 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+resource kv 'Microsoft.KeyVault/vaults@2022-11-01' existing = {
   name: kvName
   scope: kvRG
 }
@@ -132,6 +132,12 @@ module ACR './modules/aca/acr.bicep' = {
   }
 }
 
+output acrId string = ACR.outputs.acrId
+output acrName string = ACR.outputs.acrName
+output acrIdentity string = ACR.outputs.acrIdentity
+output acrType string = ACR.outputs.acrType
+output acrRegistryUrl string = ACR.outputs.acrRegistryUrl
+
 // https://docs.microsoft.com/en-us/azure/spring-cloud/how-to-deploy-in-azure-virtual-network?tabs=azure-portal#virtual-network-requirements
 module vnetModule './modules/aca/vnet.bicep' = if (deployToVNet) {
   name: 'vnet-aca'
@@ -150,7 +156,7 @@ module vnetModule './modules/aca/vnet.bicep' = if (deployToVNet) {
 // should apply only when deployToVNet=true
 //
 
-resource vnet 'Microsoft.Network/virtualNetworks@2022-07-01' existing = if (deployToVNet) {
+resource vnet 'Microsoft.Network/virtualNetworks@2022-09-01' existing = if (deployToVNet) {
   name: vnetName
 }
 
@@ -184,8 +190,8 @@ module mysqlWithCorpEnv './modules/mysql/mysql.bicep' = if (deployToVNet) {
   params: {
     appName: appName
     location: location
-    serverName: kv.getSecret('MYSQL-SERVER-NAME')
-    administratorLogin: kv.getSecret('SPRING-DATASOURCE-USERNAME')
+    serverName: 
+    administratorLogin: 
     administratorLoginPassword: kv.getSecret('SPRING-DATASOURCE-PASSWORD')
     azureContainerAppsOutboundPubIP: [corpManagedEnvironment.outputs.corpManagedEnvironmentStaticIp]
   }

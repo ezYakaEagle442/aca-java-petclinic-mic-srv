@@ -1,7 +1,7 @@
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.appplatform/spring?tabs=bicep
 @description('A UNIQUE name')
-@maxLength(23)
-param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+@maxLength(21)
+param appName string = 'petcli${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
@@ -18,7 +18,7 @@ param azureContainerAppEnvName string = 'aca-env-${appName}'
 
 
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
-param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.9.jar'
+param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.10.jar'
 
 @description('The applicationinsights config file location')
 param applicationInsightsConfigFile string = 'BOOT-INF/classes/applicationinsights.json'
@@ -101,19 +101,19 @@ param imageNameVetsService string
 param imageNameVisitsService string
 
 @description('The Azure Container App instance name for admin-server')
-param adminServerContainerAppName string = 'aca-${appName}-admin-server'
+param adminServerContainerAppName string = 'aca-admin-server'
 
 @description('The Azure Container App instance name for config-server')
-param configServerContainerAppName string = 'aca-${appName}-config-server'
+param configServerContainerAppName string = 'aca-config-server'
 
 @description('The Azure Container App instance name for customers-service')
-param customersServiceContainerAppName string = 'aca-${appName}-customers-service'
+param customersServiceContainerAppName string = 'aca-customers-service'
 
 @description('The Azure Container App instance name for vets-service')
-param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
+param vetsServiceContainerAppName string = 'aca-vets-service'
 
 @description('The Azure Container App instance name for visits-service')
-param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
+param visitsServiceContainerAppName string = 'aca-visits-service'
 
 @description('The admin-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param adminServerAppIdentityName string = 'id-aca-${appName}-petclinic-admin-server-dev-${location}-101'

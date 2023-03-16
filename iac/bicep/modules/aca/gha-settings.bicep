@@ -1,7 +1,7 @@
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.appplatform/spring?tabs=bicep
 @description('A UNIQUE name')
-@maxLength(23)
-param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+@maxLength(21)
+param appName string = 'petcli${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
@@ -173,6 +173,9 @@ resource githubActionSettingsCustomers 'Microsoft.App/containerApps/sourcecontro
     repoUrl: ghaSettingsCfgRepoUrl
   }
 }
+
+output githubActionSettingsIdCustomers string = githubActionSettingsCustomers.id
+output githubActionSettingsNameCustomers string = githubActionSettingsCustomers.name
 
 resource githubActionSettingsVets 'Microsoft.App/containerApps/sourcecontrols@2022-10-01' = {
   name: 'aca-gha-set-vets-svc'

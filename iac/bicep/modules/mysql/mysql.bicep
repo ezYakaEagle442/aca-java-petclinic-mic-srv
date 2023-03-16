@@ -40,7 +40,8 @@ param databaseSkuTier string = 'Burstable'
 
 @description('PostgreSQL version see https://learn.microsoft.com/en-us/azure/mysql/concepts-version-policy')
 @allowed([
-  '8.0'
+  '8.0.21'
+  '8.0.28'
   '5.7'
 ])
 param mySqlVersion string = '5.7' // https://docs.microsoft.com/en-us/azure/mysql/concepts-supported-versions

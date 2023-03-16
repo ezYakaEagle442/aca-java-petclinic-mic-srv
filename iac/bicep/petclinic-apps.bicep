@@ -20,15 +20,15 @@
 
 
 @description('A UNIQUE name')
-@maxLength(23)
-param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+@maxLength(21)
+param appName string = 'petcli${uniqueString(resourceGroup().id, subscription().id)}'
 
 param location string = resourceGroup().location
 // param rgName string = 'rg-${appName}'
 
 @maxLength(24)
 @description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
-param kvName string // = 'kv-${appName}'
+param kvName string = 'kv-${appName}'
 
 @description('The name of the KV RG')
 param kvRGName string
@@ -36,19 +36,15 @@ param kvRGName string
 @description('The name of the KV Endpoint')
 param springCloudAzureKeyVaultEndpoint string = 'https://${kvName}.vault.azure.net'
 
-param setKVAccessPolicies bool = true
-
 @description('The Azure Active Directory tenant ID that should be used for authenticating requests to the Key Vault.')
 param tenantId string = subscription().tenantId
 
 @description('The Azure Subscription ID that should be used for authenticating requests to the Key Vault and used by GitHub Action settings.')
 param subscriptionId string = subscription().id
 
-@description('The Log Analytics workspace name used by Azure Container App instance')
-param logAnalyticsWorkspaceName string = 'log-${appName}'
 
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
-param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.4.jar'
+param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.10.jar'
 
 param appInsightsName string = 'appi-${appName}'
 
@@ -68,25 +64,25 @@ param deployToVNet bool = false
 param vnetName string = 'vnet-aca'
 
 @description('The Azure Container App instance name for admin-server')
-param adminServerContainerAppName string = 'aca-${appName}-admin-server'
+param adminServerContainerAppName string = 'aca-admin-server'
 
 @description('The Azure Container App instance name for config-server')
-param configServerContainerAppName string = 'aca-${appName}-config-server'
+param configServerContainerAppName string = 'aca-config-server'
 
 @description('The Azure Container App instance name for discovery-server')
-param discoveryServerContainerAppName string = 'aca-${appName}-discovery-server'
+param discoveryServerContainerAppName string = 'aca-discovery-server'
 
 @description('The Azure Container App instance name for api-gateway')
-param apiGatewayContainerAppName string = 'aca-${appName}-api-gateway'
+param apiGatewayContainerAppName string = 'aca-api-gateway'
 
 @description('The Azure Container App instance name for customers-service')
-param customersServiceContainerAppName string = 'aca-${appName}-customers-service'
+param customersServiceContainerAppName string = 'aca-customers-service'
 
 @description('The Azure Container App instance name for vets-service')
-param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
+param vetsServiceContainerAppName string = 'aca-vets-service'
 
 @description('The Azure Container App instance name for visits-service')
-param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
+param visitsServiceContainerAppName string = 'aca-visits-service'
 
 @description('The GitHub Action Settings Configuration / Image Tag, with GitHub commit ID (SHA) github.sha. Ex: petclinic/petclinic-admin-server:{{ github.sha }}')
 param imageNameAdminServer string

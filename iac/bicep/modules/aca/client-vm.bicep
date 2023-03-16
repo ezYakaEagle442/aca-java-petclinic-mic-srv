@@ -1,8 +1,8 @@
 // See https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.compute/vm-simple-windows/main.bicep
 
 @description('A UNIQUE name')
-@maxLength(23)
-param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+@maxLength(21)
+param appName string = 'petcli${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location

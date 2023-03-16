@@ -1,8 +1,8 @@
 // https://github.com/cwe1ss/msa-template/blob/main/infrastructure/environment/monitoring.bicep
 
 @description('A UNIQUE name')
-@maxLength(23)
-param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+@maxLength(21)
+param appName string = 'petcli${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The location')
 param location string = resourceGroup().location

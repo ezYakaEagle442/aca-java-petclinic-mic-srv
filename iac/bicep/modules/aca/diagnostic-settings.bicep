@@ -1,7 +1,7 @@
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.appplatform/spring?tabs=bicep
 @description('A UNIQUE name')
-@maxLength(23)
-param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+@maxLength(21)
+param appName string = 'petcli${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The Log Analytics workspace name used by Azure Container App instance')
 param logAnalyticsWorkspaceName string = 'log-${appName}'

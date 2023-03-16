@@ -7,8 +7,8 @@ Microsoft.KeyVault/locations/deletedVaults/purge/action
 // https://argonsys.com/microsoft-cloud/library/dealing-with-deployment-blockers-with-bicep/
 
 @description('A UNIQUE name')
-@maxLength(23)
-param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+@maxLength(21)
+param appName string = 'petcli${uniqueString(resourceGroup().id, subscription().id)}'
 
 @maxLength(24)
 @description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
@@ -47,7 +47,7 @@ param vNetRules array = []
 ]
 */
 
-resource kv 'Microsoft.KeyVault/vaults@2022-07-01' = {
+resource kv 'Microsoft.KeyVault/vaults@2022-11-01' = {
   name: kvName
   location: location
   properties: {
@@ -82,8 +82,9 @@ resource kv 'Microsoft.KeyVault/vaults@2022-07-01' = {
 output keyVault object = kv
 output keyVaultId string = kv.id
 output keyVaultName string = kv.name
-output keyVaultPublicNetworkAccess string = kv.properties.publicNetworkAccess
 output keyVaultURI string = kv.properties.vaultUri
+output keyVaultPublicNetworkAccess string = kv.properties.publicNetworkAccess
+output keyVaultPublicNetworkAclsPpRules array = kv.properties.networkAcls.ipRules
 
 // /!\ In the GHA Workflow, KV must be created firstly, then 'az keyvault network-rule add' must be completed
 // only then ./kv/kv_sec_key.bicep' can be called to create the secrets 

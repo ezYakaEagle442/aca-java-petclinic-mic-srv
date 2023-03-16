@@ -1,8 +1,8 @@
 // https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming
 
 @description('A UNIQUE name')
-@maxLength(23)
-param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+@maxLength(21)
+param appName string = 'petcli${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The Identity location')
 param location string = resourceGroup().location
@@ -46,7 +46,7 @@ param visitsServiceAppIdentityName string = 'id-aca-${appName}-petclinic-visits-
 ///////////////////////////////////
 // New resources
 
-resource adminServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
+resource adminServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: adminServerAppIdentityName
   location: location
   tags: tags
@@ -55,7 +55,7 @@ output adminServerIdentityId string = adminServerIdentity.id
 output adminServerPrincipalId string = adminServerIdentity.properties.principalId
 output adminServerClientId string = adminServerIdentity.properties.clientId
 
-resource configServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
+resource configServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: configServerAppIdentityName
   location: location
   tags: tags
@@ -65,7 +65,7 @@ output configServerPrincipalId string = configServerIdentity.properties.principa
 output configServerClientId string = configServerIdentity.properties.clientId
 
 
-resource discoveryServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
+resource discoveryServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: discoveryServerAppIdentityName
   location: location
   tags: tags
@@ -74,7 +74,7 @@ output discoveryServerIdentityId string = discoveryServerIdentity.id
 output discoveryServerPrincipalId string = discoveryServerIdentity.properties.principalId
 output discoveryServerClientId string = discoveryServerIdentity.properties.clientId
 
-resource apiGatewayIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
+resource apiGatewayIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: apiGatewayAppIdentityName
   location: location
   tags: tags
@@ -83,7 +83,7 @@ output apiGatewayIdentityId string = apiGatewayIdentity.id
 output apiGatewayPrincipalId string = apiGatewayIdentity.properties.principalId
 output apiGatewayClientId string = apiGatewayIdentity.properties.clientId
 
-resource customersServicedentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
+resource customersServicedentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: customersServiceAppIdentityName
   location: location
   tags: tags
@@ -92,7 +92,7 @@ output customersServiceIdentityId string = customersServicedentity.id
 output customersServicePrincipalId string = customersServicedentity.properties.principalId
 output customersServiceClientId string = customersServicedentity.properties.clientId
 
-resource vetsServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
+resource vetsServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: vetsServiceAppIdentityName
   location: location
   tags: tags
@@ -101,7 +101,7 @@ output vetsServiceIdentityId string = vetsServiceIdentity.id
 output vetsServicePrincipalId string = vetsServiceIdentity.properties.principalId
 output vetsServiceClientId string = vetsServiceIdentity.properties.clientId
 
-resource visitsServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
+resource visitsServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: visitsServiceAppIdentityName
   location: location
   tags: tags

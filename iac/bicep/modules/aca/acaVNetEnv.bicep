@@ -1,7 +1,7 @@
 
-@maxLength(23)
+@maxLength(21)
 // to get a unique name each time ==> param appName string = 'demo${uniqueString(resourceGroup().id, deployment().name)}'
-param appName string = 'petcliaca${uniqueString(resourceGroup().id)}'
+param appName string = 'petcli${uniqueString(resourceGroup().id)}'
 param location string = resourceGroup().location
 
 @description('The Azure Container App Environment name')

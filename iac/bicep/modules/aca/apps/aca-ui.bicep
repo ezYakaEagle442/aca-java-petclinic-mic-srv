@@ -1,7 +1,7 @@
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.appplatform/spring?tabs=bicep
 @description('A UNIQUE name')
-@maxLength(23)
-param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+@maxLength(21)
+param appName string = 'petcli${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
@@ -15,7 +15,7 @@ param azureContainerAppEnvName string = 'aca-env-${appName}'
 param appInsightsName string = 'appi-${appName}'
 
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
-param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.9.jar'
+param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.10.jar'
 
 @description('The applicationinsights config file location')
 param applicationInsightsConfigFile string = 'BOOT-INF/classes/applicationinsights.json'
@@ -24,9 +24,13 @@ param applicationInsightsConfigFile string = 'BOOT-INF/classes/applicationinsigh
 @description('The Azure Active Directory tenant ID that should be used by Key Vault in the Spring Config')
 param springCloudAzureTenantId string
 
-@secure()
+
+@maxLength(24)
+@description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
+param kvName string = 'kv-${appName}'
+
 @description('The Azure Key Vault EndPoint that should be used by Key Vault in the Spring Config. Ex: https://<key-vault-name>.vault.azure.net')
-param springCloudAzureKeyVaultEndpoint string
+param springCloudAzureKeyVaultEndpoint string = 'https://kv-${appName}.vault.azure.net'
 
 // Spring Cloud for Azure params required to get secrets from Key Vault.
 // https://microsoft.github.io/spring-cloud-azure/current/reference/html/index.html#basic-usage-3
@@ -92,7 +96,7 @@ resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-10-01' e
   name: azureContainerAppEnvName
 }
 
-resource apiGatewayIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
+resource apiGatewayIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
   name: apiGatewayAppIdentityName
 }
 

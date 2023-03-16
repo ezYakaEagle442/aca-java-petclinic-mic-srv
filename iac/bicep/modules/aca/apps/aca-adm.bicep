@@ -1,7 +1,7 @@
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.appplatform/spring?tabs=bicep
 @description('A UNIQUE name')
-@maxLength(23)
-param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+@maxLength(21)
+param appName string = 'petcli${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
@@ -15,7 +15,7 @@ param azureContainerAppEnvName string = 'aca-env-${appName}'
 param appInsightsName string = 'appi-${appName}'
 
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
-param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.9.jar'
+param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.10.jar'
 
 @description('The applicationinsights config file location')
 param applicationInsightsConfigFile string = 'BOOT-INF/classes/applicationinsights.json'
@@ -50,7 +50,7 @@ param containerResourcesMemory string = '1.0Gi'
 param imageNameAdminServer string
 
 @description('The Azure Container App instance name for admin-server')
-param adminServerContainerAppName string = 'aca-${appName}-admin-server'
+param adminServerContainerAppName string = 'aca-admin-server'
 
 @description('The admin-server Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param adminServerAppIdentityName string = 'id-aca-${appName}-petclinic-admin-server-dev-${location}-101'
@@ -59,7 +59,7 @@ resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-10-01' e
   name: azureContainerAppEnvName
 }
 
-resource adminServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview'existing = {
+resource adminServerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31'existing = {
   name: adminServerAppIdentityName
 }
 

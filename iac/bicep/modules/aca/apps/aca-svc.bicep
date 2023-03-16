@@ -1,14 +1,14 @@
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.appplatform/spring?tabs=bicep
 @description('A UNIQUE name')
-@maxLength(23)
-param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+@maxLength(21)
+param appName string = 'petcli${uniqueString(resourceGroup().id, subscription().id)}'
 
 @description('The location of the Azure resources.')
 param location string = resourceGroup().location
 
 @maxLength(24)
 @description('The name of the KV, must be UNIQUE. A vault name must be between 3-24 alphanumeric characters.')
-param kvName string // = 'kv-${appName}'
+param kvName string = 'kv-${appName}'
 
 @description('The name of the KV RG')
 param kvRGName string
@@ -22,7 +22,7 @@ param azureContainerAppEnvName string = 'aca-env-${appName}'
 param appInsightsName string = 'appi-${appName}'
 
 @description('The applicationinsights-agent-3.x.x.jar file is downloaded in each Dockerfile. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/java-spring-boot#spring-boot-via-docker-entry-point')
-param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.9.jar'
+param applicationInsightsAgentJarFilePath string = '/tmp/app/applicationinsights-agent-3.4.10.jar'
 
 @description('The applicationinsights config file location')
 param applicationInsightsConfigFile string = 'BOOT-INF/classes/applicationinsights.json'
@@ -76,16 +76,16 @@ param imageNameVetsService string
 param imageNameVisitsService string
 
 @description('The Azure Container App instance name for config-server')
-param configServerContainerAppName string = 'aca-${appName}-config-server'
+param configServerContainerAppName string = 'aca-config-server'
 
 @description('The Azure Container App instance name for customers-service')
-param customersServiceContainerAppName string = 'aca-${appName}-customers-service'
+param customersServiceContainerAppName string = 'aca-customers-service'
 
 @description('The Azure Container App instance name for vets-service')
-param vetsServiceContainerAppName string = 'aca-${appName}-vets-service'
+param vetsServiceContainerAppName string = 'aca-vets-service'
 
 @description('The Azure Container App instance name for visits-service')
-param visitsServiceContainerAppName string = 'aca-${appName}-visits-service'
+param visitsServiceContainerAppName string = 'aca-visits-service'
 
 @description('The customers-service Identity name, see Character limit: 3-128 Valid characters: Alphanumerics, hyphens, and underscores')
 param customersServiceAppIdentityName string = 'id-aca-${appName}-petclinic-customers-service-dev-${location}-101'
@@ -100,15 +100,15 @@ resource corpManagedEnvironment 'Microsoft.App/managedEnvironments@2022-10-01' e
   name: azureContainerAppEnvName
 }
 
-resource customersServicedentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
+resource customersServicedentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
   name: customersServiceAppIdentityName
 }
 
-resource vetsServiceAppIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
+resource vetsServiceAppIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
   name: vetsServiceAppIdentityName
 }
 
-resource visitsServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' existing = {
+resource visitsServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
   name: visitsServiceAppIdentityName
 }
 
@@ -120,7 +120,7 @@ resource ACR 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existin
   name: acrName
 }
 
-resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing = {
+resource appInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: appInsightsName
 }
 

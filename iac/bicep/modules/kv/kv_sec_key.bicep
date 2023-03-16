@@ -7,8 +7,8 @@ Microsoft.KeyVault/locations/deletedVaults/purge/action
 // https://argonsys.com/microsoft-cloud/library/dealing-with-deployment-blockers-with-bicep/
 
 @description('A UNIQUE name')
-@maxLength(23)
-param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+@maxLength(21)
+param appName string = 'petcli${uniqueString(resourceGroup().id, subscription().id)}'
 
 @maxLength(24)
 @description('The name of the KV, must be UNIQUE.  A vault name must be between 3-24 alphanumeric characters.')
@@ -21,7 +21,6 @@ param secretsObject object
 */
 
 @description('Secret Name.')
-@secure()
 param secretName string
 
 @description('Secret value')
@@ -31,9 +30,9 @@ param secretValue string
 // https://learn.microsoft.com/en-us/azure/key-vault/secrets/secrets-best-practices#secrets-rotation
 // Because secrets are sensitive to leakage or exposure, it's important to rotate them often, at least every 60 days. 
 @description('Expiry date in seconds since 1970-01-01T00:00:00Z. Ex: 1672444800 ==> 31/12/2022')
-param secretExpiryDate int = 1672444800
+param secretExpiryDate int = 1703980800 // 31/12/2023
 
-resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
+resource kv 'Microsoft.KeyVault/vaults@2022-11-01' existing = {
   name: kvName
 }
 
@@ -41,7 +40,7 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = {
 // https://docs.microsoft.com/en-us/azure/developer/github/github-key-vault
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.keyvault/vaults/secrets?tabs=bicep
 
-resource kvSecrets 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource kvSecrets 'Microsoft.KeyVault/vaults/secrets@2022-11-01' = {
   name: secretName
   parent: kv
   properties: {

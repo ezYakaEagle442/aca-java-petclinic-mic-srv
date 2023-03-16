@@ -16,7 +16,7 @@ var infrastructureSubnet = {
   cidr: infrastructureSubnetCidr
 }
 
-resource vnet 'Microsoft.Network/virtualNetworks@2022-07-01' = {
+resource vnet 'Microsoft.Network/virtualNetworks@2022-09-01' = {
   name: vnetName
   location: location
   properties: {
@@ -55,5 +55,6 @@ resource vnet 'Microsoft.Network/virtualNetworks@2022-07-01' = {
 }
 
 output vnetId string = vnet.id
+output vnetName string = vnet.name
 output infrastructureSubnetId string = vnet.properties.subnets[0].id
 output infrastructureSubnetAddressPrefix string = vnet.properties.subnets[0].properties.addressPrefix

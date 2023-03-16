@@ -1,6 +1,6 @@
 @description('A UNIQUE name')
-@maxLength(23)
-param appName string = 'petcliaca${uniqueString(resourceGroup().id, subscription().id)}'
+@maxLength(21)
+param appName string = 'petcli${uniqueString(resourceGroup().id, subscription().id)}'
 
 @allowed([
   'AcrPull'
@@ -63,6 +63,10 @@ resource acr 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' existin
   }
 }
 
+output CustomersServiceUpdatedOn string = AcrPullRoleAssignmentCustomersService.properties.updatedOn
+output CustomersServiceRoleAssignmentId string = AcrPullRoleAssignmentCustomersService.id
+output CustomersServiceRoleAssignmentName string = AcrPullRoleAssignmentCustomersService.name
+
  // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
  resource AcrPullRoleAssignmentVetsService 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(acr.id, acrRoleType , acaVetsServicePrincipalId)
@@ -73,6 +77,10 @@ resource acr 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' existin
     principalType: 'ServicePrincipal'
   }
 }
+
+output VetsServiceUpdatedOn string = AcrPullRoleAssignmentVetsService.properties.updatedOn
+output VetsServiceRoleAssignmentId string = AcrPullRoleAssignmentVetsService.id
+output VetsServiceRoleAssignmentName string = AcrPullRoleAssignmentVetsService.name
 
  // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
  resource AcrPullRoleAssignmentVisitsService 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
@@ -85,6 +93,10 @@ resource acr 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' existin
   }
 }
 
+output VisitsServiceUpdatedOn string = AcrPullRoleAssignmentVisitsService.properties.updatedOn
+output VisitsServiceRoleAssignmentId string = AcrPullRoleAssignmentVisitsService.id
+output VisitsServiceRoleAssignmentName string = AcrPullRoleAssignmentVisitsService.name
+
  // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
  resource AcrPullRoleAssignmentConfigServer 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(acr.id, acrRoleType , acaConfigServerPrincipalId)
@@ -95,6 +107,10 @@ resource acr 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' existin
     principalType: 'ServicePrincipal'
   }
 }
+
+output ConfigServerUpdatedOn string = AcrPullRoleAssignmentConfigServer.properties.updatedOn
+output ConfigServerRoleAssignmentId string = AcrPullRoleAssignmentConfigServer.id
+output ConfigServerRoleAssignmentName string = AcrPullRoleAssignmentConfigServer.name
 
  // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
  resource AcrPullRoleAssignmentAdminServer 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
@@ -107,6 +123,10 @@ resource acr 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' existin
   }
 }
 
+output AdminServerUpdatedOn string = AcrPullRoleAssignmentAdminServer.properties.updatedOn
+output AdminServerRoleAssignmentId string = AcrPullRoleAssignmentAdminServer.id
+output AdminServerRoleAssignmentName string = AcrPullRoleAssignmentAdminServer.name
+
  // acrpull role to assign to the ACA Identity: az role assignment create --assignee $sp_id --role acrpull --scope $acr_registry_id
  resource AcrPullRoleAssignmentacaApiGateway 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(acr.id, acrRoleType , acaApiGatewayPrincipalId)
@@ -117,6 +137,10 @@ resource acr 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' existin
     principalType: 'ServicePrincipal'
   }
 }
+
+output ApiGatewayUpdatedOn string = AcrPullRoleAssignmentacaApiGateway.properties.updatedOn
+output ApiGatewayRoleAssignmentId string = AcrPullRoleAssignmentacaApiGateway.id
+output ApiGatewayRoleAssignmentName string = AcrPullRoleAssignmentacaApiGateway.name
 
 
 
