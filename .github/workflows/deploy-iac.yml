@@ -329,8 +329,7 @@ jobs:
               -p kvRGName=${{ env.RG_KV }} \
               -p administratorLogin=${{ env.MYSQL_ADM_USR }} \
               -p dbServerName=${{ env.MYSQL_SERVER_NAME }} \
-              -p vNetRules=[] \
-              -p ipRules=[]
+              -p vNetRules=[]
 
             az containerapp delete --name hello-test -g ${{ env.RG_APP }} --yes
             echo "hello-test ACA test deleted"
