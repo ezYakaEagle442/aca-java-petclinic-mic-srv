@@ -84,7 +84,7 @@ output keyVaultId string = kv.id
 output keyVaultName string = kv.name
 output keyVaultURI string = kv.properties.vaultUri
 output keyVaultPublicNetworkAccess string = kv.properties.publicNetworkAccess
-output keyVaultPublicNetworkAclsPpRules array = kv.properties.networkAcls.ipRules
+output keyVaultPublicNetworkAclsIpRules array = kv.properties.networkAcls.ipRules
 
 // /!\ In the GHA Workflow, KV must be created firstly, then 'az keyvault network-rule add' must be completed
 // only then ./kv/kv_sec_key.bicep' can be called to create the secrets 
