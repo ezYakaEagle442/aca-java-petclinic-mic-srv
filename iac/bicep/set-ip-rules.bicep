@@ -89,7 +89,7 @@ output keyVaultId string = kvsetiprules.outputs.keyVaultId
 output keyVaultName string = kvsetiprules.outputs.keyVaultName
 output keyVaultURI string = kvsetiprules.outputs.keyVaultURI
 output keyVaultPublicNetworkAccess string = kvsetiprules.outputs.keyVaultPublicNetworkAccess
-output keyVaultPublicNetworkAclsPpRules array = kvsetiprules.outputs.keyVaultPublicNetworkAclsPpRules
+output keyVaultPublicNetworkAclsIpRules array = kvsetiprules.outputs.keyVaultPublicNetworkAclsIpRules
 
 resource kv 'Microsoft.KeyVault/vaults@2022-11-01' existing = {
   name: kvName
