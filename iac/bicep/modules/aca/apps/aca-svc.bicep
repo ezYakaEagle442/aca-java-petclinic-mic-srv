@@ -164,7 +164,7 @@ resource CustomersServiceContainerApp 'Microsoft.App/containerApps@2022-10-01' =
           server: ACR.properties.loginServer
           identity: customersServicedentity.id
           //username: registryUsr
-          // passwordSecretRef: 'registrypassword'
+          // passwordSecretRef: 'ACR.listCredentials().passwords[0].value'
         }
       ]
       secrets: [
