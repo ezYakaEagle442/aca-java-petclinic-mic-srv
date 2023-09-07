@@ -76,9 +76,9 @@ subName="set here the name of your subscription"
 subName=$(az account list --query "[?name=='${subName}'].{name:name}" --output tsv)
 echo "subscription Name :" $subName
 
-SUBSCRIPTION_ID=$(az account list --query "[?name=='${subName}'].{id:id}" --output tsv)
-SUBSCRIPTION_ID=$(az account show --query id -o tsv)
-TENANT_ID=$(az account show --query tenantId -o tsv)
+SUBSCRIPTION_ID=$(az account list --query "[?name=='${subName}'].{id:id}" --output tsv | tr -d '\r' | tr -d '"')
+SUBSCRIPTION_ID=$(az account show --query id -o tsv | tr -d '\r' | tr -d '"')
+TENANT_ID=$(az account show --query tenantId -o tsv | tr -d '\r' | tr -d '"')
 ```
 
 Add your AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID to your GH repo secrets / Actions secrets / Repository secrets
@@ -99,9 +99,9 @@ az ad app create --display-name $SPN_APP_NAME > aad_app.json
 # Enterprise Application
 
 # This is the unique ID of the Service Principal object associated with this application.
-SPN_OBJECT_ID=$(az ad app list --show-mine --query "[?displayName=='${SPN_APP_NAME}'].{objectId:id}" -o tsv)
+SPN_OBJECT_ID=$(az ad app list --show-mine --query "[?displayName=='${SPN_APP_NAME}'].{objectId:id}" -o tsv | tr -d '\r' | tr -d '"')
 
-APPLICATION_ID=$(az ad app list --show-mine --query "[?displayName=='${SPN_APP_NAME}'].{appId:appId}" -o tsv)
+APPLICATION_ID=$(az ad app list --show-mine --query "[?displayName=='${SPN_APP_NAME}'].{appId:appId}" -o tsv | tr -d '\r' | tr -d '"')
 ```
 
 Troubleshoot:
@@ -112,11 +112,11 @@ If you hit _["Error: : No subscriptions found for ***."](https://learn.microsoft
 az ad sp create --id $APPLICATION_ID
 
 
-SPN_APP_ID=$(az ad sp list --all --query "[?appDisplayName=='${SPN_APP_NAME}'].{appId:appId}" --output tsv)
+SPN_APP_ID=$(az ad sp list --all --query "[?appDisplayName=='${SPN_APP_NAME}'].{appId:appId}" -o tsv | tr -d '\r' | tr -d '"')
 #SPN_APP_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME}'].{appId:appId}" --output tsv)
 # TENANT_ID=$(az ad sp list --show-mine --query "[?appDisplayName=='${SPN_APP_NAME}'].{t:appOwnerOrganizationId}" --output tsv)
 
-az ad sp show --id $SPN_OBJECT_ID
+az ad sp show --id $SPN_APP_ID
 
 # the assignee is an appId
 az role assignment create --assignee $SPN_APP_ID --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_KV} --role contributor
